@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Addicts Clone</title>
+    <title>MinoanHobby</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -17,7 +17,7 @@
         }
 
         body {
-            background-color: #0b1a10; /* Σκούρο πράσινο/μαύρο φόντο */
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
             color: #ffffff;
             overflow-x: hidden;
         }
@@ -28,29 +28,35 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 50px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             font-size: 14px;
+            border-bottom: 1px solid #ff0000; /* Έντονη κόκκινη γραμμή */
         }
 
         .top-bar a {
-            color: #fff;
+            color: #e0e0e0; /* Γκρι */
             margin-right: 15px;
             text-decoration: none;
             transition: color 0.3s;
         }
 
         .top-bar a:hover {
-            color: #cca43b; /* Χρυσό hover */
+            color: #ff0000; /* Έντονο κόκκινο στο hover */
         }
 
         .utility-icons * {
             margin-left: 15px;
             cursor: pointer;
+            color: #e0e0e0; /* Γκρι */
+        }
+
+        .utility-icons *:hover {
+            color: #ff0000;
         }
 
         .cart-count {
-            background-color: #cca43b;
-            color: black;
+            background-color: #ff0000; /* Έντονο Κόκκινο */
+            color: white;
             padding: 2px 6px;
             border-radius: 50%;
             font-size: 11px;
@@ -63,14 +69,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 50px;
-            background-color: #07140c;
-            border-bottom: 1px solid rgba(204, 164, 59, 0.2);
+            background-color: #0b132b; /* Ακόμα πιο σκούρο μπλε */
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
         }
 
         .main-header nav a {
-            color: #fff;
+            color: #e0e0e0; /* Γκρι */
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             margin: 0 15px;
             letter-spacing: 1px;
@@ -78,31 +84,33 @@
         }
 
         .main-header nav a:hover {
-            color: #cca43b;
+            color: #ff0000; /* Έντονο κόκκινο */
         }
 
         /* LOGO */
         .logo h1 {
-            font-size: 24px;
+            font-size: 26px;
             font-style: italic;
-            color: #fff;
+            color: #ffffff;
             letter-spacing: 2px;
+            font-weight: 900;
         }
 
         .logo h1 span {
-            color: #cca43b;
+            color: #ff0000; /* Έντονο κόκκινο στο Hobby */
             display: block;
             font-size: 14px;
             text-align: center;
             margin-top: -5px;
+            letter-spacing: 4px;
         }
 
         /* HERO SECTION */
         .hero-section {
             position: relative;
             height: 85vh;
-            /* Placeholder εικόνα φόντου */
-            background: linear-gradient(rgba(11, 26, 16, 0.65), #0b1a10), url('https://via.placeholder.com/1920x1080/1a3322/ffffff?text=Basketball+Background') no-repeat center center/cover;
+            /* Μπλε gradient φόντο */
+            background: linear-gradient(rgba(13, 27, 42, 0.7), #0d1b2a), url('https://via.placeholder.com/1920x1080/112233/ffffff?text=Basketball+MinoanHobby') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -111,13 +119,13 @@
             padding: 40px;
         }
 
-        /* Μεγάλος Τίτλος SELECT */
+        /* Μεγάλος Τίτλος SELECT (Κόκκινο & Γκρι στυλ) */
         .brand-title {
             font-size: 90px;
             font-weight: 900;
-            color: #cca43b;
+            color: #ff0000; /* Έντονο Κόκκινο */
             letter-spacing: 5px;
-            text-shadow: 2px 2px 15px rgba(0,0,0,0.7);
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.8);
         }
 
         .subtitle {
@@ -125,7 +133,8 @@
             letter-spacing: 4px;
             margin-top: -10px;
             margin-bottom: 40px;
-            color: #ddd;
+            color: #e0e0e0; /* Γκρι */
+            font-weight: bold;
         }
 
         /* FEATURES (Κυκλάκια με πληροφορίες) */
@@ -145,7 +154,7 @@
         }
 
         .feature-icon {
-            border: 2px solid #cca43b;
+            border: 2px solid #ff0000; /* Κόκκινο περίγραμμα */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -153,23 +162,24 @@
             justify-content: center;
             align-items: center;
             font-size: 18px;
-            color: #cca43b;
+            color: #ff0000; /* Κόκκινο εικονίδιο */
             margin-right: 15px;
             flex-shrink: 0;
+            background-color: rgba(0,0,0,0.3);
         }
 
         .feature-text strong {
             display: block;
             font-size: 13px;
-            color: #fff;
+            color: #ffffff;
         }
 
         .feature-text span {
             font-size: 11px;
-            color: #aaa;
+            color: #e0e0e0; /* Γκρι */
         }
 
-        /* CARDS PREVIEW (Κάτω μέρος του banner) */
+        /* CARDS PREVIEW */
         .cards-preview {
             display: flex;
             gap: 20px;
@@ -179,21 +189,24 @@
         .card-placeholder {
             width: 120px;
             height: 170px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(204, 164, 59, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #e0e0e0; /* Γκρι αρχικά */
             border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 12px;
-            color: #cca43b;
-            transition: transform 0.3s;
+            color: #e0e0e0; /* Γκρι */
+            font-weight: bold;
+            transition: all 0.3s ease;
             cursor: pointer;
         }
 
         .card-placeholder:hover {
             transform: translateY(-10px);
-            border-color: #cca43b;
+            border-color: #ff0000; /* Κόκκινο στο hover */
+            color: #ff0000;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
         }
 
         /* ΒΕΛΗ ΠΛΟΗΓΗΣΗΣ */
@@ -201,9 +214,9 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(204, 164, 59, 0.5);
-            color: white;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #ff0000;
+            color: #e0e0e0;
             padding: 15px 20px;
             cursor: pointer;
             font-size: 18px;
@@ -212,8 +225,8 @@
         }
 
         .arrow-btn:hover {
-            background: #cca43b;
-            color: black;
+            background: #ff0000;
+            color: white;
         }
 
         .prev-btn { left: 20px; }
@@ -239,21 +252,14 @@
 
     <header class="main-header">
         <nav class="nav-left">
-            <a href="#">BOXES</a>
-            <a href="#">BREAKS</a>
-            <a href="#">SUPPLIES</a>
-            <a href="#">SHIPPING</a>
-        </nav>
+            <a href="#">ΠΑΚΕΤΑ</a>         <a href="#">ΑΝΟΙΓΜΑΤΑ</a>      <a href="#">ΑΞΕΣΟΥΑΡ</a>       <a href="#">ΑΠΟΣΤΟΛΕΣ</a>      </nav>
         
         <div class="logo">
-            <h1>CARD<span>Addicts</span></h1>
+            <h1>MINOAN<span>Hobby</span></h1>
         </div>
 
         <nav class="nav-right">
-            <a href="#">ΤΙ ΕΙΝΑΙ ΤΟ BREAK</a>
-            <a href="#">ΣΧΕΤΙΚΑ</a>
-            <a href="#">ΕΠΙΚΟΙΝΩΝΙΑ</a>
-        </nav>
+            <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>  <a href="#">Η ΕΤΑΙΡΕΙΑ</a>       <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>       </nav>
     </header>
 
     <section class="hero-section">
@@ -268,22 +274,22 @@
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-pen-nib"></i></div>
                     <div class="feature-text">
-                        <strong>3 AUTOGRAPHS OR</strong>
-                        <span>MEMORABILIA CARDS PER BOX</span>
+                        <strong>3 AYTOΓΡΑΦΑ Ή</strong>
+                        <span>ΚΑΡΤΕΣ MEMORABILIA ΑΝΑ ΚΟΥΤΙ</span>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-gem"></i></div>
                     <div class="feature-text">
-                        <strong>RARE INSERTS</strong>
+                        <strong>ΣΠΑΝΙΑ INSERTS</strong>
                         <span>STAINED GLASS - VISIONARY<br>EQUALIZERS - UNSTOPPABLE</span>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
                     <div class="feature-text">
-                        <strong>BASE SET</strong>
-                        <span>3 TIERS - 250 CARDS</span>
+                        <strong>ΒΑΣΙΚΟ ΣΕΤ</strong>
+                        <span>3 ΕΠΙΠΕΔΑ - 250 ΚΑΡΤΕΣ</span>
                     </div>
                 </div>
             </div>
