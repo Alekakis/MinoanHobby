@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
         * {
             margin: 0;
             padding: 0;
@@ -16,10 +17,10 @@
         }
 
         body {
-            background-color: #0d1b2a;
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
             color: #ffffff;
             overflow-x: hidden;
-            padding-right: 60px;
+            padding-right: 60px; /* Χώρος δεξιά για το πλαϊνό μενού */
         }
 
         /* MAIN HEADER & NAVIGATION */
@@ -29,7 +30,7 @@
             align-items: center;
             padding: 15px 40px;
             background-color: #0b132b;
-            border-bottom: 2px solid #ff0000;
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
             position: relative;
             z-index: 10;
         }
@@ -207,7 +208,7 @@
         .slot-dot {
             width: 8px;
             height: 8px;
-            background-color: #00ff00; 
+            background-color: #00ff00; /* Πράσινο όταν υπάρχουν slots */
             border-radius: 50%;
             display: inline-block;
         }
@@ -240,7 +241,7 @@
         }
 
         .team-card.sold-out .slot-dot {
-            background-color: #ff0000; 
+            background-color: #ff0000; /* Κόκκινο όταν εξαντληθεί */
         }
 
         .team-card.sold-out .buy-btn {
@@ -297,32 +298,33 @@
     </main>
 
     <script>
-       // Η πλήρης λίστα και των 20 ομάδων της Euroleague
+        // Η πλήρης λίστα και των 20 ομάδων της Euroleague με τις τιμές τους
         const euroleagueTeams = [
-            { id: 1, name: "Anadolu Efes Istanbul", price: "30.00 €", slots: 3 },
-            { id: 2, name: "AS Monaco", price: "25.00 €", slots: 3 },
-            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: "30.00 €", slots: 3 },
-            { id: 4, name: "Dubai Basketball", price: "35.00 €", slots: 3 },
-            { id: 5, name: "EA7 Emporio Armani Milan", price: "25.00 €", slots: 3 },
-            { id: 6, name: "FC Barcelona", price: "35.00 €", slots: 3 },
-            { id: 7, name: "FC Bayern Munich", price: "20.00 €", slots: 3 },
-            { id: 8, name: "Fenerbahce Beko Istanbul", price: "35.00 €", slots: 3 },
-            { id: 9, name: "Hapoel Shlomo Tel Aviv", price: "25.00 €", slots: 3 },
-            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: "25.00 €", slots: 3 },
-            { id: 11, name: "LDLC ASVEL Villeurbanne", price: "20.00 €", slots: 3 },
-            { id: 12, name: "Maccabi Playtika Tel Aviv", price: "25.00 €", slots: 3 },
-            { id: 13, name: "Olympiacos Piraeus", price: "45.00 €", slots: 3 },
-            { id: 14, name: "Panathinaikos AKTOR Athens", price: "45.00 €", slots: 3 },
-            { id: 15, name: "Paris Basketball", price: "25.00 €", slots: 3 },
-            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: "35.00 €", slots: 3 },
-            { id: 17, name: "Real Madrid", price: "40.00 €", slots: 3 },
-            { id: 18, name: "Virtus Segafredo Bologna", price: "20.00 €", slots: 3 },
-            { id: 19, name: "Valencia Basket", price: "25.00 €", slots: 3 },
-            { id: 20, name: "Zalgiris Kaunas", price: "25.00 €", slots: 3 }
+            { id: 1, name: "Anadolu Efes Istanbul", price: 30.00, slots: 3 },
+            { id: 2, name: "AS Monaco", price: 25.00, slots: 3 },
+            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 30.00, slots: 3 },
+            { id: 4, name: "Dubai Basketball", price: 35.00, slots: 3 },
+            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, slots: 3 },
+            { id: 6, name: "FC Barcelona", price: 35.00, slots: 3 },
+            { id: 7, name: "FC Bayern Munich", price: 20.00, slots: 3 },
+            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, slots: 3 },
+            { id: 9, name: "Hapoel Shlomo Tel Aviv", price: 25.00, slots: 3 },
+            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 25.00, slots: 3 },
+            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 20.00, slots: 3 },
+            { id: 12, name: "Maccabi Playtika Tel Aviv", price: 25.00, slots: 3 },
+            { id: 13, name: "Olympiacos Piraeus", price: 45.00, slots: 3 },
+            { id: 14, name: "Panathinaikos AKTOR Athens", price: 45.00, slots: 3 },
+            { id: 15, name: "Paris Basketball", price: 25.00, slots: 3 },
+            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 35.00, slots: 3 },
+            { id: 17, name: "Real Madrid", price: 40.00, slots: 3 },
+            { id: 18, name: "Virtus Segafredo Bologna", price: 20.00, slots: 3 },
+            { id: 19, name: "Valencia Basket", price: 25.00, slots: 3 },
+            { id: 20, name: "Zalgiris Kaunas", price: 25.00, slots: 3 }
         ];
 
         const container = document.getElementById('teams-container');
 
+        // Εμφάνιση των ομάδων στην οθόνη
         function renderTeams() {
             container.innerHTML = "";
             euroleagueTeams.forEach(team => {
@@ -334,13 +336,13 @@
                 card.innerHTML = `
                     <div class="team-info">
                         <h3>${team.name}</h3>
-                        <div class="team-price">${team.price}</div>
+                        <div class="team-price">${team.price.toFixed(2)} €</div>
                         <div class="slots-status">
                             <span class="slot-dot"></span>
                             ${isSoldOut ? 'ΕΞΑΝΤΛΗΘΗΚΕ' : `Διαθέσιμα Slots: <strong>${team.slots} / 3</strong>`}
                         </div>
                     </div>
-                    <button class="buy-btn" ${isSoldOut ? 'disabled' : ''} onclick="handlePurchase(${team.id})">
+                    <button class="buy-btn" ${isSoldOut ? 'disabled' : ''} id="btn-${team.id}" onclick="handlePurchase(${team.id})">
                         ${isSoldOut ? 'ΕΞΑΝΤΛΗΘΗΚΕ' : 'ΑΓΟΡΑ SLOT'}
                     </button>
                 `;
@@ -348,17 +350,51 @@
             });
         }
 
-        function handlePurchase(teamId) {
+        // Σύνδεση με τη Vercel Serverless Function της Viva Wallet
+        async function handlePurchase(teamId) {
             const team = euroleagueTeams.find(t => t.id === teamId);
-            if (team && team.slots > 0) {
-                alert(`Προετοιμασία πληρωμής για την ομάδα: ${team.name}.\nΤο slot θα κλειδώσει προσωρινά και θα μεταφερθείτε στη Viva Wallet.`);
-                
-                // Εδώ θα συνδέσουμε το API/κώδικα της Viva μόλις μου τον στείλεις
-                team.slots -= 1;
-                renderTeams(); 
+            if (!team || team.slots <= 0) return;
+
+            const button = document.getElementById(`btn-${teamId}`);
+            button.disabled = true;
+            button.innerText = "ΚΛΕΙΔΩΜΑ...";
+
+            try {
+                // Κλήση του API σου στο Vercel (σιγουρέψου ότι η διαδρομή του αρχείου σου είναι σωστή, π.χ. /api/viva)
+                const response = await fetch('/api/viva', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        amount: team.price 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.OrderCode) {
+                    // 1. Μείωση του slot τοπικά στην οθόνη του χρήστη
+                    team.slots -= 1;
+                    renderTeams();
+
+                    // 2. Αυτόματη μεταφορά στο Checkout της Viva Payments
+                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+                } else {
+                    alert("Σφάλμα κατά τη δημιουργία της παραγγελίας. Παρακαλώ δοκιμάστε ξανά.");
+                    button.disabled = false;
+                    button.innerText = "ΑΓΟΡΑ SLOT";
+                }
+
+            } catch (error) {
+                console.error("Πρόβλημα σύνδεσης με το API:", error);
+                alert("Υπήρξε ένα πρόβλημα επικοινωνίας με το σύστημα πληρωμών.");
+                button.disabled = false;
+                button.innerText = "ΑΓΟΡΑ SLOT";
             }
         }
 
+        // Αρχικό φόρτωμα των ομάδων κατά το άνοιγμα της σελίδας
         renderTeams();
     </script>
 </body>
