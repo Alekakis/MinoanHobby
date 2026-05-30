@@ -1,44 +1,27 @@
+import Redis from 'ioredis';
+
+// Σύνδεση με το κανονικό Redis URL σου
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+    
     if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
     try {
-        // Διαβάζουμε τα στοιχεία σύνδεσης της βάσης απευθείας από το Vercel
-        const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
-        const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
-
-        // Παίρνουμε όλα τα κλειδιά που ξεκινάνε με team:status:
-        const keysResponse = await fetch(`${kvUrl}/keys/team:status:*`, {
-            headers: { Authorization: `Bearer ${kvToken}` }
-        });
-        const keysData = await keysResponse.json();
-        const keys = keysData.result || [];
-
-        const slotStatuses = {};
-
-        if (keys.length > 0) {
-            // Παίρνουμε τις τιμές για αυτά τα κλειδιά
-            const valuesResponse = await fetch(`${kvUrl}/mget`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${kvToken}` },
-                body: JSON.stringify(keys)
-            });
-            const valuesData = await valuesResponse.json();
-            const values = valuesData.result || [];
-
-            keys.forEach((key, index) => {
-                const teamId = key.split(':').pop();
-                slotStatuses[teamId] = values[index];
+        const slots = [];
+        // Διαβάζουμε τα status για τις 24 ομάδες (1 έως 24)
+        for (let i = 1; i <= 24; i++) {
+            const status = await redis.get(`team:status:${i}`);
+            slots.push({
+                id: i,
+                status: status || 'available' // Αν δεν υπάρχει, είναι διαθέσιμο
             });
         }
-
-        return res.status(200).json(slotStatuses);
+        return res.status(200).json(slots);
     } catch (error) {
-        console.error("Database error:", error);
-        return res.status(500).json({ error: "Αποτυχία ανάκτησης από τη βάση." });
+        console.error("Redis Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 }
