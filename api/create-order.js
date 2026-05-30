@@ -23,17 +23,12 @@ export default async function handler(req, res) {
         if (!teamId) throw new Error("Missing teamId");
 
         // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks) ---
-        if (teamId.toLowerCase() !== 'ducks') {
+        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks & Megabox) ---
+        if (teamId.toLowerCase() !== 'ducks' && teamId.toLowerCase() !== 'megabox half case') {
             const currentStatus = await redis.get(`team:status:${teamId}`);
-
-            if (currentStatus === 'sold') {
-                return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
-            }
-            if (currentStatus === 'pending') {
-                return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
-            }
-
-            // Κλείδωμα για 2 λεπτά μέχρι να ολοκληρωθεί η μεταφορά στη Viva Wallet
+            if (currentStatus === 'sold') return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
+            if (currentStatus === 'pending') return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
+            
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
 
