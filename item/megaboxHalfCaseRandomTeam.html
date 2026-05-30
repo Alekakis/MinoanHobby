@@ -7,19 +7,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; }
-        .break-container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
+
+        /* Sidebar */
+        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
+        .right-side-panel a { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: 0.3s; }
+        .right-side-panel a:hover { color: #ff0000; transform: scale(1.1); }
+
+        /* Header */
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; }
+        .playful-logo { font-size: 28px; font-weight: bold; color: #ffffff; }
+        .playful-logo span { color: #ff0000; font-style: italic; }
+
+        /* Container */
+        .break-container { max-width: 1000px; margin: 40px auto; padding: 20px; text-align: center; }
+        .box-image { width: 100%; max-width: 400px; border-radius: 12px; margin-bottom: 20px; border: 3px solid #ff0000; }
+        
         .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
-        .team-card { background: #0b132b; border: 1px solid #333; padding: 10px; text-align: center; border-radius: 8px; }
+        .team-card { background: #0b132b; border: 1px solid #333; padding: 15px; text-align: center; border-radius: 8px; transition: 0.3s; }
         .team-card.sold { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
-        .logo { width: 60px; height: 60px; object-fit: contain; }
-        #buy-btn { background: #ff0000; color: white; border: none; padding: 20px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; border-radius: 5px; text-transform: uppercase; }
-        #buy-btn:disabled { background: #555; }
+        .logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; }
+        
+        #buy-btn { background: #ff0000; color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; width: 100%; cursor: pointer; border-radius: 8px; margin-bottom: 30px; }
+        #buy-btn:hover { background: #cc0000; }
     </style>
 </head>
 <body>
+
+    <aside class="right-side-panel">
+        <div class="panel-top"><a href="#"><i class="fas fa-shopping-cart"></i></a></div>
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </aside>
+
+    <header class="main-header">
+        <nav><a href="../products.html" style="color:white; text-decoration:none;">ΠΑΚΕΤΑ</a></nav>
+        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        <nav><a href="../index.html" style="color:white; text-decoration:none;">ΑΡΧΙΚΗ</a></nav>
+    </header>
+
     <main class="break-container">
+        <img src="/images/megabox-photo.png" alt="Megabox" class="box-image">
         <h1>Megabox Random Team Break</h1>
+        <p style="margin-bottom: 20px;">Αγοράστε ένα τυχαίο slot και κερδίστε μια από τις διαθέσιμες ομάδες!</p>
+        
         <button id="buy-btn" onclick="buyRandom()">ΑΓΟΡΑ ΤΥΧΑΙΑΣ ΟΜΑΔΑΣ (27.49€)</button>
         <div class="team-grid" id="teams-container"></div>
     </main>
@@ -42,7 +75,6 @@
 
         async function load() {
             try {
-                // Η κάθετος μπροστά διορθώνει το fetch failed
                 const res = await fetch('/api/get-slots');
                 const slots = await res.json();
                 const container = document.getElementById('teams-container');
@@ -50,38 +82,19 @@
                     const s = slots.find(x => x.id === t.id);
                     const sold = s && (s.status === 'sold' || s.status === 'pending');
                     return `<div class="team-card ${sold ? 'sold' : ''}">
-                        <img src="${t.logo}" class="logo" onerror="this.src='/images/placeholder.png'">
+                        <img src="${t.logo}" class="logo">
                         <p>${t.name}</p>
                         <p style="color:${sold ? 'red':'green'}">${sold ? 'ΕΞΑΝΤΛΗΘΗΚΕ':'ΔΙΑΘΕΣΙΜΟ'}</p>
                     </div>`;
                 }).join('');
-            } catch (err) {
-                console.error("Σφάλμα:", err);
-            }
+            } catch (err) { console.error("API Error:", err); }
         }
 
         async function buyRandom() {
-            const btn = document.getElementById('buy-btn');
-            btn.disabled = true;
-            btn.innerText = "ΕΠΕΞΕΡΓΑΣΙΑ...";
-            
-            try {
-                const res = await fetch('/api/create-random-order', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ amount: "27.49" }) 
-                });
-                const data = await res.json();
-                if(data.OrderCode) {
-                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
-                } else {
-                    alert(data.error || "Κάτι πήγε στραβά");
-                    btn.disabled = false;
-                    btn.innerText = "ΑΓΟΡΑ ΤΥΧΑΙΑΣ ΟΜΑΔΑΣ (27.49€)";
-                }
-            } catch (e) {
-                alert("Σφάλμα σύνδεσης");
-                btn.disabled = false;
-            }
+            const res = await fetch('/api/create-random-order', { method: 'POST' });
+            const data = await res.json();
+            if(data.OrderCode) window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+            else alert(data.error);
         }
         load();
     </script>
