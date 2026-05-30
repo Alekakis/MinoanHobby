@@ -72,7 +72,7 @@
     <header class="main-header">
         <nav class="nav-left">
             <a href="products.html">BOXES</a>
-            <a href="break.html" style="color: #ff0000;">BREAKS</a>
+            <a href="breakOrder.html" style="color: #ff0000;">BREAKS</a>
             <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
         <div class="playful-logo">Minoan<span>Hobby</span></div>
@@ -123,72 +123,115 @@
             const removeBox = document.getElementById('remove-ducks-box');
 
             try {
-                // Κλήση στο endpoint του Redis για να πάρουμε το live stock
+                // Κλήση στο endpoint για να πάρουμε το live stock από το Redis
                 const response = await fetch('/api/get-slots'); 
                 const data = await response.json();
                 
-                // Αν ο server επιστρέφει το ducks stock (αν δεν υπάρχει, θεωρούμε 10)
+                // Παίρνουμε το live stock (αν δεν υπάρχει, θεωρούμε 10)
                 const realLiveStock = data.ducks !== undefined ? data.ducks : 10;
-                
-                // Το εμφανιζόμενο stock είναι το live μείον όσα έχει βάλει ήδη στο καλάθι του
-                const displayStock = realLiveStock - userQty;
 
                 if (realLiveStock <= 0) {
                     btnDucks.disabled = true;
                     btnDucks.innerText = "Εξαντλήθηκε";
                     stockText.className = "stock-indicator out";
                     stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                    removeBox.innerHTML = "";
+                    removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
                 } else if (userQty > 0) {
                     btnDucks.disabled = false;
-                    btnDucks.innerText = `Στο καλάθι (${userQty})`;
+                    btnDucks.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
                     stockText.className = "stock-indicator";
-                    stockText.innerText = `✔️ Απομένουν ${displayStock} ακόμα`;
-                    removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>`;
+                    stockText.innerText = `✔️ Live Απόθεμα στο Redis: ${realLiveStock} διαθέσιμα`;
+                    removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                 } else {
                     btnDucks.disabled = false;
                     btnDucks.innerText = "Προσθηκη στο καλαθι";
                     stockText.className = "stock-indicator";
-                    stockText.innerText = `🔥 Live Stock: ${displayStock} διαθέσιμα`;
+                    stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
                     removeBox.innerHTML = "";
-                }
-
-                // Αν το live stock μειώθηκε λόγω άλλων αγοραστών και ο χρήστης ζητάει παραπάνω από το display
-                if (displayStock <= 0 && userQty > 0) {
-                    btnDucks.disabled = true;
-                    btnDucks.innerText = `Όλο το στοκ στο καλάθι σας (${userQty})`;
                 }
 
             } catch (error) {
                 console.error("Error fetching live stock:", error);
                 stockText.innerText = "Σφάλμα φόρτωσης στοκ";
+                btnDucks.disabled = false;
             }
         }
 
-        // Προσθήκη Ducks στο καλάθι
-        function addDucksToCart() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const existingItem = cart.find(item => item.name === 'Ducks');
+        // Προσθήκη Ducks στο καλάθι με έλεγχο και κλείδωμα στο Redis
+        async function addDucksToCart() {
+            const btnDucks = document.getElementById('btn-ducks');
+            btnDucks.disabled = true; // Double-click προστασία! Κλειδώνει αμέσως.
+            btnDucks.innerText = "Παρακαλώ περιμένετε...";
 
-            if (existingItem) {
-                existingItem.qty += 1;
-            } else {
-                cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
+            try {
+                const response = await fetch('/api/reserve-duck', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    const existingItem = cart.find(item => item.name === 'Ducks');
+
+                    if (existingItem) {
+                        existingItem.qty += 1;
+                    } else {
+                        cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
+                    }
+
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    
+                    // Έναρξη 10λεπτου timer αν δεν έχει ξεκινήσει ήδη
+                    if (!sessionStorage.getItem('checkout_timer_start')) {
+                        sessionStorage.setItem('checkout_timer_start', Date.now());
+                    }
+                } else {
+                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
+                }
+            } catch (error) {
+                console.error("Error reserving duck:", error);
+                alert("Αποτυχία σύνδεσης με τον server. Δοκιμάστε ξανά.");
+            } finally {
+                // Ξεκλειδώνει και ανανεώνει την οθόνη με τα νέα δεδομένα από το Redis
+                await updatePageState();
             }
-
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updatePageState();
         }
 
-        // Αφαίρεση Ducks από το καλάθι
-        function removeDucksFromCart() {
+        // Αφαίρεση Ducks και επιστροφή του στοκ πίσω στο Redis
+        async function removeDucksFromCart() {
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart = cart.filter(item => item.name !== 'Ducks');
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updatePageState();
+            const ducksItem = cart.find(item => item.name === 'Ducks');
+            
+            if (!ducksItem) return;
+
+            const btnDucks = document.getElementById('btn-ducks');
+            btnDucks.disabled = true;
+            btnDucks.innerText = "Επιστροφή αποθέματος...";
+
+            try {
+                // Επιστρέφουμε στον server όσα κομμάτια είχε δεσμεύσει στο καλάθι του
+                for (let i = 0; i < ducksItem.qty; i++) {
+                    await fetch('/api/reserve-duck', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'remove' })
+                    });
+                }
+
+                cart = cart.filter(item => item.name !== 'Ducks');
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (error) {
+                console.error("Error releasing duck stock:", error);
+                alert("Παρουσιάστηκε πρόβλημα κατά την αφαίρεση.");
+            } finally {
+                await updatePageState();
+            }
         }
 
-        // Εκτέλεση ελέγχου κατά τη φόρτωση
+        // Εκτέλεση live ελέγχου κατά τη φόρτωση της σελίδας
         window.onload = updatePageState;
     </script>
 </body>
