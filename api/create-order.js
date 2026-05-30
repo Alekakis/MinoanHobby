@@ -19,8 +19,8 @@ export default async function handler(req, res) {
         if (!amount) throw new Error("Missing amount");
         if (!teamId) throw new Error("Missing teamId");
 
-        const kvUrl = process.env.STORAGE_REST_API_URL;
-        const kvToken = process.env.STORAGE_REST_API_TOKEN;
+        const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
+        const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
 
         // 1. ΕΛΕΓΧΟΣ ΣΤΗ ΒΑΣΗ (Μέσω REST)
         const checkResponse = await fetch(`${kvUrl}/get/team:status:${teamId}`, {
