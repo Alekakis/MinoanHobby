@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-    // Headers για αποφυγή σφαλμάτων CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -13,7 +12,8 @@ export default async function handler(req, res) {
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
         const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
         
-        const amountCents = Math.round(parseFloat(amount) * 100);
+        // Μετατροπή σε σεντς (ακέραιος) χωρίς υποδιαστολή
+        const amountCents = Math.round(parseFloat(amount) * 100).toString();
         const auth = Buffer.from(`${merchantId}:${apiKey}`).toString('base64');
 
         const vivaResponse = await fetch('https://www.vivapayments.com/api/orders', {
@@ -23,8 +23,8 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
-                'Amount': amountCents.toString(),
-                'CustomerTrns': 'Order from Minoan Strength',
+                'Amount': amountCents,
+                'CustomerTrns': 'Order from Minoan Hobby',
                 'RequestLang': 'el-GR',
                 'MaxVisits': '1',
                 'SourceCode': '4936'
