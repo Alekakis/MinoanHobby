@@ -27,15 +27,15 @@ export default async function handler(req, res) {
          if (teamId.toLowerCase() !== 'ducks' && 
             teamId.toLowerCase() !== 'megabox half case' && 
             teamId.toLowerCase() !== '2025-26 panini euroleague contenders basketball mega box' &&
-            teamId.toLowerCase() !== 'panini euroleague select box') {
-    
+            teamId.toLowerCase() !== 'panini euroleague select box' &&
+            teamId.toLowerCase() !== 'panini la liga select box') {
+            
             const currentStatus = await redis.get(`team:status:${teamId}`);
             if (currentStatus === 'sold') return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
             if (currentStatus === 'pending') return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
-    
+            
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
-
         // --- ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET ---
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
         const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
@@ -68,15 +68,17 @@ export default async function handler(req, res) {
             } else if (teamId.toLowerCase() === '2025-26 panini euroleague contenders basketball mega box') {
                 await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 120);
             } else if (teamId.toLowerCase() === 'panini euroleague select box') {
-                // Νέο pending κλειδί για το Select Box Webhook
                 await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
+            } else if (teamId.toLowerCase() === 'panini la liga select box') {
+                // Νέο pending κλειδί για το La Liga Webhook
+                await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
             } else {
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
             }
             
             return res.status(200).json(data);
         }
-} else {
+        } else {
             // Αποτυχία Viva Wallet -> Αν είναι κανονικό slot, το ξεκλειδώνουμε αμέσως
             if (teamId.toLowerCase() !== 'ducks') {
                 await redis.del(`team:status:${teamId}`);
