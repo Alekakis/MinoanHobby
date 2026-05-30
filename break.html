@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breaks - MinoanHobby</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
+
+        /* HEADER & NAVIGATION */
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
+        .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
+        .main-header nav a:hover { color: #ff0000; }
+        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+        .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
+
+        /* RIGHT SIDEBAR */
+        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
+        .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .right-side-panel a, .right-side-panel .lang-selector { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .right-side-panel a:hover, .right-side-panel .lang-selector:hover { color: #ff0000; transform: scale(1.1); }
+        .cart-container { position: relative; }
+        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+        .lang-selector { font-size: 12px !important; font-weight: bold; text-align: center; line-height: 1.2; }
+
+        /* BREAKS CONTAINER & CARDS */
+        .shipping-container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
+        .page-title { color: #ff0000; font-size: 32px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; }
+        .page-subtitle { text-align: center; color: #cbd5e1; margin-bottom: 40px; font-size: 15px; }
+        
+        .shipping-grid { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+        .shipping-card { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s; }
+        .shipping-card:hover { transform: translateY(-5px); }
+        
+        .card-icon { font-size: 45px; color: #ff0000; margin-bottom: 15px; }
+        .card-title { font-size: 22px; color: #ffffff; margin-bottom: 10px; text-transform: uppercase; }
+        .card-price { font-size: 32px; color: #ff0000; font-weight: bold; margin-bottom: 5px; }
+        .stock-indicator { font-size: 13px; color: #22c55e; font-weight: 600; margin-bottom: 15px; }
+        .stock-indicator.out { color: #ef4444; }
+        .card-desc { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
+
+        /* BUTTONS & DISABLED STATE */
+        .add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 15px; text-transform: uppercase; transition: 0.3s; }
+        .add-btn:hover:not(:disabled) { background-color: #ff0000; box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
+        
+        .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
+        .remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
+        .remove-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <aside class="right-side-panel">
+        <div class="panel-top">
+            <a href="checkout.html" title="Καλάθι Αγορών" class="cart-container">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="global-cart-count">0</span>
+            </a>
+            <div class="lang-selector" title="Αλλαγή Γλώσσας">
+                🇬🇷<br>ΕΛ
+            </div>
+        </div>
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </aside>
+
+    <header class="main-header">
+        <nav class="nav-left">
+            <a href="products.html">BOXES</a>
+            <a href="break.html" style="color: #ff0000;">BREAKS</a>
+            <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
+        </nav>
+        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        <nav class="nav-right">
+            <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>
+        </nav>
+    </header>
+
+    <main class="shipping-container">
+        <h1 class="page-title">Live Breaks</h1>
+        <p class="page-subtitle">Επιλέξτε το πακέτο που θέλετε να ανοιχτεί ζωντανά στο επόμενο stream.</p>
+
+        <div class="shipping-grid">
+            <div class="shipping-card">
+                <div>
+                    <div class="card-icon"><i class="fas fa-crow"></i></div>
+                    <h2 class="card-title">Ducks</h2>
+                    <div class="card-price">9.99 €</div>
+                    <div id="ducks-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+                    <p class="card-desc">Λάβετε μέρος στο αποκλειστικό Ducks Break. Περιορισμένο live στοκ 10 τεμαχίων.</p>
+                </div>
+                <div>
+                    <button class="add-btn" id="btn-ducks" onclick="addDucksToCart()">Προσθηκη στο καλαθι</button>
+                    <div id="remove-ducks-box"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Φόρτωση και έλεγχος του καλαθιού & του live stock
+        async function updatePageState() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // 1. Ενημέρωση του μετρητή στο sidebar
+            const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+            const badge = document.getElementById('global-cart-count');
+            if (badge) badge.innerText = totalItems;
+
+            // 2. Έλεγχος αν ο χρήστης έχει ήδη Ducks στο καλάθι
+            const ducksInCart = cart.find(item => item.name === 'Ducks');
+            const userQty = ducksInCart ? ducksInCart.qty : 0;
+
+            const btnDucks = document.getElementById('btn-ducks');
+            const stockText = document.getElementById('ducks-stock-text');
+            const removeBox = document.getElementById('remove-ducks-box');
+
+            try {
+                // Κλήση στο endpoint του Redis για να πάρουμε το live stock
+                const response = await fetch('/api/get-slots'); 
+                const data = await response.json();
+                
+                // Αν ο server επιστρέφει το ducks stock (αν δεν υπάρχει, θεωρούμε 10)
+                const realLiveStock = data.ducks !== undefined ? data.ducks : 10;
+                
+                // Το εμφανιζόμενο stock είναι το live μείον όσα έχει βάλει ήδη στο καλάθι του
+                const displayStock = realLiveStock - userQty;
+
+                if (realLiveStock <= 0) {
+                    btnDucks.disabled = true;
+                    btnDucks.innerText = "Εξαντλήθηκε";
+                    stockText.className = "stock-indicator out";
+                    stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
+                    removeBox.innerHTML = "";
+                } else if (userQty > 0) {
+                    btnDucks.disabled = false;
+                    btnDucks.innerText = `Στο καλάθι (${userQty})`;
+                    stockText.className = "stock-indicator";
+                    stockText.innerText = `✔️ Απομένουν ${displayStock} ακόμα`;
+                    removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>`;
+                } else {
+                    btnDucks.disabled = false;
+                    btnDucks.innerText = "Προσθηκη στο καλαθι";
+                    stockText.className = "stock-indicator";
+                    stockText.innerText = `🔥 Live Stock: ${displayStock} διαθέσιμα`;
+                    removeBox.innerHTML = "";
+                }
+
+                // Αν το live stock μειώθηκε λόγω άλλων αγοραστών και ο χρήστης ζητάει παραπάνω από το display
+                if (displayStock <= 0 && userQty > 0) {
+                    btnDucks.disabled = true;
+                    btnDucks.innerText = `Όλο το στοκ στο καλάθι σας (${userQty})`;
+                }
+
+            } catch (error) {
+                console.error("Error fetching live stock:", error);
+                stockText.innerText = "Σφάλμα φόρτωσης στοκ";
+            }
+        }
+
+        // Προσθήκη Ducks στο καλάθι
+        function addDucksToCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.name === 'Ducks');
+
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updatePageState();
+        }
+
+        // Αφαίρεση Ducks από το καλάθι
+        function removeDucksFromCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.name !== 'Ducks');
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updatePageState();
+        }
+
+        // Εκτέλεση ελέγχου κατά τη φόρτωση
+        window.onload = updatePageState;
+    </script>
+</body>
+</html>
