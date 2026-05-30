@@ -230,6 +230,16 @@
 
     alert("Ο χρόνος των 10 λεπτών έληξε! Το stock αποδεσμεύτηκε αυτόματα.");
     sessionStorage.removeItem('checkout_timer_start');
+
+           // --- ΕΠΙΣΤΡΟΦΗ LA LIGA SELECT BOX (ΝΕΟ) ---
+    const laLigaItem = cart.find(item => item.name === 'Panini La Liga Select Box');
+    if (laLigaItem) {
+        try {
+            for (let i = 0; i < laLigaItem.qty; i++) {
+                await fetch('/api/reserve-laliga', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove' }) });
+            }
+        } catch (e) {}
+    }
            
     // --- ΕΠΙΣΤΡΟΦΗ EUROLEAGUE SELECT BOX (ΝΕΟ) ---
     const selectItem = cart.find(item => item.name === 'Panini EuroLeague Select Box');
