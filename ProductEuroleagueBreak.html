@@ -293,12 +293,10 @@
         </div>
 
         <h2 class="teams-title">Επιλέξτε Ομάδα & Θέση</h2>
-        <div class="teams-grid" id="teams-container">
-            </div>
+        <div class="teams-grid" id="teams-container"></div>
     </main>
 
     <script>
-        // Η πλήρης λίστα και των 20 ομάδων της Euroleague με τις τιμές τους
         const euroleagueTeams = [
             { id: 1, name: "Anadolu Efes Istanbul", price: 30.00, slots: 3 },
             { id: 2, name: "AS Monaco", price: 25.00, slots: 3 },
@@ -308,23 +306,22 @@
             { id: 6, name: "FC Barcelona", price: 35.00, slots: 3 },
             { id: 7, name: "FC Bayern Munich", price: 20.00, slots: 3 },
             { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, slots: 3 },
-            { id: 9, name: "Hapoel Shlomo Tel Aviv", price: 25.00, slots: 3 },
+            { id: 9, name: "Hapoel IBI Tel Aviv", price: 25.00, slots: 3 },
             { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 25.00, slots: 3 },
             { id: 11, name: "LDLC ASVEL Villeurbanne", price: 20.00, slots: 3 },
-            { id: 12, name: "Maccabi Playtika Tel Aviv", price: 25.00, slots: 3 },
+            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 25.00, slots: 3 },
             { id: 13, name: "Olympiacos Piraeus", price: 45.00, slots: 3 },
             { id: 14, name: "Panathinaikos AKTOR Athens", price: 45.00, slots: 3 },
             { id: 15, name: "Paris Basketball", price: 25.00, slots: 3 },
             { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 35.00, slots: 3 },
             { id: 17, name: "Real Madrid", price: 40.00, slots: 3 },
-            { id: 18, name: "Virtus Segafredo Bologna", price: 20.00, slots: 3 },
+            { id: 18, name: "Virtus Bologna", price: 20.00, slots: 3 },
             { id: 19, name: "Valencia Basket", price: 25.00, slots: 3 },
             { id: 20, name: "Zalgiris Kaunas", price: 25.00, slots: 3 }
         ];
 
         const container = document.getElementById('teams-container');
 
-        // Εμφάνιση των ομάδων στην οθόνη
         function renderTeams() {
             container.innerHTML = "";
             euroleagueTeams.forEach(team => {
@@ -350,8 +347,7 @@
             });
         }
 
-        // Σύνδεση με τη Vercel Serverless Function της Viva Wallet
-       async function handlePurchase(teamId) {
+        async function handlePurchase(teamId) {
             const team = euroleagueTeams.find(t => t.id === teamId);
             if (!team || team.slots <= 0) return;
 
@@ -377,7 +373,6 @@
                     renderTeams();
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
-                    // ΕΔΩ: Μας δείχνει τι ακριβώς απάντησε η Viva αν απέτυχε
                     alert("Σφάλμα Viva: " + JSON.stringify(data));
                     button.disabled = false;
                     button.innerText = "ΑΓΟΡΑ SLOT";
@@ -385,13 +380,12 @@
 
             } catch (error) {
                 console.error("Πρόβλημα σύνδεσης με το API:", error);
-                // ΕΔΩ: Μας δείχνει αν το πρόβλημα είναι του δικτύου ή του Vercel
                 alert("Πρόβλημα Δικτύου/Vercel: " + error.message);
                 button.disabled = false;
                 button.innerText = "ΑΓΟΡΑ SLOT";
             }
         }
-        // Αρχικό φόρτωμα των ομάδων κατά το άνοιγμα της σελίδας
+
         renderTeams();
     </script>
 </body>
