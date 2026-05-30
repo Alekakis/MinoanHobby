@@ -24,11 +24,11 @@ export default async function handler(req, res) {
 
         // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks) ---
         // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks & Megabox) ---
-        if (teamId.toLowerCase() !== 'ducks' && teamId.toLowerCase() !== 'megabox half case') {
+         if (teamId.toLowerCase() !== 'ducks' && teamId.toLowerCase() !== 'megabox half case' && teamId.toLowerCase() !== '2025-26 panini euroleague contenders basketball mega box') {
             const currentStatus = await redis.get(`team:status:${teamId}`);
             if (currentStatus === 'sold') return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
             if (currentStatus === 'pending') return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
-            
+    
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
 
