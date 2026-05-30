@@ -220,41 +220,41 @@
         }
 
         // Αποδέσμευση αποθέματος και ενημέρωση του Redis σε περίπτωση λήξης του 10λέπτου
-        async function releaseStock() {
-            clearInterval(timerInterval);
-            const submitBtn = document.getElementById('submit-order-btn');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Αποδέσμευση στοκ...";
-            }
+       async function releaseStock() {
+    clearInterval(timerInterval);
+    const submitBtn = document.getElementById('submit-order-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Αποδέσμευση στοκ...";
+    }
 
-            alert("Ο χρόνος των 10 λεπτών έληξε! Το stock αποδεσμεύτηκε αυτόματα για να είναι διαθέσιμο σε άλλους αγοραστές.");
-            sessionStorage.removeItem('checkout_timer_start');
-            
-            // Έλεγχος αν υπάρχουν Ducks στο καλάθι για να επιστραφούν στο Redis
-            const ducksItem = cart.find(item => item.name === 'Ducks');
-            if (ducksItem) {
-                try {
-                    // Επιστροφή όλων των τεμαχίων Ducks πίσω στο Redis
-                    for (let i = 0; i < ducksItem.qty; i++) {
-                        await fetch('/api/reserve-duck', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'remove' })
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error releasing ducks stock from checkout:", error);
-                }
+    alert("Ο χρόνος των 10 λεπτών έληξε! Το stock αποδεσμεύτηκε αυτόματα.");
+    sessionStorage.removeItem('checkout_timer_start');
+    
+    // --- ΕΠΙΣΤΡΟΦΗ DUCKS ---
+    const ducksItem = cart.find(item => item.name === 'Ducks');
+    if (ducksItem) {
+        try {
+            for (let i = 0; i < ducksItem.qty; i++) {
+                await fetch('/api/reserve-duck', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove' }) });
             }
+        } catch (e) {}
+    }
 
-            // Κρατάμε μόνο τα έξοδα αποστολής (αν υπάρχουν) και καθαρίζουμε τα υπόλοιπα προϊόντα
-            cart = cart.filter(item => item.name.includes('Shipping'));
-            localStorage.setItem('cart', JSON.stringify(cart));
-            
-            // Ανακατεύθυνση πίσω στη σελίδα των Breaks
-            window.location.href = "breakOrder.html";
-        }
+    // --- ΕΠΙΣΤΡΟΦΗ MEGABOX (ΝΕΟ) ---
+    const megaboxItem = cart.find(item => item.name === 'Megabox Half Case');
+    if (megaboxItem) {
+        try {
+            for (let i = 0; i < megaboxItem.qty; i++) {
+                await fetch('/api/reserve-megabox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove' }) });
+            }
+        } catch (e) {}
+    }
+
+    cart = cart.filter(item => item.name.includes('Shipping'));
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.location.href = "../breakOrder.html";
+}
 
         // Αποστολή στοιχείων στο API για τη Viva Payments
         async function handleCheckout(event) {
