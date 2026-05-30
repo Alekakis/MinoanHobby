@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="el"><head>
+<!DOCTYPE html>
+<html lang="el">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MinoanHobby</title>
@@ -15,7 +17,7 @@
         }
 
         body {
-            background-color: #0d1b2a; /* ΕΠΕΣΤΡΕΨΕ: Σκούρο Μπλε φόντο */
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
             color: #ffffff;
             overflow-x: hidden;
             padding-right: 60px; /* Χώρος στα δεξιά για να μην πέφτει το περιεχόμενο πάνω στο πλαϊνό μενού */
@@ -26,8 +28,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
-            background-color: #0b132b; /* ΕΠΕΣΤΡΕΨΕ: Ακόμα πιο σκούρο μπλε */
+            padding: 10px 40px;
+            background-color: #0b132b; /* Ακόμα πιο σκούρο μπλε */
             border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
             position: relative;
             z-index: 10;
@@ -47,31 +49,36 @@
             color: #ff0000; /* Έντονο κόκκινο */
         }
 
-        /* LOGO IMAGE */
-        .logo img {
-            height: 50px; /* Μπορείτε να αλλάξετε το ύψος ανάλογα με τις διαστάσεις του λογοτύπου σας */
+        /* LOGO IMAGE (Πάνω μενού) */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-image {
+            max-height: 12px; /* ΑΛΛΑΓΗ: Μειώθηκε στο 1/4 του αρχικού μεγέθους */
             width: auto;
             display: block;
         }
 
-        /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL (STIKY/FIXED FEATURE) */
+        /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL */
         .right-side-panel {
             position: fixed;
             top: 0;
             right: 0;
             width: 60px;
             height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85); /* ΕΠΕΣΤΡΕΨΕ: Ημιδιαφανές μαύρο */
+            background-color: rgba(0, 0, 0, 0.85); /* Ημιδιαφανές μαύρο */
             border-left: 2px solid #ff0000;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Σπρώχνει το top πάνω και το bottom κάτω */
+            justify-content: space-between;
             align-items: center;
             padding: 25px 0;
             z-index: 100;
         }
 
-        /* Πάνω ενότητα panel (Λογαριασμός & Utilities) */
         .panel-top {
             display: flex;
             flex-direction: column;
@@ -79,7 +86,6 @@
             gap: 25px;
         }
 
-        /* Κάτω ενότητα panel (Social Media) */
         .panel-bottom {
             display: flex;
             flex-direction: column;
@@ -87,9 +93,8 @@
             gap: 20px;
         }
 
-        /* Κοινό στυλ για όλα τα εικονίδια στο πλαϊνό μενού */
         .right-side-panel a, .right-side-panel .lang-selector {
-            color: #e0e0e0; /* Γκρι */
+            color: #e0e0e0;
             font-size: 18px;
             text-decoration: none;
             transition: all 0.3s ease;
@@ -98,11 +103,10 @@
         }
 
         .right-side-panel a:hover, .right-side-panel .lang-selector:hover {
-            color: #ff0000; /* Κόκκινο στο hover */
+            color: #ff0000;
             transform: scale(1.1);
         }
 
-        /* Ειδική ρύθμιση για το καλάθι */
         .cart-container {
             position: relative;
         }
@@ -119,7 +123,6 @@
             right: -10px;
         }
 
-        /* Επιλογέας Γλώσσας κάθετα */
         .lang-selector {
             font-size: 12px !important;
             font-weight: bold;
@@ -130,7 +133,7 @@
         /* HERO SECTION */
         .hero-section {
             position: relative;
-            height: calc(100vh - 82px); /* Προσαρμογή ώστε να πιάνει το υπόλοιπο ύψος */
+            height: calc(100vh - 74px);
             background: linear-gradient(rgba(13, 27, 42, 0.7), #0d1b2a), url('https://via.placeholder.com/1920x1080/112233/ffffff?text=Basketball+MinoanHobby') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
@@ -140,20 +143,19 @@
             padding: 40px;
         }
 
-        /* Μεγάλος Τίτλος Minoan Hobby */
+        /* Μεγάλος Τίτλος */
         .brand-title {
             font-size: 80px;
             font-weight: 900;
             color: #ff0000;
             letter-spacing: 3px;
             text-shadow: 3px 3px 15px rgba(0,0,0,0.8);
-            text-transform: uppercase;
         }
 
         .subtitle {
             font-size: 18px;
             letter-spacing: 4px;
-            margin-top: -10px;
+            margin-top: 5px;
             margin-bottom: 40px;
             color: #e0e0e0;
             font-weight: bold;
@@ -187,146 +189,4 @@
             color: #ff0000;
             margin-right: 15px;
             flex-shrink: 0;
-            background-color: rgba(0,0,0,0.3);
-        }
-
-        .feature-text strong {
-            display: block;
-            font-size: 13px;
-            color: #ffffff;
-        }
-
-        .feature-text span {
-            font-size: 11px;
-            color: #e0e0e0;
-        }
-
-        /* CARDS PREVIEW */
-        .cards-preview {
-            display: flex;
-            gap: 20px;
-            margin-top: 50px;
-        }
-
-        .card-placeholder {
-            width: 120px;
-            height: 170px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            color: #e0e0e0;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .card-placeholder:hover {
-            transform: translateY(-10px);
-            border-color: #ff0000;
-            color: #ff0000;
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
-        }
-
-        /* ΒΕΛΗ ΠΛΟΗΓΗΣΗΣ */
-        .arrow-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.6);
-            border: 1px solid #ff0000;
-            color: #e0e0e0;
-            padding: 15px 20px;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .arrow-btn:hover {
-            background: #ff0000;
-            color: white;
-        }
-
-        .prev-btn { left: 20px; }
-        /* Μετακίνηση του δεξιού βέλους λίγο πιο αριστερά για να μην πέφτει πάνω στο πλαϊνό panel */
-        .next-btn { right: 80px; }
-    </style></head><body>
-
-    <aside class="right-side-panel">
-        <div class="panel-top">
-            <a href="#" class="cart-container" title="Καλάθι Αγορών">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">0</span>
-            </a>
-            <div class="lang-selector" title="Αλλαγή Γλώσσας">
-                🇬🇷<br>ΕΛ
-            </div>
-        </div>
-
-        <div class="panel-bottom">
-            <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
-        </div>
-    </aside>
-
-    <header class="main-header">
-        <nav class="nav-left">
-            <a href="#">ΠΑΚΕΤΑ</a>
-            <a href="#">ΑΝΟΙΓΜΑΤΑ</a>
-            <a href="#">ΑΠΟΣΤΟΛΕΣ</a>
-        </nav>
-        
-        <div class="Logo">
-            <img src="Logo.png" alt="Minoan Hobby Logo">
-        </div>
-
-        <nav class="nav-right">
-            <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
-            <a href="#">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a> <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>
-        </nav>
-    </header>
-
-    <section class="hero-section">
-        <button class="arrow-btn prev-btn">&#10094;</button>
-        <button class="arrow-btn next-btn">&#10095;</button>
-
-        <div class="hero-content">
-            <h2 class="brand-title">Minoan Hobby</h2>
-            <p class="subtitle">EUROLEAGUE BASKETBALL</p>
-
-            <div class="features-container">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-pen-nib"></i></div>
-                    <div class="feature-text">
-                        <strong>3 AYTOΓΡΑΦΑ Ή</strong>
-                        <span>ΚΑΡΤΕΣ MEMORABILIA ΑΝΑ ΚΟΥΤΙ</span>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-gem"></i></div>
-                    <div class="feature-text">
-                        <strong>ΣΠΑΝΙΑ INSERTS</strong>
-                        <span>STAINED GLASS - VISIONARY<br>EQUALIZERS - UNSTOPPABLE</span>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
-                    <div class="feature-text">
-                        <strong>ΒΑΣΙΚΟ ΣΕΤ</strong>
-                        <span>3 ΕΠΙΠΕΔΑ - 250 ΚΑΡΤΕΣ</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="cards-preview">
-                <div class="card-placeholder">Κάρτα 1</div>
-                <div class="card-placeholder">Κάρτα 2</div>
-                <div class="card-placeholder">Κάρτα 3</div>
-                <div class="card-placeholder">Κάρτα 4</div>
-            </div>
-        </div>
-    </section></body></html>
+            background-color: rgba(0,0
