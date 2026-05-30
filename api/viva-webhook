@@ -1,0 +1,35 @@
+// Αυτό το endpoint το καλεί η ίδια η Viva μόλις γίνει η πληρωμή
+app.post('/api/viva-webhook', async (req, res) => {
+    const event = req.body;
+
+    // Ελέγχουμε αν το event αφορά επιτυχημένη πληρωμή (Transaction Business Short / Success)
+    if (event.EventTypeId === 1796 || event.EventData.StatusId === 'F') { 
+        const orderCode = event.EventData.OrderCode;
+
+        // 1. Βρίσκεις τα στοιχεία του πελάτη από τη βάση σου χρησιμοποιώντας το orderCode
+        const order = await db.findOrder(orderCode); 
+
+        // 2. Σύνθεση των δεδομένων για το Web3Forms
+        const emailData = {
+            access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
+            subject: "💰 ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ - Νέα Παραγγελία!",
+            "Όνομα": order.firstName,
+            "Επώνυμο": order.lastName,
+            "Email": order.email,
+            "Κινητό": order.phone,
+            "Προϊόντα": order.cart.map(i => `${i.name} (x${i.qty})`).join(', '),
+            "Σύνολο Πληρωμής": event.EventData.Amount + " €"
+        };
+
+        // 3. Αποστολή του email από τον Server στο mail σου
+        await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(emailData)
+        });
+
+        return res.status(200).send('OK');
+    }
+
+    res.status(200).send('Event ignored');
+});
