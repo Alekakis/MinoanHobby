@@ -201,6 +201,40 @@
     </main>
 
     <script>
+
+
+        <script>
+    // Συνάρτηση για συμμετοχή σε διαιρέτη
+    async function joinDivider(dividerId) {
+        const btn = document.getElementById(`btn-${dividerId}`);
+        btn.disabled = true; // Απενεργοποίηση για αποφυγή spam
+
+        const res = await fetch(`/api/slots/${dividerId}/pending`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            alert("Το slot κλειδώθηκε για 1 λεπτό. Προχωρήστε στην πληρωμή!");
+            // Ξεκινάμε χρονόμετρο 60 δευτερολέπτων
+            startTimer(dividerId, 60);
+        } else {
+            alert("Αυτό το slot είναι ήδη κατειλημμένο ή δεν είναι διαθέσιμο.");
+            btn.disabled = false;
+        }
+    }
+
+    function startTimer(id, duration) {
+        let timer = duration;
+        const display = document.getElementById(`timer-${id}`);
+        const interval = setInterval(() => {
+            display.textContent = `Κλειδωμένο: ${timer}s`;
+            if (--timer < 0) {
+                clearInterval(interval);
+                display.textContent = "";
+                load(); // Επαναφόρτωση για απελευθέρωση
+            }
+        }, 1000);
+    }
+</script>
         // Η λογική παραμένει ως είχε
         const teams = [
             { id: 1, name: "Anadolu Efes", logo: "/images/imageAna.png" }, { id: 2, name: "AS Monaco", logo: "/images/imageMon.png" },
