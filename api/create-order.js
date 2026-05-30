@@ -57,17 +57,17 @@ export default async function handler(req, res) {
         const data = await vivaResponse.json();
 
         if (data.OrderCode) {
-            // Δημιουργία mappings για το Webhook (Διάρκεια 2 λεπτά)
             if (teamId.toLowerCase() === 'ducks') {
-                // Για τα Ducks: Απλώς ενημερώνουμε το Webhook για την ποσότητα της παραγγελίας
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
+            } else if (teamId.toLowerCase() === 'megabox half case') {
+        // Νέο pending κλειδί για το Megabox Webhook
+                await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 120);
             } else {
-                // Για τα Slots: Κρατάμε ποιο teamId αντιστοιχεί σε αυτό το OrderCode
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
-            }
-            
-            return res.status(200).json(data);
-        } else {
+        }
+    
+    return res.status(200).json(data);
+} else {
             // Αποτυχία Viva Wallet -> Αν είναι κανονικό slot, το ξεκλειδώνουμε αμέσως
             if (teamId.toLowerCase() !== 'ducks') {
                 await redis.del(`team:status:${teamId}`);
