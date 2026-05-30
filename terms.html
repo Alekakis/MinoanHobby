@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Όροι & Προϋποθέσεις - MinoanHobby</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-right: 60px; /* Χώρος στα δεξιά για το πλαϊνό μενού */
+        }
+
+        /* MAIN HEADER & NAVIGATION (Ίδιο με την κεντρική) */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #0b132b; /* Blue-black */
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-header nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .main-header nav a:hover {
+            color: #ff0000;
+        }
+
+        /* ΠΑΙΧΝΙΔΙΑΡΙΚΟ STYLE ΓΙΑ ΤΑ ΓΡΑΜΜΑΤΑ */
+        .playful-logo {
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            text-transform: none;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .playful-logo span {
+            color: #ff0000;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-left: 5px;
+        }
+
+        /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL (Ίδιο με την κεντρική) */
+        .right-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            border-left: 2px solid #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            z-index: 100;
+        }
+
+        .panel-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .right-side-panel a, .right-side-panel .lang-selector {
+            color: #e0e0e0;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .right-side-panel a:hover, .right-side-panel .lang-selector:hover {
+            color: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .cart-container {
+            position: relative;
+        }
+
+        .cart-count {
+            background-color: #ff0000;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -10px;
+        }
+
+        .lang-selector {
+            font-size: 12px !important;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* TERMS CONTENT SECTION */
+        .terms-section {
+            padding: 60px 40px;
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(rgba(13, 27, 42, 0.4), #0d1b2a);
+        }
+
+        .terms-wrapper {
+            max-width: 900px;
+            width: 100%;
+            background-color: rgba(11, 19, 43, 0.6); /* Ημιδιαφανές blue-black πλαίσιο */
+            border: 1px solid rgba(255, 0, 0, 0.3); /* Διακριτικό κόκκινο border */
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .terms-wrapper h1 {
+            color: #ff0000; /* Κόκκινος Κύριος Τίτλος */
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff0000;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        .welcome-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #ffffff;
+            margin-bottom: 35px;
+            font-weight: 500;
+        }
+
+        .terms-block {
+            margin-bottom: 30px;
+        }
+
+        .terms-block h2 {
+            color: #ff0000; /* Κόκκινοι Υπότιτλοι 1, 2, 3 κλπ */
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terms-block h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #ff0000;
+            border-radius: 50%;
+        }
+
+        .terms-block p {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        .terms-block strong {
+            color: #ffffff;
+        }
+
+        /* TIPS BOX (Για τα τεχνικά tips) */
+        .tips-box {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid #ff0000;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .tips-box h3 {
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-box h3 i {
+            color: #ff0000;
+        }
+
+        .tips-box p {
+            font-size: 13px;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .tips-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .blockquote-text {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 4px;
+            color: #ffffff !important;
+            font-style: italic;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        /* BACK BUTTON */
+        .action-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #ff0000;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 12px 25px;
+            border-radius: 25px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .back-home-btn:hover {
+            background-color: #ffffff;
+            color: #0d1b2a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="right-side-panel">
+        <div class="panel-top">
+            <a href="#" class="cart-container" title="Καλάθι Αγορών">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </a>
+            <div class="lang-selector" title="Αλλαγή Γλώσσας">
+                🇬🇷<br>ΕΛ
+            </div>
+        </div>
+
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </aside>
+
+    <header class="main-header">
+        <nav class="nav-left">
+            <a href="index.html">ΠΑΚΕΤΑ</a>
+            <a href="index.html">ΑΝΟΙΓΜΑΤΑ</a>
+            <a href="index.html">ΑΠΟΣΤΟΛΕΣ</a>
+        </nav>
+        
+        <div class="playful-logo">
+            Minoan<span>Hobby</span>
+        </div>
+
+        <nav class="nav-right">
+            <a href="index.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+            <a href="terms.html" style="color: #ff0000;">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="index.html">ΜΑΘΕΤΕ ΝΕΑ</a>
+        </nav>
+    </header>
+
+    <section class="terms-section">
+        <div class="terms-wrapper">
+            <h1>Όροι και Προϋποθέσεις Συμμετοχής σε Live Breaks</h1>
+            
+            <p class="welcome-text">
+                Καλώς ήρθατε στην ιστοσελίδα μας. Πριν προχωρήσετε σε οποιαδήποτε αγορά θέσης (Spot), ομάδας (Team) ή προϊόντος, παρακαλούμε να διαβάσετε προσεκτικά τους παρακάτω όρους. Η ολοκλήρωση μιας παραγγελίας και η πληρωμή της σημαίνει την πλήρη, ρητή και ανεπιφύλακτη αποδοχή τους.
+            </p>
+
+            <div class="terms-block">
+                <h2>1. Φύση της Υπηρεσίας (Τι αγοράζετε)</h2>
+                <p><strong>Ορισμός Υπηρεσίας:</strong> Ο πελάτης κατανοεί και αποδέχεται ότι με την αγορά μιας θέσης (Spot / Team / Player) σε ένα "Live Break", δεν αγοράζει ένα ολόκληρο ή σφραγισμένο προϊόν (π.χ. ένα κλειστό κουτί/box/case), αλλά το δικαίωμα να λάβει τις κάρτες που θα αντιστοιχούν αποκλειστικά στην ομάδα ή τον παίκτη που του ανατέθηκε, όπως αυτές θα αποσφραγιστούν ζωντανά (Live) κατά τη διάρκεια της μετάδοσης.</p>
+                <p><strong>Ρίσκο Συμμετοχής (Hitless Spots):</strong> Λόγω της τυχαίας φύσης των συσκευασιών της Panini (ή οποιασδήποτε άλλης εταιρείας), η αγορά μιας θέσης δεν εγγυάται τη λήψη συγκεκριμένου αριθμού καρτών ή καρτών συγκεκριμένης χρηματικής αξίας. Υπάρχει η πιθανότητα μια ομάδα ή ένα spot να μην περιέχει καμία κάρτα στο συγκεκριμένο άνοιγμα ("hitless spot"). Σε αυτή την περίπτωση, δεν επιστρέφονται χρήματα.</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>2. Κανόνες Ανάθεσης Καρτών & Πολλαπλές Ομάδες (Multi-Team / Multi-Player)</h2>
+                <p><strong>Γενικός Κανόνας:</strong> Μια κάρτα ανήκει στον συμμετέχοντα που έχει την ομάδα η οποία αναγράφεται στην κάρτα ή τη φανέλα που φοράει ο παίκτης, σύμφωνα με το επίσημο checklist του κατασκευαστή (Panini).</p>
+                <p><strong>Κάρτες με Πολλαπλές Ομάδες/Παίκτες:</strong> Αν μια κάρτα απεικονίζει δύο (2) ή περισσότερους παίκτες από διαφορετικές ομάδες, η ιδιοκτησία της κάρτας θα κρίνεται ζωντανά (Live) μέσω κλήρωσης (Random) στην πλατφόρμα Random.org (ή αντίστοιχη αξιόπιστη ψηφιακή γεννήτρια). Στην κλήρωση θα συμμετέχουν μόνο οι κάτοχοι των εμπλεκόμενων ομάδων.</p>
+                <p><strong>Συμφωνία Συμμετεχόντων:</strong> Οι εμπλεκόμενοι ιδιοκτήτες έχουν το δικαίωμα, αν το επιθυμούν, να συμφωνήσουν μεταξύ τους στο chat του Live (πριν πραγματοποιηθεί η κλήρωση) για την πώληση, εξαγορά ή ανταλλαγή του μεριδίου τους, ώστε να αποφευχθεί η κλήρωση.</p>
+                <p><strong>Κάρτες Εθνικών Ομάδων / All-Star / Κολεγίων:</strong> Αν ένας παίκτης απεικονίζεται με φανέλα Εθνικής Ομάδας, All-Star Team ή Πανεπιστημίου (College), η κάρτα ανήκει στον ιδιοκτήτη της επαγγελματικής ομάδας (Club) στην οποία αγωνιζόταν ο παίκτης τη σεζόν κυκλοφορίας του συγκεκριμένου προϊόντος. Αν ο παίκτης έχει αποσυρθεί (Legend), η κάρτα πάει στην ομάδα με την οποία αγωνίστηκε τα περισσότερα χρόνια ή σύμφωνα με το επίσημο checklist της Panini για το συγκεκριμένο προϊόν.</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>3. Ακυρώσεις, Επιστροφές & Δικαίωμα Υπαναχώρησης</h2>
+                <p><strong>Οριστικές Αγορές (Εξαίρεση Υπαναχώρησης):</strong> Βάσει της ευρωπαϊκής νομοθεσίας για το ηλεκτρονικό εμπόριο, η παρούσα υπηρεσία εμπίπτει στις εξαιρέσεις του δικαιώματος υπαναχώρησης (υπηρεσίες που εκτελούνται ζωντανά και περιλαμβάνουν αποσφράγιση αγαθών). Από τη στιγμή που θα γίνει η κλήρωση των ομάδων (Random) ή θα ξεκινήσει η ζωντανή ροή (Live Streaming) του break, καμία ακύρωση και καμία επιστροφή χρημάτων δεν γίνεται δεκτή.</p>
+                <p><strong>Ακύρωση προ του Live:</strong> Επιστροφή χρημάτων ή ακύρωση θέσης μπορεί να ζητηθεί μόνο μέσω email ή γραπτού μηνύματος αυστηρά έως και δύο (2) ώρες πριν από την προγραμματισμένη έναρξη του Live Stream.</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>4. Τεχνικά Σφάλματα & Διπλοεγγραφές (Double Sells)</h2>
+                <p>Αν λόγω τεχνικού σφάλματος του e-shop πουληθεί η ίδια ακριβώς θέση (spot/team) σε δύο ή περισσότερα άτομα ταυτόχρονα, έγκυρη θεωρείται αποκλειστικά και μόνο η παραγγελία που καταγράφηκε πρώτη χρονικά στο σύστημα (βάσει ώρας και δευτερολέπτου της πλατφόρμας πληρωμών).</p>
+                <p>Στον δεύτερο (ή επόμενο) αγοραστή γίνεται άμεση, υποχρεωτική και πλήρης επιστροφή χρημάτων εντός 1-3 εργάσιμων ημερών.</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>5. Αμφισβήτηση Συναλλαγών (Chargebacks)</h2>
+                <p>Οποιαδήποτε κακόβουλη προσπάθεια ακύρωσης πληρωμής ή αμφισβήτησης συναλλαγής (chargeback) μέσω Τράπεζας, PayPal ή Stripe μετά τη διεξαγωγή του Live Break, θα αντιμετωπίζεται νομικά.</p>
+                <p>Η εταιρεία μας θα προσκομίζει στους παρόχους πληρωμών και στις αρχές: το πλήρες βίντεο του Live Stream που αποδεικνύει την παροχή της υπηρεσίας, το αποδεικτικό αποστολής των καρτών (Tracking Number) και τους παρόντες όρους που αποδέχτηκε ο χρήστης κατά το checkout.</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>6. Αποστολές, Ασφάλεια & Ελαττώματα Προϊόντος</h2>
+                <p><strong>Προστασία Καρτών:</strong> Όλες οι κάρτες μεγάλης αξίας (Hits, Autographs, Memorabilia, Numbered, Short Prints) τοποθετούνται άμεσα σε προστατευτικά sleeves και σκληρές θήκες (Toploaders / One-Touches) κατά τη διάρκεια ή αμέσως μετά το live.</p>
+                <p><strong>Ευθύνη Courier:</strong> Η εταιρεία μας συσκευάζει τις κάρτες με τη μέγιστη δυνατή ασφάλεια. Από τη στιγμή που το δέμα παραδίδεται στην εταιρεία ταχυμεταφορών (Courier) και εκδίδεται ο αριθμός αποστολής (Tracking Number), η ευθύνη για τυχόν καθυστερήσεις, απώλεια ή καταστροφή μετακυλίεται στον μεταφορέα.</p>
+                <p><strong>Εργοστασιακά Ελαττώματα (Factory Defects):</strong> Η εταιρεία μας δεν φέρει καμία ευθύνη για τυχόν ελαττώματα που προέρχονται από το εργοστάσιο παραγωγής της Panini (π.χ. print lines, γρατζουνιές, κακό κόψιμο - miscuts, φθαρμένες γωνίες μέσα στο κλειστό πακέτο).</p>
+            </div>
+
+            <div class="terms-block">
+                <h2>7. Πνευματική Ιδιοκτησία & Marketing</h2>
+                <p><strong>Ιδιοκτησία Βίντεο:</strong> Όλο το οπτικοακουστικό υλικό (Livestreams, YouTube βίντεο, TikTok Shorts, Instagram Reels) που παράγεται κατά τη διάρκεια των breaks αποτελεί αποκλειστική πνευματική ιδιοκτησία της ιστοσελίδας μας.</p>
+                <p><strong>Χρήση Υλικού:</strong> Διατηρούμε το δικαίωμα να χρησιμοποιήσουμε αποσπάσματα των βίντεο (π.χ. τη στιγμή που ανοίγει μια σπάνια ή ακριβή κάρτα) για διαφημιστικούς λόγους στα μέσα κοινωνικής δικτύωσης. Κατά τη διαδικασία αυτή, προστατεύονται τα προσωπικά δεδομένα των χρηστών (χρήση μόνο των μικρών ονομάτων ή των usernames του chat).</p>
+            </div>
+
+            <div class="tips-box">
+                <h3><i class="fas fa-lightbulb"></i> Τεχνικές Σημειώσεις Διαχείρισης e-Shop</h3>
+                <p><strong>1. Υποχρεωτικό Checkbox στο Checkout:</strong> Στη σελίδα ολοκλήρωσης πληρωμής, πρέπει να ρυθμιστεί ένα μη προ-τσεκαρισμένο πεδίο επιλογής που θα εμποδίζει την αγορά αν δεν επιλεγεί. Το κείμενο δίπλα:</p>
+                <p class="blockquote-text">«Έχω διαβάσει και αποδέχομαι τους Όρους Χρήσης. Κατανοώ ότι αγοράζω θέση σε Live Break και ότι μετά την έναρξη της διαδικασίας δεν γίνεται δεκτή καμία ακύρωση ή επιστροφή χρημάτων.»</p>
+                <p><strong>2. Πολιτική Αρχειοθέτησης Βίντεο:</strong> Όλα τα Livestreams πρέπει να παραμένουν αποθηκευμένα (π.χ. ως "Unlisted" στο YouTube) για τουλάχιστον 6 μήνες, καθώς αποτελούν το μοναδικό αποδεικτικό μέσο σε περίπτωση μεταγενέστερης αμφισβήτησης (chargeback).</p>
+            </div>
+
+            <div class="action-container">
+                <a href="index.html" class="back-home-btn">
+                    <i class="fas fa-arrow-left"></i> ΕΠΙΣΤΡΟΦΗ ΣΤΗΝ ΑΡΧΙΚΗ
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>
