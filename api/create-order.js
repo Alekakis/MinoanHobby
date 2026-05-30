@@ -31,8 +31,8 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
         }
 
-        // 2. ΚΛΕΙΔΩΜΑ ΓΙΑ 10 ΛΕΠΤΑ (600 δευτερόλεπτα)
-        await redis.set(`team:status:${teamId}`, 'pending', 'EX', 300);
+        // 2. ΚΛΕΙΔΩΜΑ ΓΙΑ  2 ΛΕΠΤΑ 
+        await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
 
         // 3. ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
