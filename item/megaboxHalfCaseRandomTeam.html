@@ -2,55 +2,54 @@
 <html lang="el">
 <head>
     <meta charset="UTF-8">
-    <title>Megabox Half Case Random Team</title>
+    <title>Megabox Random Team</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; text-align: center; padding: 50px; }
-        .box { border: 2px solid #ff9900; padding: 30px; display: inline-block; border-radius: 10px; background: #222; }
-        .price { font-size: 24px; color: #ff9900; margin: 15px 0; }
-        button { background: #ff9900; color: black; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        .team-card { border: 1px solid #444; padding: 10px; text-align: center; transition: 0.3s; }
+        .sold { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        .logo { width: 80px; height: 80px; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>Megabox Half Case Break</h1>
-        <p>Αγοράστε μια τυχαία ομάδα από το Pool! Η ομάδα θα αποκαλυφθεί μετά την πληρωμή.</p>
-        
-        <div class="price">Τιμή Θέσης: <span id="product-price">50.00</span>€</div>
-        
-        <button id="buy-btn" onclick="startRandomPurchase()">Αγορά Random Ομάδας</button>
-        <p id="message"></p>
-    </div>
+    <h1>Megabox Half Case - Random Team</h1>
+    <button id="random-buy-btn" onclick="buyRandom()">Αγορά Random Ομάδας (27.49€)</button>
+
+    <div class="team-grid" id="team-list">
+        </div>
 
     <script>
-        async function startRandomPurchase() {
-            const btn = document.getElementById('buy-btn');
-            const msg = document.getElementById('message');
-            btn.disabled = true;
-            msg.innerText = "Παρακαλώ περιμένετε, δεσμεύεται τυχαία ομάδα...";
+        const euroleagueTeams = [/* Εδώ η λίστα σου */];
 
-            try {
-                const response = await fetch('/api/create-random-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: "50.00" }) // Εδώ ορίζεις την τιμή
-                });
+        async function init() {
+            const container = document.getElementById('team-list');
+            const response = await fetch('/api/get-slots'); // Χρησιμοποιούμε το API που έχουμε ήδη
+            const statusList = await response.json();
 
-                const data = await response.json();
-
-                if (data.OrderCode) {
-                    // Στέλνουμε τον χρήστη στη Viva Wallet
-                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
-                } else {
-                    msg.innerText = "Σφάλμα: " + (data.error || "Αποτυχία Viva");
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                msg.innerText = "Σφάλμα δικτύου.";
-                btn.disabled = false;
-            }
+            euroleagueTeams.forEach(team => {
+                const status = statusList.find(s => s.id === team.id);
+                const isSold = status && (status.status === 'sold' || status.status === 'pending');
+                
+                container.innerHTML += `
+                    <div class="team-card ${isSold ? 'sold' : ''}">
+                        <img src="${team.logo}" class="logo">
+                        <p>${team.name}</p>
+                    </div>
+                `;
+            });
         }
+        
+        async function buyRandom() {
+            // Καλεί το API που φτιάξαμε για random αγορά
+            const res = await fetch('/api/create-random-order', {
+                method: 'POST',
+                body: JSON.stringify({ amount: "27.49" })
+            });
+            const data = await res.json();
+            if(data.OrderCode) window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+        }
+
+        init();
     </script>
 </body>
 </html>
