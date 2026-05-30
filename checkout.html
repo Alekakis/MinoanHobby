@@ -230,7 +230,16 @@
 
     alert("Ο χρόνος των 10 λεπτών έληξε! Το stock αποδεσμεύτηκε αυτόματα.");
     sessionStorage.removeItem('checkout_timer_start');
-
+           
+    // --- ΕΠΙΣΤΡΟΦΗ EUROLEAGUE SELECT BOX (ΝΕΟ) ---
+    const selectItem = cart.find(item => item.name === 'Panini EuroLeague Select Box');
+    if (selectItem) {
+        try {
+            for (let i = 0; i < selectItem.qty; i++) {
+                await fetch('/api/reserve-euroleague-select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove' }) });
+            }
+        } catch (e) {}
+    }
            // --- ΕΠΙΣΤΡΟΦΗ EUROLEAGUE MEGA BOX (ΝΕΟ) ---
     const euroleagueItem = cart.find(item => item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box');
     if (euroleagueItem) {
