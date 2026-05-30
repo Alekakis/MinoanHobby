@@ -4,55 +4,243 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Megabox Random Team - MinoanHobby</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { background-color: #0d1b2a; color: #ffffff; font-family: sans-serif; padding-right: 60px; margin: 0; }
-        .main-header { display: flex; justify-content: space-between; padding: 20px 40px; background: #0b132b; border-bottom: 2px solid #ff0000; }
-        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background: rgba(0,0,0,0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; align-items: center; padding: 25px 0; z-index: 100; }
-        .break-container { max-width: 800px; margin: 40px auto; text-align: center; }
-        .stats-box { background: #0b132b; padding: 20px; border: 1px solid #ff0000; border-radius: 10px; display: inline-block; margin-bottom: 20px; }
-        .buy-btn { background: #ff0000; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0d1b2a;
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-right: 60px; /* Χώρος δεξιά για το πλαϊνό μενού */
+        }
+
+        /* MAIN HEADER & NAVIGATION */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #0b132b;
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-header nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .main-header nav a:hover { color: #ff0000; }
+
+        .playful-logo {
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .playful-logo span {
+            color: #ff0000;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-left: 5px;
+        }
+
+        /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL */
+        .right-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            border-left: 2px solid #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            z-index: 100;
+        }
+
+        .panel-top, .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .right-side-panel a {
+            color: #e0e0e0;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .right-side-panel a:hover { color: #ff0000; transform: scale(1.1); }
+
+        .cart-container { position: relative; }
+        .cart-count {
+            background-color: #ff0000;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -10px;
+        }
+
+        /* CONTENT */
+        .break-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .break-image {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 8px;
+            border: 2px solid #ff0000;
+            margin-bottom: 20px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .team-card {
+            background-color: #0b132b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .team-card.sold { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        .logo { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
+        
+        #buy-btn {
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 15px 30px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 18px;
+            text-transform: uppercase;
+            transition: 0.3s;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        #buy-btn:hover { background-color: #ff0000; }
     </style>
 </head>
 <body>
 
     <aside class="right-side-panel">
-        <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+        <div class="panel-top">
+            <a href="#" class="cart-container">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </a>
+        </div>
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
     </aside>
 
     <header class="main-header">
-        <nav><a href="../products.html" style="color:white;">ΠΑΚΕΤΑ</a></nav>
-        <div style="font-size:24px; font-weight:bold;">Minoan<span style="color:red;">Hobby</span></div>
+        <nav class="nav-left">
+            <a href="products.html">ΠΑΚΕΤΑ</a>
+            <a href="index.html">ΑΝΟΙΓΜΑΤΑ</a>
+            <a href="index.html">ΑΠΟΣΤΟΛΕΣ</a>
+        </nav>
+        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        <nav class="nav-right">
+            <a href="index.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="index.html">ΜΑΘΕΤΕ ΝΕΑ</a>
+        </nav>
     </header>
 
     <main class="break-container">
-        <div id="break-config" data-total-price="27.49" data-max-slots="6"></div>
-
-        <h1>Megabox Random Team</h1>
-        <div class="stats-box">
-            <p>Κόστος ανά θέση: <span id="price-display" style="color:#ff0000; font-weight:bold;"></span></p>
-            <p>Πιθανότητα νίκης: <span id="prob-display" style="color:#ff0000; font-weight:bold;"></span></p>
-        </div>
-
-        <button class="buy-btn" onclick="buySlot()">ΑΓΟΡΑ ΘΕΣΗΣ</button>
+        <img src="/images/megabox-photo.png" alt="Megabox Break" class="break-image">
+        <h1>Megabox Random Team Break</h1>
+        <p style="margin: 20px 0; color: #e0e0e0;">Αγοράστε ένα τυχαίο slot και ανακαλύψτε την ομάδα που θα σας τύχει!</p>
+        
+        <button id="buy-btn" onclick="buyRandom()">ΑΓΟΡΑ ΤΥΧΑΙΑΣ ΟΜΑΔΑΣ (27.49€)</button>
+        <div class="team-grid" id="teams-container"></div>
     </main>
 
     <script>
-        function calculateStats() {
-            const config = document.getElementById('break-config');
-            const total = parseFloat(config.dataset.totalPrice);
-            const slots = parseInt(config.dataset.maxSlots);
-            document.getElementById('price-display').innerText = (total / slots).toFixed(2) + " €";
-            document.getElementById('prob-display').innerText = ((1 / slots) * 100).toFixed(1) + " %";
-        }
-        
-        async function buySlot() {
-            // Εδώ καλείς το API σου για να κρατήσεις τη θέση
-            alert("Η θέση κρατήθηκε!");
+        // Η λογική παραμένει ως είχε
+        const teams = [
+            { id: 1, name: "Anadolu Efes", logo: "/images/imageAna.png" }, { id: 2, name: "AS Monaco", logo: "/images/imageMon.png" },
+            { id: 3, name: "Crvena Zvezda", logo: "/images/imageZve.png" }, { id: 4, name: "Dubai", logo: "/images/imageDub.png" },
+            { id: 5, name: "Milan", logo: "/images/imageMil.png" }, { id: 6, name: "Barcelona", logo: "/images/imageBar.png" },
+            { id: 7, name: "Bayern", logo: "/images/imageBay.png" }, { id: 8, name: "Fenerbahce", logo: "/images/imageFen.png" },
+            { id: 9, name: "Hapoel", logo: "/images/imageHap.png" }, { id: 10, name: "Baskonia", logo: "/images/imageBasc.png" },
+            { id: 11, name: "ASVEL", logo: "/images/imageVil.png" }, { id: 12, name: "Maccabi", logo: "/images/imageMac.png" },
+            { id: 13, name: "Olympiacos", logo: "/images/imageOly.png" }, { id: 14, name: "Panathinaikos", logo: "/images/imagePan.png" },
+            { id: 15, name: "Paris", logo: "/images/imagePar.png" }, { id: 16, name: "Partizan", logo: "/images/imagePart.png" },
+            { id: 17, name: "Real Madrid", logo: "/images/imageMad.png" }, { id: 18, name: "Virtus", logo: "/images/imageBol.png" },
+            { id: 19, name: "Valencia", logo: "/images/imageVal.png" }, { id: 20, name: "Zalgiris", logo: "/images/imageZal.png" },
+            { id: 21, name: "Oly Legend", logo: "/images/imageOly.png" }, { id: 22, name: "Pao Legend", logo: "/images/imagePan.png" },
+            { id: 23, name: "CSKA", logo: "/images/imageCska.png" }
+        ];
+
+        async function load() {
+            try {
+                const res = await fetch('/api/get-slots');
+                const slots = await res.json();
+                const container = document.getElementById('teams-container');
+                container.innerHTML = teams.map(t => {
+                    const s = slots.find(x => x.id === t.id);
+                    const sold = s && (s.status === 'sold' || s.status === 'pending');
+                    return `<div class="team-card ${sold ? 'sold' : ''}">
+                        <img src="${t.logo}" class="logo">
+                        <h3>${t.name}</h3>
+                        <p style="color:${sold ? 'red':'#00ff00'}">${sold ? 'ΕΞΑΝΤΛΗΘΗΚΕ':'ΔΙΑΘΕΣΙΜΟ'}</p>
+                    </div>`;
+                }).join('');
+            } catch (err) { console.error("API Error:", err); }
         }
 
-        window.onload = calculateStats;
+        async function buyRandom() {
+            const res = await fetch('/api/create-random-order', { method: 'POST' });
+            const data = await res.json();
+            if(data.OrderCode) window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+            else alert(data.error || "Κάτι πήγε στραβά");
+        }
+        load();
     </script>
 </body>
 </html>
