@@ -122,39 +122,40 @@
             const stockText = document.getElementById('ducks-stock-text');
             const removeBox = document.getElementById('remove-ducks-box');
 
-            try {
-                // Κλήση στο endpoint για να πάρουμε το live stock από το Redis
-                const response = await fetch('/api/get-slots'); 
-                const data = await response.json();
-                
-                // Παίρνουμε το live stock (αν δεν υπάρχει, θεωρούμε 10)
-                const realLiveStock = data.ducks !== undefined ? data.ducks : 10;
+        // ΑΛΛΑΓΗ ΜΟΝΟ ΣΕ ΑΥΤΟ ΤΟ BLOCK ΜΕΣΑ ΣΤΗΝ updatePageState()
+try {
+    // Χτυπάμε το νέο ειδικό endpoint για το live στοκ της πάπιας
+    const response = await fetch('/api/get-duck-stock'); 
+    const data = await response.json();
+    
+    // Παίρνουμε την πραγματική τιμή που άφησαν οι κρατήσεις στο Redis
+    const realLiveStock = data.stock !== undefined ? data.stock : 10;
 
-                if (realLiveStock <= 0) {
-                    btnDucks.disabled = true;
-                    btnDucks.innerText = "Εξαντλήθηκε";
-                    stockText.className = "stock-indicator out";
-                    stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                    removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
-                } else if (userQty > 0) {
-                    btnDucks.disabled = false;
-                    btnDucks.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
-                    stockText.className = "stock-indicator";
-                    stockText.innerText = `✔️ Live Απόθεμα στο Redis: ${realLiveStock} διαθέσιμα`;
-                    removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
-                } else {
-                    btnDucks.disabled = false;
-                    btnDucks.innerText = "Προσθηκη στο καλαθι";
-                    stockText.className = "stock-indicator";
-                    stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
-                    removeBox.innerHTML = "";
-                }
+    if (realLiveStock <= 0) {
+        btnDucks.disabled = true;
+        btnDucks.innerText = "Εξαντλήθηκε";
+        stockText.className = "stock-indicator out";
+        stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
+        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+    } else if (userQty > 0) {
+        btnDucks.disabled = false;
+        btnDucks.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
+        stockText.className = "stock-indicator";
+        stockText.innerText = `✔️ Live Απόθεμα στο Redis: ${realLiveStock} διαθέσιμα`;
+        removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
+    } else {
+        btnDucks.disabled = false;
+        btnDucks.innerText = "Προσθηκη στο καλαθι";
+        stockText.className = "stock-indicator";
+        stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
+        removeBox.innerHTML = "";
+    }
 
-            } catch (error) {
-                console.error("Error fetching live stock:", error);
-                stockText.innerText = "Σφάλμα φόρτωσης στοκ";
-                btnDucks.disabled = false;
-            }
+} catch (error) {
+    console.error("Error fetching live stock:", error);
+    stockText.innerText = "Σφάλμα φόρτωσης στοκ";
+    btnDucks.disabled = false;
+}
         }
 
         // Προσθήκη Ducks στο καλάθι με έλεγχο και κλείδωμα στο Redis
