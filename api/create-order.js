@@ -6,7 +6,14 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { amount, teamId } = req.body;
+    // --- ΔΙΟΡΘΩΣΗ: Μετατροπή του body σε JSON αν έρθει σαν string ---
+    let body = req.body;
+    if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch(e) {}
+    }
+    
+    const { amount, teamId } = body || {};
+    // ---------------------------------------------------------------
 
     try {
         if (!amount) throw new Error("Missing amount");
@@ -61,7 +68,7 @@ export default async function handler(req, res) {
         if (data.OrderCode) {
             return res.status(200).json(data);
         } else {
-            // Αν αποτύχει η Viva, ξεκλειδώνουμε
+            // Αν αποτύχει η Viva, ξεκλειδώνουμε τη βάση
             await fetch(`${kvUrl}/del/team:status:${teamId}`, {
                 headers: { Authorization: `Bearer ${kvToken}` }
             });
