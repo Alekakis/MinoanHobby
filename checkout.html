@@ -18,8 +18,13 @@
 
         /* RIGHT SIDEBAR */
         .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
-        .right-side-panel a { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
-        .right-side-panel a:hover { color: #ff0000; transform: scale(1.1); }
+        .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .right-side-panel a, .right-side-panel .lang-selector { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .right-side-panel a:hover, .right-side-panel .lang-selector:hover { color: #ff0000; transform: scale(1.1); }
+        .cart-container { position: relative; }
+        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+        .lang-selector { font-size: 12px !important; font-weight: bold; text-align: center; line-height: 1.2; }
 
         /* CHECKOUT CONTAINER */
         .checkout-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
@@ -60,8 +65,15 @@
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="#" title="Καλάθι Αγορών"><i class="fas fa-shopping-cart"></i></a>
+            <a href="checkout.html" title="Καλάθι Αγορών" class="cart-container">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="global-cart-count">0</span>
+            </a>
+            <div class="lang-selector" title="Αλλαγή Γλώσσας">
+                🇬🇷<br>ΕΛ
+            </div>
         </div>
+
         <div class="panel-bottom">
             <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
@@ -71,11 +83,18 @@
     <header class="main-header">
         <nav class="nav-left">
             <a href="products.html">ΠΑΚΕΤΑ</a>
-            <a href="index.html">ΑΝΟΙΓΜΑΤΑ</a>
+            <a href="#">ΑΝΟΙΓΜΑΤΑ</a>
+            <a href="#">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
-        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        
+        <div class="playful-logo">
+            Minoan<span>Hobby</span>
+        </div>
+
         <nav class="nav-right">
+            <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
             <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>
         </nav>
     </header>
 
@@ -91,8 +110,7 @@
 
         <div class="box-panel">
             <h2>Τα Προϊόντα σας</h2>
-            <div id="cart-summary-list">
-                </div>
+            <div id="cart-summary-list"></div>
             <div class="cart-total">
                 <span>Σύνολο:</span>
                 <span id="cart-total-price">0.00 €</span>
@@ -133,35 +151,44 @@
     </main>
 
     <script>
-        // Ανάκτηση των πραγματικών προϊόντων από το localStorage του site σου
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-        // Εμφάνιση των στοιχείων καλαθιού
+        // Εμφάνιση των στοιχείων καλαθιού και ενημέρωση του badge στο sidebar
         function loadCartSummary() {
             const listContainer = document.getElementById('cart-summary-list');
+            const badge = document.getElementById('global-cart-count');
             let total = 0;
+            let totalItems = 0;
 
             if (cart.length === 0) {
                 listContainer.innerHTML = "<p style='color:#e0e0e0; text-align:center;'>Το καλάθι σας είναι άδειο.</p>";
                 document.querySelector('.submit-btn').disabled = true;
                 document.querySelector('.submit-btn').style.opacity = "0.4";
+                if (badge) badge.innerText = "0";
                 return;
             }
 
             listContainer.innerHTML = cart.map(item => {
-                total += item.price * (item.qty || 1);
+                const itemQty = item.qty || 1;
+                total += item.price * itemQty;
+                totalItems += itemQty;
                 return `
                     <div class="cart-item">
-                        <span>${item.name} (x${item.qty || 1})</span>
-                        <span style="font-weight: bold;">${(item.price * (item.qty || 1)).toFixed(2)} €</span>
+                        <span>${item.name} (x${itemQty})</span>
+                        <span style="font-weight: bold;">${(item.price * itemQty).toFixed(2)} €</span>
                     </div>
                 `;
             }).join('');
 
             document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
+            
+            // Ενημέρωση αριθμού στο sidebar
+            if (badge) {
+                badge.innerText = totalItems;
+            }
         }
 
-        // Λογική Κράτησης Stock για 10 Λεπτά (600 δευτερόλεπτα)
+        // Λογική Κράτησης Stock για 10 Λεπτά
         function startStockTimer() {
             const timerBanner = document.getElementById('stock-timer');
             let duration = 10 * 60; 
@@ -197,8 +224,8 @@
         function releaseStock() {
             alert("Ο χρόνος των 10 λεπτών έληξε. Το stock αποδεσμεύτηκε αυτόματα για να είναι διαθέσιμο σε άλλους αγοραστές.");
             sessionStorage.removeItem('checkout_timer_start');
-            localStorage.removeItem('cart'); // Αδειάζει το καλάθι
-            window.location.href = "products.html"; // Επιστροφή στα πακέτα
+            localStorage.removeItem('cart');
+            window.location.href = "products.html";
         }
 
         // Αποστολή στοιχείων στο API για τη Viva Payments
@@ -210,7 +237,6 @@
                 return false;
             }
 
-            // Δημιουργία object με τα στοιχεία του πελάτη και το καλάθι του
             const orderPayload = {
                 firstName: document.getElementById('firstname').value,
                 lastName: document.getElementById('lastname').value,
@@ -220,7 +246,6 @@
             };
 
             try {
-                // Στέλνουμε τα στοιχεία στο δικό σου Node.js / Vercel API endpoint
                 const res = await fetch('/api/create-viva-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -230,11 +255,8 @@
                 const data = await res.json();
                 
                 if(data.OrderCode) {
-                    // Καθαρίζουμε το local session αφού η παραγγελία δημιουργήθηκε επιτυχώς
                     localStorage.removeItem('cart');
                     sessionStorage.removeItem('checkout_timer_start');
-                    
-                    // Ανακατεύθυνση στο επίσημο περιβάλλον checkout της Viva Wallet
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
                     alert(data.error || "Παρουσιάστηκε πρόβλημα κατά τη δημιουργία της πληρωμής.");
