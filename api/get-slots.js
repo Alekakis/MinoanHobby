@@ -8,8 +8,8 @@ export default async function handler(req, res) {
 
     try {
         // Διαβάζουμε τα στοιχεία σύνδεσης της βάσης απευθείας από το Vercel
-        const kvUrl = process.env.STORAGE_REST_API_URL;
-        const kvToken = process.env.STORAGE_REST_API_TOKEN;
+        const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
+        const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
 
         // Παίρνουμε όλα τα κλειδιά που ξεκινάνε με team:status:
         const keysResponse = await fetch(`${kvUrl}/keys/team:status:*`, {
