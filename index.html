@@ -51,7 +51,7 @@
 
         /* ΠΑΙΧΝΙΔΙΑΡΙΚΟ STYLE ΓΙΑ ΤΑ ΓΡΑΜΜΑΤΑ ΣΤΟ ΠΑΝΩ ΜΕΝΟΥ */
         .playful-logo {
-            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; /* Παιχνιδιάρικη γραμματοσειρά */
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; /* Παιχνιδιάρική γραμματοσειρά */
             font-size: 28px;
             font-weight: bold;
             color: #ffffff;
@@ -273,7 +273,7 @@
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="checkout.html" title="Καλάθι Αγορών">
+            <a href="checkout.html" title="Καλάθι Αγορών" class="cart-container">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count" id="global-cart-count">0</span>
             </a>
@@ -349,6 +349,25 @@
             </div>
         </div>
     </section>
+
+    <script>
+        function updateCartBadge() {
+            // Διαβάζει το καλάθι από το localStorage της συσκευής
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Προσθέτει τις ποσότητες όλων των προϊόντων μαζί
+            const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+            
+            // Ενημερώνει το κόκκινο κυκλάκι με το σωστό νούμερο
+            const badge = document.getElementById('global-cart-count');
+            if (badge) {
+                badge.innerText = totalItems;
+            }
+        }
+
+        // Εκτελείται αυτόματα τη στιγμή που φορτώνει η αρχική σελίδα
+        window.onload = updateCartBadge;
+    </script>
 
 </body>
 </html>
