@@ -22,29 +22,8 @@ export default async function handler(req, res) {
         if (!amount) throw new Error("Missing amount");
         if (!teamId) throw new Error("Missing teamId");
 
-        // --- ΕΙΔΙΚΗ ΛΟΓΙΚΗ ΓΙΑ ΤΙΣ ΠΑΠΙΕΣ (DUCKS) ---
-        if (teamId.toLowerCase() === 'ducks') {
-            // 1. Αρχικοποίηση stock στο Redis αν δεν υπάρχει (ξεκινάει από 10)
-            const exists = await redis.exists('product:stock:ducks');
-            if (!exists) {
-                await redis.set('product:stock:ducks', 10);
-            }
-
-            // 2. Έλεγχος live stock
-            const currentStock = parseInt(await redis.get('product:stock:ducks')) || 0;
-
-            if (currentStock <= 0) {
-                return res.status(400).json({ error: 'Το προϊόν Ducks έχει εξαντληθεί!' });
-            }
-            if (currentStock < orderQty) {
-                return res.status(400).json({ error: `Δεν υπάρχει αρκετό απόθεμα. Διαθέσιμα κομμάτια: ${currentStock}` });
-            }
-
-            // 3. Προσωρινή μείωση stock για 2 λεπτά (120 δευτερόλεπτα)
-            await redis.decrby('product:stock:ducks', orderQty);
-            
-        } else {
-            // --- Η ΥΠΑΡΧΟΥΣΑ ΛΟΓΙΚΗ ΣΟΥ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ SLOTS ---
+        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks) ---
+        if (teamId.toLowerCase() !== 'ducks') {
             const currentStatus = await redis.get(`team:status:${teamId}`);
 
             if (currentStatus === 'sold') {
@@ -54,11 +33,11 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
             }
 
-            // Κλείδωμα για 2 λεπτά
+            // Κλείδωμα για 2 λεπτά μέχρι να ολοκληρωθεί η μεταφορά στη Viva Wallet
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
 
-        // 4. ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET
+        // --- ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET ---
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
         const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
         
@@ -83,20 +62,19 @@ export default async function handler(req, res) {
         const data = await vivaResponse.json();
 
         if (data.OrderCode) {
-            // Δημιουργία mappings για το Webhook ώστε να ξέρει τι να διαχειριστεί στην ακύρωση/επιτυχία
+            // Δημιουργία mappings για το Webhook (Διάρκεια 2 λεπτά)
             if (teamId.toLowerCase() === 'ducks') {
+                // Για τα Ducks: Απλώς ενημερώνουμε το Webhook για την ποσότητα της παραγγελίας
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
             } else {
-                // Κρατάμε ποιο teamId αντιστοιχεί σε αυτό το OrderCode
+                // Για τα Slots: Κρατάμε ποιο teamId αντιστοιχεί σε αυτό το OrderCode
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
             }
             
             return res.status(200).json(data);
         } else {
-            // Αποτυχία Viva Wallet -> Επαναφορά/Ξεκλείδωμα αμέσως
-            if (teamId.toLowerCase() === 'ducks') {
-                await redis.incrby('product:stock:ducks', orderQty);
-            } else {
+            // Αποτυχία Viva Wallet -> Αν είναι κανονικό slot, το ξεκλειδώνουμε αμέσως
+            if (teamId.toLowerCase() !== 'ducks') {
                 await redis.del(`team:status:${teamId}`);
             }
             return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
@@ -104,14 +82,11 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error("Vercel Function Error:", error);
-        // Επαναφορά σε περίπτωση κρασαρίσματος του κώδικα
-        if (teamId) {
+        
+        // Επαναφορά/Καθαρισμός σε περίπτωση κρασαρίσματος
+        if (teamId && teamId.toLowerCase() !== 'ducks') {
             try {
-                if (teamId.toLowerCase() === 'ducks') {
-                    await redis.incrby('product:stock:ducks', orderQty);
-                } else {
-                    await redis.del(`team:status:${teamId}`);
-                }
+                await redis.del(`team:status:${teamId}`);
             } catch (_) {}
         }
         return res.status(500).json({ error: error.message });
