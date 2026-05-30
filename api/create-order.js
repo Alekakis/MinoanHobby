@@ -63,17 +63,19 @@ export default async function handler(req, res) {
        if (data.OrderCode) {
             if (teamId.toLowerCase() === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
-        } else if (teamId.toLowerCase() === 'megabox half case') {
+            } else if (teamId.toLowerCase() === 'megabox half case') {
                 await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 120);
-        } else if (teamId.toLowerCase() === '2025-26 panini euroleague contenders basketball mega box') {
-        // Νέο pending κλειδί για το Euroleague Webhook
+            } else if (teamId.toLowerCase() === '2025-26 panini euroleague contenders basketball mega box') {
                 await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 120);
-        } else {
+            } else if (teamId.toLowerCase() === 'panini euroleague select box') {
+                // Νέο pending κλειδί για το Select Box Webhook
+                await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
+            } else {
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
+            }
+            
+            return res.status(200).json(data);
         }
-    
-        return res.status(200).json(data);
-    }
 } else {
             // Αποτυχία Viva Wallet -> Αν είναι κανονικό slot, το ξεκλειδώνουμε αμέσως
             if (teamId.toLowerCase() !== 'ducks') {
