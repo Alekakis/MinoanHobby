@@ -316,7 +316,7 @@
     </main>
 
     <script>
-        // Πίνακας ομάδων με διορθωμένη τη Virtus και την προσθήκη της CSKA
+        // Πίνακας ομάδων
         const euroleagueTeams = [
             { id: 1, name: "Anadolu Efes Istanbul", price: 25.00, slots: 1, logo: "images/imageAna.png" },
             { id: 2, name: "AS Monaco", price: 30.00, slots: 1, logo: "images/imageMon.png" },
@@ -347,7 +347,11 @@
 
         function renderTeams() {
             container.innerHTML = "";
-            euroleagueTeams.forEach(team => {
+            
+            // Ταξινόμηση από την ακριβότερη προς τη φθηνότερη
+            const sortedTeams = [...euroleagueTeams].sort((a, b) => b.price - a.price);
+
+            sortedTeams.forEach(team => {
                 const isSoldOut = team.slots === 0;
                 
                 const card = document.createElement('div');
