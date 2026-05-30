@@ -176,14 +176,13 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            text-decoration: none; /* Αφαιρεί την υπογράμμιση επειδή όλη η κάρτα είναι link */
+            text-decoration: none; 
             color: #ffffff;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             position: relative;
         }
 
-        /* Hover εφέ στην κάρτα */
         .product-card:hover {
             transform: translateY(-10px);
             border-color: #ff0000;
@@ -206,15 +205,14 @@
         .product-image {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Γεμίζει το κουτί όμορφα */
+            object-fit: cover;
             transition: transform 0.5s ease;
         }
 
         .product-card:hover .product-image {
-            transform: scale(1.05); /* Ελαφρύ ζουμ στο hover */
+            transform: scale(1.05);
         }
 
-        /* Ταμπέλα "LIVE BREAK" ή "HOT" πάνω στην εικόνα */
         .product-badge {
             position: absolute;
             top: 15px;
@@ -235,7 +233,7 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* Σπρώχνει το κουμπί τέρμα κάτω για να είναι όλα στο ίδιο ύψος */
+            flex-grow: 1;
         }
 
         .product-title {
@@ -248,18 +246,18 @@
         }
 
         .product-card:hover .product-title {
-            color: #ff0000; /* Κοκκινίζει ο τίτλος στο hover */
+            color: #ff0000;
         }
 
         .product-price {
             font-size: 20px;
             font-weight: 900;
             color: #ffffff;
-            margin-top: auto; /* Σπρώχνει την τιμή στο κάτω μέρος της ενότητας */
+            margin-top: auto;
             margin-bottom: 15px;
         }
 
-        /* Κουμπί Προβολής / Αγοράς */
+        /* Κουμπί */
         .product-btn {
             background-color: transparent;
             border: 2px solid #ff0000;
@@ -323,50 +321,39 @@
 
         <div class="products-grid">
 
-            <a href="product-1.html" class="product-card">
+            <a href="ProductEuroleagueBreak.html" class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">Live Break</span>
                     <img src="https://via.placeholder.com/300x300/112233/ffffff?text=Select+Euroleague" alt="Product 1" class="product-image">
                 </div>
                 <div class="product-info">
                     <h2 class="product-title">2023-24 Panini Select Euroleague Basketball Case Break</h2>
-                    <div class="product-price">35.000 €</div>
+                    <div class="product-price">Από 20.00 €</div>
                     <div class="product-btn">Επιλογή Θέσης</div>
                 </div>
             </a>
 
-            <a href="product-2.html" class="product-card">
+            <a href="#" class="product-card" style="cursor: default; onclick='return false;'">
                 <div class="product-image-wrapper">
-                    <span class="product-badge">New</span>
+                    <span class="product-badge">Σύντομα</span>
                     <img src="https://via.placeholder.com/300x300/112233/ffffff?text=Donruss+Euroleague" alt="Product 2" class="product-image">
                 </div>
                 <div class="product-info">
                     <h2 class="product-title">2023-24 Panini Donruss Euroleague Basketball Hobby Box</h2>
-                    <div class="product-price">45.000 €</div>
-                    <div class="product-btn">Επιλογή Θέσης</div>
+                    <div class="product-price">-- €</div>
+                    <div class="product-btn">Μη διαθέσιμο</div>
                 </div>
             </a>
 
-            <a href="product-3.html" class="product-card">
+            <a href="#" class="product-card" style="cursor: default; onclick='return false;'">
                 <div class="product-image-wrapper">
-                    <span class="product-badge">Live Break</span>
+                    <span class="product-badge">Σύντομα</span>
                     <img src="https://via.placeholder.com/300x300/112233/ffffff?text=NBA+Hoops" alt="Product 3" class="product-image">
                 </div>
                 <div class="product-info">
                     <h2 class="product-title">2023-24 Panini NBA Hoops Basketball Hobby Box Break</h2>
-                    <div class="product-price">25.000 €</div>
-                    <div class="product-btn">Επιλογή Θέσης</div>
-                </div>
-            </a>
-
-            <a href="product-4.html" class="product-card">
-                <div class="product-image-wrapper">
-                    <img src="https://via.placeholder.com/300x300/112233/ffffff?text=Prizm+Blaster" alt="Product 4" class="product-image">
-                </div>
-                <div class="product-info">
-                    <h2 class="product-title">2023-24 Panini Prizm NBA Basketball Blaster Box</h2>
-                    <div class="product-price">19.000 €</div>
-                    <div class="product-btn">Επιλογή Θέσης</div>
+                    <div class="product-price">-- €</div>
+                    <div class="product-btn">Μη διαθέσιμο</div>
                 </div>
             </a>
 
