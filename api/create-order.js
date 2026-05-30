@@ -21,7 +21,6 @@ export default async function handler(req, res) {
 
         const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
         const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
-
         // 1. ΕΛΕΓΧΟΣ ΣΤΗ ΒΑΣΗ (Μέσω REST)
         const checkResponse = await fetch(`${kvUrl}/get/team:status:${teamId}`, {
             headers: { Authorization: `Bearer ${kvToken}` }
@@ -78,8 +77,8 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error("Vercel Function Error:", error);
         if (teamId) {
-            const kvUrl = process.env.KV_REST_API_URL;
-            const kvToken = process.env.KV_REST_API_TOKEN;
+            const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
+            const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
             try { 
                 await fetch(`${kvUrl}/del/team:status:${teamId}`, { headers: { Authorization: `Bearer ${kvToken}` } });
             } catch (_) {}
