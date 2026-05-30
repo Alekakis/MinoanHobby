@@ -184,15 +184,34 @@
         .team-info h3 {
             font-size: 16px;
             color: #ffffff;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-weight: 700;
+            min-height: 44px; /* Διασφαλίζει ότι οι κάρτες έχουν ίδιο ύψος ακόμα και με μεγάλα ονόματα */
+        }
+
+        /* CONTAINER ΓΙΑ ΤΙΜΗ ΚΑΙ ΕΙΚΟΝΑ */
+        .price-logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .team-price {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 800;
             color: #ff0000;
-            margin-bottom: 15px;
+        }
+
+        .team-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
         }
 
         /* Slots styling */
@@ -297,27 +316,28 @@
     </main>
 
     <script>
+        // Προσθήκη του πεδίου logo για κάθε ομάδα ξεχωριστά
         const euroleagueTeams = [
-            { id: 1, name: "Anadolu Efes Istanbul", price: 30.00, slots: 3 },
-            { id: 2, name: "AS Monaco", price: 25.00, slots: 3 },
-            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 30.00, slots: 3 },
-            { id: 4, name: "Dubai Basketball", price: 35.00, slots: 3 },
-            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, slots: 3 },
-            { id: 6, name: "FC Barcelona", price: 35.00, slots: 3 },
-            { id: 7, name: "FC Bayern Munich", price: 20.00, slots: 3 },
-            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, slots: 3 },
-            { id: 9, name: "Hapoel IBI Tel Aviv", price: 25.00, slots: 3 },
-            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 25.00, slots: 3 },
-            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 20.00, slots: 3 },
-            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 25.00, slots: 3 },
-            { id: 13, name: "Olympiacos Piraeus", price: 45.00, slots: 3 },
-            { id: 14, name: "Panathinaikos AKTOR Athens", price: 45.00, slots: 3 },
-            { id: 15, name: "Paris Basketball", price: 25.00, slots: 3 },
-            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 35.00, slots: 3 },
-            { id: 17, name: "Real Madrid", price: 40.00, slots: 3 },
-            { id: 18, name: "Virtus Bologna", price: 20.00, slots: 3 },
-            { id: 19, name: "Valencia Basket", price: 25.00, slots: 3 },
-            { id: 20, name: "Zalgiris Kaunas", price: 25.00, slots: 3 }
+            { id: 1, name: "Anadolu Efes Istanbul", price: 30.00, slots: 3, logo: "logos/efes.png" },
+            { id: 2, name: "AS Monaco", price: 25.00, slots: 3, logo: "logos/monaco.png" },
+            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 30.00, slots: 3, logo: "logos/redstar.png" },
+            { id: 4, name: "Dubai Basketball", price: 35.00, slots: 3, logo: "logos/dubai.png" },
+            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, slots: 3, logo: "logos/milan.png" },
+            { id: 6, name: "FC Barcelona", price: 35.00, slots: 3, logo: "logos/barcelona.png" },
+            { id: 7, name: "FC Bayern Munich", price: 20.00, slots: 3, logo: "logos/bayern.png" },
+            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, slots: 3, logo: "logos/fenerbahce.png" },
+            { id: 9, name: "Hapoel IBI Tel Aviv", price: 25.00, slots: 3, logo: "logos/hapoel.png" },
+            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 25.00, slots: 3, logo: "logos/baskonia.png" },
+            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 20.00, slots: 3, logo: "logos/asvel.png" },
+            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 25.00, slots: 3, logo: "logos/maccabi.png" },
+            { id: 13, name: "Olympiacos Piraeus", price: 45.00, slots: 3, logo: "logos/olympiacos.png" },
+            { id: 14, name: "Panathinaikos AKTOR Athens", price: 45.00, slots: 3, logo: "logos/paok.png" },
+            { id: 15, name: "Paris Basketball", price: 25.00, slots: 3, logo: "logos/paris.png" },
+            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 35.00, slots: 3, logo: "logos/partizan.png" },
+            { id: 17, name: "Real Madrid", price: 40.00, slots: 3, logo: "logos/realmadrid.png" },
+            { id: 18, name: "Virtus Bologna", price: 20.00, slots: 3, logo: "logos/virtus.png" },
+            { id: 19, name: "Valencia Basket", price: 25.00, slots: 3, logo: "logos/valencia.png" },
+            { id: 20, name: "Zalgiris Kaunas", price: 25.00, slots: 3, logo: "logos/zalgiris.png" }
         ];
 
         const container = document.getElementById('teams-container');
@@ -333,7 +353,10 @@
                 card.innerHTML = `
                     <div class="team-info">
                         <h3>${team.name}</h3>
-                        <div class="team-price">${team.price.toFixed(2)} €</div>
+                        <div class="price-logo-container">
+                            <div class="team-price">${team.price.toFixed(2)} €</div>
+                            <img src="${team.logo}" alt="${team.name} Logo" class="team-logo" onerror="this.src='https://via.placeholder.com/45/112233/ffffff?text=Team'">
+                        </div>
                         <div class="slots-status">
                             <span class="slot-dot"></span>
                             ${isSoldOut ? 'ΕΞΑΝΤΛΗΘΗΚΕ' : `Διαθέσιμα Slots: <strong>${team.slots} / 3</strong>`}
