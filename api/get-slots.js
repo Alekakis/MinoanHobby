@@ -1,33 +1,44 @@
-import { kv } from '@vercel/kv';
-
 export default async function handler(req, res) {
-    // Επιτρέπουμε CORS για να μπορεί να το διαβάζει η HTML σελίδα
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
-
-    if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
     try {
-        // Διαβάζει όλα τα κλειδιά από τη Redis που ξεκινούν με team:status:
-        const keys = await kv.keys('team:status:*');
+        // Διαβάζουμε τα στοιχεία σύνδεσης της βάσης απευθείας από το Vercel
+        const kvUrl = process.env.KV_REST_API_URL;
+        const kvToken = process.env.KV_REST_API_TOKEN;
+
+        // Παίρνουμε όλα τα κλειδιά που ξεκινάνε με team:status:
+        const keysResponse = await fetch(`${kvUrl}/keys/team:status:*`, {
+            headers: { Authorization: `Bearer ${kvToken}` }
+        });
+        const keysData = await keysResponse.json();
+        const keys = keysData.result || [];
+
         const slotStatuses = {};
-        
+
         if (keys.length > 0) {
-            const values = await kv.mget(...keys);
+            // Παίρνουμε τις τιμές για αυτά τα κλειδιά
+            const valuesResponse = await fetch(`${kvUrl}/mget`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${kvToken}` },
+                body: JSON.stringify(keys)
+            });
+            const valuesData = await valuesResponse.json();
+            const values = valuesData.result || [];
+
             keys.forEach((key, index) => {
                 const teamId = key.split(':').pop();
-                slotStatuses[teamId] = values[index]; // Επιστρέφει π.χ. { "14": "sold", "18": "pending" }
+                slotStatuses[teamId] = values[index];
             });
         }
 
         return res.status(200).json(slotStatuses);
     } catch (error) {
         console.error("Database error:", error);
-        return res.status(500).json({ error: "Αποτυχία ανάκτησης δεδομένων από τη βάση." });
+        return res.status(500).json({ error: "Αποτυχία ανάκτησης από τη βάση." });
     }
 }
