@@ -351,7 +351,7 @@
         }
 
         // Σύνδεση με τη Vercel Serverless Function της Viva Wallet
-        async function handlePurchase(teamId) {
+       async function handlePurchase(teamId) {
             const team = euroleagueTeams.find(t => t.id === teamId);
             if (!team || team.slots <= 0) return;
 
@@ -360,8 +360,7 @@
             button.innerText = "ΚΛΕΙΔΩΜΑ...";
 
             try {
-                // Κλήση του API σου στο Vercel (σιγουρέψου ότι η διαδρομή του αρχείου σου είναι σωστή, π.χ. /api/viva)
-                const response = await fetch('/api/viva', {
+                const response = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -374,26 +373,24 @@
                 const data = await response.json();
 
                 if (data.OrderCode) {
-                    // 1. Μείωση του slot τοπικά στην οθόνη του χρήστη
                     team.slots -= 1;
                     renderTeams();
-
-                    // 2. Αυτόματη μεταφορά στο Checkout της Viva Payments
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
-                    alert("Σφάλμα κατά τη δημιουργία της παραγγελίας. Παρακαλώ δοκιμάστε ξανά.");
+                    // ΕΔΩ: Μας δείχνει τι ακριβώς απάντησε η Viva αν απέτυχε
+                    alert("Σφάλμα Viva: " + JSON.stringify(data));
                     button.disabled = false;
                     button.innerText = "ΑΓΟΡΑ SLOT";
                 }
 
             } catch (error) {
                 console.error("Πρόβλημα σύνδεσης με το API:", error);
-                alert("Υπήρξε ένα πρόβλημα επικοινωνίας με το σύστημα πληρωμών.");
+                // ΕΔΩ: Μας δείχνει αν το πρόβλημα είναι του δικτύου ή του Vercel
+                alert("Πρόβλημα Δικτύου/Vercel: " + error.message);
                 button.disabled = false;
                 button.innerText = "ΑΓΟΡΑ SLOT";
             }
         }
-
         // Αρχικό φόρτωμα των ομάδων κατά το άνοιγμα της σελίδας
         renderTeams();
     </script>
