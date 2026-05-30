@@ -316,7 +316,7 @@
     </main>
 
     <script>
-        // Αρχικός πίνακας ομάδων
+      // Αρχικός πίνακας ομάδων
         const euroleagueTeams = [
             { id: 1, name: "Anadolu Efes Istanbul", price: 25.00, logo: "images/imageAna.png" },
             { id: 2, name: "AS Monaco", price: 30.00, logo: "images/imageMon.png" },
@@ -343,10 +343,11 @@
             { id: 23, name: "CSKA Moscow", price: 50.00, logo: "images/imageCska.png" }
         ];
 
-        // Αντικείμενο που θα κρατάει τα live status από τη βάση (π.χ. { "14": "sold" })
         let liveStatuses = {};
-
         const container = document.getElementById('teams-container');
+
+        // 1. ΕΜΦΑΝΙΖΟΥΜΕ ΤΙΣ ΟΜΑΔΕΣ ΑΜΕΣΩΣ ΜΟΛΙΣ ΦΟΡΤΩΣΕΙ Η ΣΕΛΙΔΑ
+        renderTeams();
 
         // Συνάρτηση ανάκτησης των Live δεδομένων από τη βάση
         async function fetchLiveStatuses() {
@@ -354,10 +355,14 @@
                 const response = await fetch('/api/get-slots');
                 if (response.ok) {
                     liveStatuses = await response.json();
-                    renderTeams();
+                } else {
+                    console.warn("Το Live API επέστρεψε σφάλμα, εμφανίζονται οι default διαθέσιμες ομάδες.");
                 }
             } catch (error) {
                 console.error("Σφάλμα Live Polling:", error);
+            } finally {
+                // Ό,τι και να γίνει (ακόμα και με σφάλμα API), ξανασχεδιάζουμε για να μην μένει λευκή η οθόνη
+                renderTeams();
             }
         }
 
@@ -368,12 +373,12 @@
             const sortedTeams = [...euroleagueTeams].sort((a, b) => b.price - a.price);
 
             sortedTeams.forEach(team => {
-                const status = liveStatuses[team.id]; // Μπορεί να είναι 'pending', 'sold' ή undefined
+                const status = liveStatuses[team.id]; // 'pending', 'sold' ή undefined
                 const isLocked = status === 'sold' || status === 'pending';
                 
                 let buttonText = "ΑΓΟΡΑ SLOT";
                 if (status === 'sold') buttonText = "ΕΞΑΝΤΛΗΘΗΚΕ";
-                if (status === 'pending') buttonText = "ΣΕ checkout...";
+                if (status === 'pending') buttonText = "ΣΕ CHECKOUT...";
 
                 const card = document.createElement('div');
                 card.className = `team-card ${isLocked ? 'sold-out' : ''}`;
