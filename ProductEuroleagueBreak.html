@@ -186,7 +186,7 @@
             color: #ffffff;
             margin-bottom: 12px;
             font-weight: 700;
-            min-height: 44px; /* Διασφαλίζει ότι οι κάρτες έχουν ίδιο ύψος ακόμα και με μεγάλα ονόματα */
+            min-height: 44px;
         }
 
         /* CONTAINER ΓΙΑ ΤΙΜΗ ΚΑΙ ΕΙΚΟΝΑ */
@@ -227,7 +227,7 @@
         .slot-dot {
             width: 8px;
             height: 8px;
-            background-color: #00ff00; /* Πράσινο όταν υπάρχουν slots */
+            background-color: #00ff00; /* Πράσινο όταν είναι ελεύθερο */
             border-radius: 50%;
             display: inline-block;
         }
@@ -253,14 +253,14 @@
             background-color: #ff0000;
         }
 
-        /* Κατάσταση Εξαντλήθηκε */
+        /* Κατάσταση Εξαντλήθηκε / Δεσμευμένο */
         .team-card.sold-out {
             opacity: 0.4;
             border-color: #333;
         }
 
         .team-card.sold-out .slot-dot {
-            background-color: #ff0000; /* Κόκκινο όταν εξαντληθεί */
+            background-color: #ff0000; /* Κόκκινο όταν κλείδωσε/πουλήθηκε */
         }
 
         .team-card.sold-out .buy-btn {
@@ -306,8 +306,8 @@
             <div class="break-details">
                 <h1>2023-24 Panini Select Euroleague Basketball Case Break</h1>
                 <p><strong>Τύπος:</strong> Team Buy Break (Επιλογή Ομάδας)</p>
-                <p>Καλώς ήρθατε στο μεγάλο Live Break της Euroleague! Διαλέξτε την ομάδα σας παρακάτω. Κάθε ομάδα διαθέτει ακριβώς <strong>1 Slot</strong>. Όταν αγοράζετε το slot, το απόθεμα εξαντλείται αυτόματα, η ομάδα κλειδώνει και δεν μπορεί να αγοραστεί από άλλον.</p>
-                <p style="color: #ff0000; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> Προσοχή: Κατά τη διαδικασία πληρωμής μέσω Viva Wallet, το slot δεσμεύεται προσωρινά για να αποφευχθούν διπλοεγγραφές.</p>
+                <p>Καλώς ήρθατε στο μεγάλο Live Break της Euroleague! Διαλέξτε την ομάδα σας παρακάτω. Κάθε ομάδα διαθέτει ακριβώς <strong>1 Slot</strong>. Όταν αγοράζετε το slot, η ομάδα κλειδώνει live και δεν μπορεί να αγοραστεί από άλλον.</p>
+                <p style="color: #ff0000; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> Προσοχή: Κατά τη διαδικασία πληρωμής, το slot δεσμεύεται live για 10 λεπτά προς αποφυγή διπλοεγγραφών.</p>
             </div>
         </div>
 
@@ -316,34 +316,50 @@
     </main>
 
     <script>
-        // Πίνακας ομάδων
+        // Αρχικός πίνακας ομάδων
         const euroleagueTeams = [
-            { id: 1, name: "Anadolu Efes Istanbul", price: 25.00, slots: 1, logo: "images/imageAna.png" },
-            { id: 2, name: "AS Monaco", price: 30.00, slots: 1, logo: "images/imageMon.png" },
-            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 20.00, slots: 1, logo: "images/imageZve.png" },
-            { id: 4, name: "Dubai Basketball", price: 20.00, slots: 1, logo: "images/imageDub.png" },
-            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, slots: 1, logo: "images/imageMil.png" },
-            { id: 6, name: "FC Barcelona", price: 50.00, slots: 1, logo: "images/imageBar.png" },
-            { id: 7, name: "FC Bayern Munich", price: 20.00, slots: 1, logo: "images/imageBay.png" },
-            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, slots: 1, logo: "images/imageFen.png" },
-            { id: 9, name: "Hapoel IBI Tel Aviv", price: 20.00, slots: 1, logo: "images/imageHap.png" },
-            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 30.00, slots: 1, logo: "images/imageBasc.png" },
-            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 70.00, slots: 1, logo: "images/imageVil.png" },
-            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 35.00, slots: 1, logo: "images/imageMac.png" },
-            { id: 13, name: "Olympiacos Piraeus", price: 70.00, slots: 1, logo: "images/imageOly.png" },
-            { id: 14, name: "Panathinaikos AKTOR Athens", price: 110.00, slots: 1, logo: "images/imagePan.png" },
-            { id: 15, name: "Paris Basketball", price: 25.00, slots: 1, logo: "images/imagePar.png" },
-            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 50.00, slots: 1, logo: "images/imagePart.png" },
-            { id: 17, name: "Real Madrid", price: 115.00, slots: 1, logo: "images/imageMad.png" },
-            { id: 18, name: "Virtus Bologna", price: 30.00, slots: 1, logo: "images/imageBol.png" },
-            { id: 19, name: "Valencia Basket", price: 35.00, slots: 1, logo: "images/imageVal.png" },
-            { id: 20, name: "Zalgiris Kaunas", price: 25.00, slots: 1, logo: "images/imageZal.png" },
-            { id: 21, name: "Olympiacos Piraeus LEGEND", price: 100.00, slots: 1, logo: "images/imageOly.png" },
-            { id: 22, name: "Panathinaikos AKTOR Athens LEGEND", price: 150.00, slots: 1, logo: "images/imagePan.png" },
-            { id: 23, name: "CSKA Moscow", price: 50.00, slots: 1, logo: "images/imageCska.png" }
+            { id: 1, name: "Anadolu Efes Istanbul", price: 25.00, logo: "images/imageAna.png" },
+            { id: 2, name: "AS Monaco", price: 30.00, logo: "images/imageMon.png" },
+            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 20.00, logo: "images/imageZve.png" },
+            { id: 4, name: "Dubai Basketball", price: 20.00, logo: "images/imageDub.png" },
+            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, logo: "images/imageMil.png" },
+            { id: 6, name: "FC Barcelona", price: 50.00, logo: "images/imageBar.png" },
+            { id: 7, name: "FC Bayern Munich", price: 20.00, logo: "images/imageBay.png" },
+            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, logo: "images/imageFen.png" },
+            { id: 9, name: "Hapoel IBI Tel Aviv", price: 20.00, logo: "images/imageHap.png" },
+            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 30.00, logo: "images/imageBasc.png" },
+            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 70.00, logo: "images/imageVil.png" },
+            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 35.00, logo: "images/imageMac.png" },
+            { id: 13, name: "Olympiacos Piraeus", price: 70.00, logo: "images/imageOly.png" },
+            { id: 14, name: "Panathinaikos AKTOR Athens", price: 110.00, logo: "images/imagePan.png" },
+            { id: 15, name: "Paris Basketball", price: 25.00, logo: "images/imagePar.png" },
+            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 50.00, logo: "images/imagePart.png" },
+            { id: 17, name: "Real Madrid", price: 115.00, logo: "images/imageMad.png" },
+            { id: 18, name: "Virtus Bologna", price: 30.00, logo: "images/imageBol.png" },
+            { id: 19, name: "Valencia Basket", price: 35.00, logo: "images/imageVal.png" },
+            { id: 20, name: "Zalgiris Kaunas", price: 25.00, logo: "images/imageZal.png" },
+            { id: 21, name: "Olympiacos Piraeus LEGEND", price: 100.00, logo: "images/imageOly.png" },
+            { id: 22, name: "Panathinaikos AKTOR Athens LEGEND", price: 150.00, logo: "images/imagePan.png" },
+            { id: 23, name: "CSKA Moscow", price: 50.00, logo: "images/imageCska.png" }
         ];
 
+        // Αντικείμενο που θα κρατάει τα live status από τη βάση (π.χ. { "14": "sold" })
+        let liveStatuses = {};
+
         const container = document.getElementById('teams-container');
+
+        // Συνάρτηση ανάκτησης των Live δεδομένων από τη βάση
+        async function fetchLiveStatuses() {
+            try {
+                const response = await fetch('/api/get-slots');
+                if (response.ok) {
+                    liveStatuses = await response.json();
+                    renderTeams();
+                }
+            } catch (error) {
+                console.error("Σφάλμα Live Polling:", error);
+            }
+        }
 
         function renderTeams() {
             container.innerHTML = "";
@@ -352,10 +368,15 @@
             const sortedTeams = [...euroleagueTeams].sort((a, b) => b.price - a.price);
 
             sortedTeams.forEach(team => {
-                const isSoldOut = team.slots === 0;
+                const status = liveStatuses[team.id]; // Μπορεί να είναι 'pending', 'sold' ή undefined
+                const isLocked = status === 'sold' || status === 'pending';
                 
+                let buttonText = "ΑΓΟΡΑ SLOT";
+                if (status === 'sold') buttonText = "ΕΞΑΝΤΛΗΘΗΚΕ";
+                if (status === 'pending') buttonText = "ΣΕ checkout...";
+
                 const card = document.createElement('div');
-                card.className = `team-card ${isSoldOut ? 'sold-out' : ''}`;
+                card.className = `team-card ${isLocked ? 'sold-out' : ''}`;
                 
                 card.innerHTML = `
                     <div class="team-info">
@@ -366,11 +387,11 @@
                         </div>
                         <div class="slots-status">
                             <span class="slot-dot"></span>
-                            ${isSoldOut ? 'ΕΞΑΝΤΛΗΘΗΚΕ' : `Διαθέσιμα Slots: <strong>${team.slots} / 1</strong>`}
+                            <strong>${isLocked ? buttonText : 'Διαθέσιμο: 1 / 1'}</strong>
                         </div>
                     </div>
-                    <button class="buy-btn" ${isSoldOut ? 'disabled' : ''} id="btn-${team.id}" onclick="handlePurchase(${team.id})">
-                        ${isSoldOut ? 'ΕΞΑΝΤΛΗΘΗΚΕ' : 'ΑΓΟΡΑ SLOT'}
+                    <button class="buy-btn" ${isLocked ? 'disabled' : ''} id="btn-${team.id}" onclick="handlePurchase(${team.id})">
+                        ${buttonText}
                     </button>
                 `;
                 container.appendChild(card);
@@ -379,7 +400,7 @@
 
         async function handlePurchase(teamId) {
             const team = euroleagueTeams.find(t => t.id === teamId);
-            if (!team || team.slots <= 0) return;
+            if (!team || liveStatuses[teamId] === 'sold' || liveStatuses[teamId] === 'pending') return;
 
             const button = document.getElementById(`btn-${teamId}`);
             button.disabled = true;
@@ -392,6 +413,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
+                        teamId: team.id,
                         amount: team.price 
                     })
                 });
@@ -399,29 +421,28 @@
                 const data = await response.json();
 
                 if (data.OrderCode) {
-                    // Αποθήκευση στο localStorage για αποστολή email μέσω της success.html (Web3Forms)
                     localStorage.setItem('selected_team_name', team.name);
                     localStorage.setItem('selected_team_price', team.price);
                     localStorage.setItem('last_order_code', data.OrderCode);
 
-                    team.slots -= 1;
-                    renderTeams();
+                    // Στέλνουμε τον χρήστη στη Viva Wallet
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
-                    alert("Σφάλμα Viva: " + JSON.stringify(data));
-                    button.disabled = false;
-                    button.innerText = "ΑΓΟΡΑ SLOT";
+                    alert(data.error || "Το slot κλειδώθηκε μόλις από άλλον χρήστη!");
+                    fetchLiveStatuses(); // Ανανέωση αμέσως
                 }
 
             } catch (error) {
                 console.error("Πρόβλημα σύνδεσης με το API:", error);
-                alert("Πρόβλημα Δικτύου/Vercel: " + error.message);
+                alert("Πρόβλημα δικτύου. Δοκιμάστε ξανά.");
                 button.disabled = false;
                 button.innerText = "ΑΓΟΡΑ SLOT";
             }
         }
 
-        renderTeams();
+        // Έναρξη live ελέγχου κάθε 5 δευτερόλεπτα
+        fetchLiveStatuses();
+        setInterval(fetchLiveStatuses, 5000);
     </script>
 </body>
 </html>
