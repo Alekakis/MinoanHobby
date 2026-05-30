@@ -11,9 +11,10 @@
         .break-container { max-width: 1000px; margin: 40px auto; padding: 20px; }
         .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
         .team-card { background: #0b132b; border: 1px solid #333; padding: 10px; text-align: center; border-radius: 8px; }
-        .team-card.sold { opacity: 0.3; filter: grayscale(1); }
+        .team-card.sold { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
         .logo { width: 60px; height: 60px; object-fit: contain; }
-        #buy-btn { background: #ff0000; color: white; border: none; padding: 20px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; border-radius: 5px; }
+        #buy-btn { background: #ff0000; color: white; border: none; padding: 20px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; border-radius: 5px; text-transform: uppercase; }
+        #buy-btn:disabled { background: #555; }
     </style>
 </head>
 <body>
@@ -25,39 +26,62 @@
 
     <script>
         const teams = [
-            { id: 1, name: "Anadolu Efes", logo: "/images/imageAna.png" }, { id: 2, name: "AS Monaco", logo: "images/imageMon.png" },
-            { id: 3, name: "Crvena Zvezda", logo: "/images/imageZve.png" }, { id: 4, name: "Dubai", logo: "images/imageDub.png" },
-            { id: 5, name: "Milan", logo: "/images/imageMil.png" }, { id: 6, name: "Barcelona", logo: "images/imageBar.png" },
-            { id: 7, name: "Bayern", logo: "/images/imageBay.png" }, { id: 8, name: "Fenerbahce", logo: "images/imageFen.png" },
-            { id: 9, name: "Hapoel", logo: "/images/imageHap.png" }, { id: 10, name: "Baskonia", logo: "images/imageBasc.png" },
-            { id: 11, name: "ASVEL", logo: "/images/imageVil.png" }, { id: 12, name: "Maccabi", logo: "images/imageMac.png" },
-            { id: 13, name: "Olympiacos", logo: "/images/imageOly.png" }, { id: 14, name: "Panathinaikos", logo: "images/imagePan.png" },
-            { id: 15, name: "Paris", logo: "/images/imagePar.png" }, { id: 16, name: "Partizan", logo: "images/imagePart.png" },
-            { id: 17, name: "Real Madrid", logo: "/images/imageMad.png" }, { id: 18, name: "Virtus", logo: "images/imageBol.png" },
-            { id: 19, name: "Valencia", logo: "/images/imageVal.png" }, { id: 20, name: "Zalgiris", logo: "images/imageZal.png" },
-            { id: 21, name: "Oly Legend", logo: "/images/imageOly.png" }, { id: 22, name: "Pao Legend", logo: "images/imagePan.png" },
+            { id: 1, name: "Anadolu Efes", logo: "/images/imageAna.png" }, { id: 2, name: "AS Monaco", logo: "/images/imageMon.png" },
+            { id: 3, name: "Crvena Zvezda", logo: "/images/imageZve.png" }, { id: 4, name: "Dubai", logo: "/images/imageDub.png" },
+            { id: 5, name: "Milan", logo: "/images/imageMil.png" }, { id: 6, name: "Barcelona", logo: "/images/imageBar.png" },
+            { id: 7, name: "Bayern", logo: "/images/imageBay.png" }, { id: 8, name: "Fenerbahce", logo: "/images/imageFen.png" },
+            { id: 9, name: "Hapoel", logo: "/images/imageHap.png" }, { id: 10, name: "Baskonia", logo: "/images/imageBasc.png" },
+            { id: 11, name: "ASVEL", logo: "/images/imageVil.png" }, { id: 12, name: "Maccabi", logo: "/images/imageMac.png" },
+            { id: 13, name: "Olympiacos", logo: "/images/imageOly.png" }, { id: 14, name: "Panathinaikos", logo: "/images/imagePan.png" },
+            { id: 15, name: "Paris", logo: "/images/imagePar.png" }, { id: 16, name: "Partizan", logo: "/images/imagePart.png" },
+            { id: 17, name: "Real Madrid", logo: "/images/imageMad.png" }, { id: 18, name: "Virtus", logo: "/images/imageBol.png" },
+            { id: 19, name: "Valencia", logo: "/images/imageVal.png" }, { id: 20, name: "Zalgiris", logo: "/images/imageZal.png" },
+            { id: 21, name: "Oly Legend", logo: "/images/imageOly.png" }, { id: 22, name: "Pao Legend", logo: "/images/imagePan.png" },
             { id: 23, name: "CSKA", logo: "/images/imageCska.png" }
         ];
 
         async function load() {
-            const res = await fetch('/api/get-slots');
-            const slots = await res.json();
-            const container = document.getElementById('teams-container');
-            container.innerHTML = teams.map(t => {
-                const s = slots.find(x => x.id === t.id);
-                const sold = s && (s.status === 'sold' || s.status === 'pending');
-                return `<div class="team-card ${sold ? 'sold' : ''}">
-                    <img src="${t.logo}" class="logo"><p>${t.name}</p>
-                    <p style="color:${sold ? 'red':'green'}">${sold ? 'ΕΞΑΝΤΛΗΘΗΚΕ':'ΔΙΑΘΕΣΙΜΟ'}</p>
-                </div>`;
-            }).join('');
+            try {
+                // Η κάθετος μπροστά διορθώνει το fetch failed
+                const res = await fetch('/api/get-slots');
+                const slots = await res.json();
+                const container = document.getElementById('teams-container');
+                container.innerHTML = teams.map(t => {
+                    const s = slots.find(x => x.id === t.id);
+                    const sold = s && (s.status === 'sold' || s.status === 'pending');
+                    return `<div class="team-card ${sold ? 'sold' : ''}">
+                        <img src="${t.logo}" class="logo" onerror="this.src='/images/placeholder.png'">
+                        <p>${t.name}</p>
+                        <p style="color:${sold ? 'red':'green'}">${sold ? 'ΕΞΑΝΤΛΗΘΗΚΕ':'ΔΙΑΘΕΣΙΜΟ'}</p>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error("Σφάλμα:", err);
+            }
         }
 
         async function buyRandom() {
-            const res = await fetch('/api/create-random-order', { method: 'POST', body: JSON.stringify({ amount: "27.49" }) });
-            const data = await res.json();
-            if(data.OrderCode) window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
-            else alert(data.error);
+            const btn = document.getElementById('buy-btn');
+            btn.disabled = true;
+            btn.innerText = "ΕΠΕΞΕΡΓΑΣΙΑ...";
+            
+            try {
+                const res = await fetch('/api/create-random-order', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ amount: "27.49" }) 
+                });
+                const data = await res.json();
+                if(data.OrderCode) {
+                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+                } else {
+                    alert(data.error || "Κάτι πήγε στραβά");
+                    btn.disabled = false;
+                    btn.innerText = "ΑΓΟΡΑ ΤΥΧΑΙΑΣ ΟΜΑΔΑΣ (27.49€)";
+                }
+            } catch (e) {
+                alert("Σφάλμα σύνδεσης");
+                btn.disabled = false;
+            }
         }
         load();
     </script>
