@@ -1,3 +1,7 @@
+import Redis from 'ioredis';
+
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -6,27 +10,19 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    // --- ΔΙΟΡΘΩΣΗ: Μετατροπή του body σε JSON αν έρθει σαν string ---
     let body = req.body;
     if (typeof body === 'string') {
         try { body = JSON.parse(body); } catch(e) {}
     }
     
     const { amount, teamId } = body || {};
-    // ---------------------------------------------------------------
 
     try {
         if (!amount) throw new Error("Missing amount");
         if (!teamId) throw new Error("Missing teamId");
 
-        const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
-        const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
-        // 1. ΕΛΕΓΧΟΣ ΣΤΗ ΒΑΣΗ (Μέσω REST)
-        const checkResponse = await fetch(`${kvUrl}/get/team:status:${teamId}`, {
-            headers: { Authorization: `Bearer ${kvToken}` }
-        });
-        const checkData = await checkResponse.json();
-        const currentStatus = checkData.result;
+        // 1. ΕΛΕΓΧΟΣ ΣΤΗ ΒΑΣΗ
+        const currentStatus = await redis.get(`team:status:${teamId}`);
 
         if (currentStatus === 'sold') {
             return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
@@ -36,9 +32,7 @@ export default async function handler(req, res) {
         }
 
         // 2. ΚΛΕΙΔΩΜΑ ΓΙΑ 10 ΛΕΠΤΑ (600 δευτερόλεπτα)
-        await fetch(`${kvUrl}/set/team:status:${teamId}/pending/EX/600`, {
-            headers: { Authorization: `Bearer ${kvToken}` }
-        });
+        await redis.set(`team:status:${teamId}`, 'pending', 'EX', 600);
 
         // 3. ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
@@ -67,21 +61,15 @@ export default async function handler(req, res) {
         if (data.OrderCode) {
             return res.status(200).json(data);
         } else {
-            // Αν αποτύχει η Viva, ξεκλειδώνουμε τη βάση
-            await fetch(`${kvUrl}/del/team:status:${teamId}`, {
-                headers: { Authorization: `Bearer ${kvToken}` }
-            });
+            // Αν αποτύχει η Viva, ξεκλειδώνουμε
+            await redis.del(`team:status:${teamId}`);
             return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
         }
 
     } catch (error) {
         console.error("Vercel Function Error:", error);
         if (teamId) {
-            const kvUrl = "https://admirable-prosperous-insurance-32661.upstash.io";
-            const kvToken = "9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k";
-            try { 
-                await fetch(`${kvUrl}/del/team:status:${teamId}`, { headers: { Authorization: `Bearer ${kvToken}` } });
-            } catch (_) {}
+            try { await redis.del(`team:status:${teamId}`); } catch (_) {}
         }
         return res.status(500).json({ error: error.message });
     }
