@@ -1,35 +1,98 @@
-// Αυτό το endpoint το καλεί η ίδια η Viva μόλις γίνει η πληρωμή
-app.post('/api/viva-webhook', async (req, res) => {
-    const event = req.body;
+import Redis from 'ioredis';
 
-    // Ελέγχουμε αν το event αφορά επιτυχημένη πληρωμή (Transaction Business Short / Success)
-    if (event.EventTypeId === 1796 || event.EventData.StatusId === 'F') { 
-        const orderCode = event.EventData.OrderCode;
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
-        // 1. Βρίσκεις τα στοιχεία του πελάτη από τη βάση σου χρησιμοποιώντας το orderCode
-        const order = await db.findOrder(orderCode); 
-
-        // 2. Σύνθεση των δεδομένων για το Web3Forms
-        const emailData = {
-            access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
-            subject: "💰 ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ - Νέα Παραγγελία!",
-            "Όνομα": order.firstName,
-            "Επώνυμο": order.lastName,
-            "Email": order.email,
-            "Κινητό": order.phone,
-            "Προϊόντα": order.cart.map(i => `${i.name} (x${i.qty})`).join(', '),
-            "Σύνολο Πληρωμής": event.EventData.Amount + " €"
-        };
-
-        // 3. Αποστολή του email από τον Server στο mail σου
-        await fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(emailData)
-        });
-
-        return res.status(200).send('OK');
+export default async function handler(req, res) {
+    // Επιτρέπουμε μόνο POST αιτήματα από τη Viva Wallet
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    res.status(200).send('Event ignored');
-});
+    let event = req.body;
+    if (typeof event === 'string') {
+        try { event = JSON.parse(event); } catch(e) {}
+    }
+
+    // Αν η Viva στείλει verification check στην αρχή, απαντάμε αμέσως
+    if (event && event.KeyVerification) {
+        return res.status(200).json({ KeyVerification: event.KeyVerification });
+    }
+
+    try {
+        const eventData = event.EventData || {};
+        const orderCode = eventData.OrderCode;
+        const eventTypeId = event.EventTypeId;
+        const statusId = eventData.StatusId;
+
+        if (!orderCode) {
+            return res.status(200).send('No order code found');
+        }
+
+        // --- ΠΕΡΙΠΤΩΣΗ 1: ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ (Success) ---
+        if (eventTypeId === 1796 || statusId === 'F') { 
+
+            // 1. Βρίσκεις τα στοιχεία του πελάτη από τη βάση σου/Redis χρησιμοποιώντας το orderCode
+            // (Εδώ υποθέτουμε ότι έχεις αποθηκεύσει το order object ή το διαβάζεις)
+            // Στο παράδειγμα, αν πρόκειται για ducks, καθαρίζουμε απλώς το προσωρινό pending κλειδί
+            const pendingDucksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
+            if (pendingDucksQty) {
+                // Η πληρωμή πέτυχε, άρα σβήνουμε το προσωρινό κλειδί. 
+                // Το stock μειώθηκε ήδη μόνιμα από το create-order!
+                await redis.del(`viva:pending:ducks:${orderCode}`);
+            }
+
+            // Αν είχες δεσμευμένο teamId (π.χ. team:status:123), το κάνεις 'sold' μόνιμα
+            // Για να το βρεις, μπορείς να τραβήξεις ένα mapping που έφτιαξες κατά το checkout:
+            const teamIdMapped = await redis.get(`viva:mapping:team:${orderCode}`);
+            if (teamIdMapped && teamIdMapped !== 'ducks') {
+                await redis.set(`team:status:${teamIdMapped}`, 'sold');
+                await redis.del(`viva:mapping:team:${orderCode}`);
+            }
+
+            // 2. Σύνθεση των δεδομένων για το Web3Forms
+            // Υπολογισμός πραγματικού ποσού (η Viva στέλνει cents, π.χ. 999 αντί για 9.99)
+            const actualAmount = eventData.Amount ? (parseFloat(eventData.Amount) / 100).toFixed(2) : "0.00";
+
+            const emailData = {
+                access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
+                subject: "💰 ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ - Νέα Παραγγελία!",
+                "Order Code": orderCode,
+                "Σύνολο Πληρωμής": actualAmount + " €",
+                "Μήνυμα": "Η πληρωμή ολοκληρώθηκε με επιτυχία και το stock οριστικοποιήθηκε."
+            };
+
+            // 3. Αποστολή του email από τον Server στο mail σου
+            await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(emailData)
+            });
+
+            return res.status(200).send('OK');
+        }
+
+        // --- ΠΕΡΙΠΤΩΣΗ 2: ΑΠΟΤΥΧΙΑ / ΑΚΥΡΩΣΗ ΠΛΗΡΩΜΗΣ (Failure / Cancelled) ---
+        // Αν το StatusId δείχνει αποτυχία (π.χ. 'E' = Error, 'X' = Expired)
+        if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
+            
+            // Έλεγχος αν η αποτυχημένη παραγγελία αφορούσε πάπιες (Ducks)
+            const pendingDucksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
+            if (pendingDucksQty) {
+                // Επιστρέφουμε τις πάπιες πίσω στο live stock!
+                await redis.incrby('product:stock:ducks', parseInt(pendingDucksQty));
+                // Διαγράφουμε το προσωρινό pending κλειδί
+                await redis.del(`viva:pending:ducks:${orderCode}`);
+            }
+
+            // Έλεγχος αν αφορούσε κανονικό slot ομάδας
+            const teamIdMapped = await redis.get(`viva:mapping:team:${orderCode}`);
+            if (teamIdMapped && teamIdMapped !== 'ducks') {
+                // Απελευθερώνουμε το slot σβήνοντάς το από το Redis
+                await redis.del(`team:status:${teamIdMapped}`);
+                await redis.del(`viva:mapping:team:${orderCode}`);
+            }
+
+            return res.status(200).send('Stock Released due to failure');
+        }
+
+        // Αν έρθει οποιοδήποτε άλλο άσχετο event (π.χ. δημιουργία απλή χωρίς πληρωμή ακόμα
