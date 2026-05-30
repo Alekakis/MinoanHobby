@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         // 1. Εύρεση όλων των διαθέσιμων ομάδων στο Pool
         let availableTeams = [];
         for (let i = 1; i <= TOTAL_TEAMS; i++) {
-            const status = await redis.get(`megabox:status:${i}`);
+            const status = await redis.get(`team:status:${i}`);
             if (status !== 'sold' && status !== 'pending') {
                 availableTeams.push(i);
             }
