@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Megabox Half Case Random Team</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; text-align: center; padding: 50px; }
+        .box { border: 2px solid #ff9900; padding: 30px; display: inline-block; border-radius: 10px; background: #222; }
+        .price { font-size: 24px; color: #ff9900; margin: 15px 0; }
+        button { background: #ff9900; color: black; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h1>Megabox Half Case Break</h1>
+        <p>Αγοράστε μια τυχαία ομάδα από το Pool! Η ομάδα θα αποκαλυφθεί μετά την πληρωμή.</p>
+        
+        <div class="price">Τιμή Θέσης: <span id="product-price">50.00</span>€</div>
+        
+        <button id="buy-btn" onclick="startRandomPurchase()">Αγορά Random Ομάδας</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        async function startRandomPurchase() {
+            const btn = document.getElementById('buy-btn');
+            const msg = document.getElementById('message');
+            btn.disabled = true;
+            msg.innerText = "Παρακαλώ περιμένετε, δεσμεύεται τυχαία ομάδα...";
+
+            try {
+                const response = await fetch('/api/create-random-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: "50.00" }) // Εδώ ορίζεις την τιμή
+                });
+
+                const data = await response.json();
+
+                if (data.OrderCode) {
+                    // Στέλνουμε τον χρήστη στη Viva Wallet
+                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+                } else {
+                    msg.innerText = "Σφάλμα: " + (data.error || "Αποτυχία Viva");
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                msg.innerText = "Σφάλμα δικτύου.";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
