@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         try { body = JSON.parse(body); } catch(e) {}
     }
     
-    const { amount, teamId, qty } = body || {}; // Προσθέσαμε το qty για τις πάπιες (αν δεν σταλεί, θεωρούμε 1)
+    const { amount, teamId, qty } = body || {};
     const orderQty = qty ? parseInt(qty) : 1;
 
     try {
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
 
-        // 4. ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET (Ακριβώς όπως την είχες)
+        // 4. ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
         const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
         
@@ -83,11 +83,14 @@ export default async function handler(req, res) {
         const data = await vivaResponse.json();
 
         if (data.OrderCode) {
-            // Αν όλα πάνε καλά και για τις πάπιες, δημιουργούμε ένα προσωρινό κλειδί 
-            // ώστε αν περάσουν 2 λεπτά χωρίς πληρωμή, το webhook ή ένα cron να ξέρει να τις επιστρέψει
+            // Δημιουργία mappings για το Webhook ώστε να ξέρει τι να διαχειριστεί στην ακύρωση/επιτυχία
             if (teamId.toLowerCase() === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
+            } else {
+                // Κρατάμε ποιο teamId αντιστοιχεί σε αυτό το OrderCode
+                await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
             }
+            
             return res.status(200).json(data);
         } else {
             // Αποτυχία Viva Wallet -> Επαναφορά/Ξεκλείδωμα αμέσως
@@ -101,7 +104,7 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error("Vercel Function Error:", error);
-        // Catch block: Επαναφορά σε περίπτωση κρασαρίσματος
+        // Επαναφορά σε περίπτωση κρασαρίσματος του κώδικα
         if (teamId) {
             try {
                 if (teamId.toLowerCase() === 'ducks') {
