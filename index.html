@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="el">
-<head>
+<!DOCTYPE html><html lang="el"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MinoanHobby</title>
@@ -49,22 +47,11 @@
             color: #ff0000; /* Έντονο κόκκινο */
         }
 
-        /* LOGO */
-        .logo h1 {
-            font-size: 26px;
-            font-style: italic;
-            color: #ffffff;
-            letter-spacing: 2px;
-            font-weight: 900;
-        }
-
-        .logo h1 span {
-            color: #ff0000; /* Έντονο κόκκινο στο Hobby */
+        /* LOGO IMAGE */
+        .logo img {
+            height: 50px; /* Μπορείτε να αλλάξετε το ύψος ανάλογα με τις διαστάσεις του λογοτύπου σας */
+            width: auto;
             display: block;
-            font-size: 14px;
-            text-align: center;
-            margin-top: -5px;
-            letter-spacing: 4px;
         }
 
         /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL (STIKY/FIXED FEATURE) */
@@ -153,13 +140,14 @@
             padding: 40px;
         }
 
-        /* Μεγάλος Τίτλος SELECT */
+        /* Μεγάλος Τίτλος Minoan Hobby */
         .brand-title {
-            font-size: 90px;
+            font-size: 80px;
             font-weight: 900;
             color: #ff0000;
-            letter-spacing: 5px;
+            letter-spacing: 3px;
             text-shadow: 3px 3px 15px rgba(0,0,0,0.8);
+            text-transform: uppercase;
         }
 
         .subtitle {
@@ -266,9 +254,7 @@
         .prev-btn { left: 20px; }
         /* Μετακίνηση του δεξιού βέλους λίγο πιο αριστερά για να μην πέφτει πάνω στο πλαϊνό panel */
         .next-btn { right: 80px; }
-    </style>
-</head>
-<body>
+    </style></head><body>
 
     <aside class="right-side-panel">
         <div class="panel-top">
@@ -295,7 +281,7 @@
         </nav>
         
         <div class="logo">
-            <h1>MINOAN<span>Hobby</span></h1>
+            <img src="logo.png" alt="Minoan Hobby Logo">
         </div>
 
         <nav class="nav-right">
@@ -309,7 +295,7 @@
         <button class="arrow-btn next-btn">&#10095;</button>
 
         <div class="hero-content">
-            <h2 class="brand-title">SELECT</h2>
+            <h2 class="brand-title">Minoan Hobby</h2>
             <p class="subtitle">EUROLEAGUE BASKETBALL</p>
 
             <div class="features-container">
@@ -343,7 +329,4 @@
                 <div class="card-placeholder">Κάρτα 4</div>
             </div>
         </div>
-    </section>
-
-</body>
-</html>
+    </section></body></html>
