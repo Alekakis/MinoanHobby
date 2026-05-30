@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Επιτυχής Αγορά!</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; text-align: center; padding: 100px 20px; }
+        .success-box { border: 2px solid #00ffcc; padding: 40px; display: inline-block; background: #222; border-radius: 15px; }
+        .team-reveal { font-size: 36px; color: #00ffcc; font-weight: bold; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="success-box">
+        <h1>🎉 Η πληρωμή ολοκληρώθηκε!</h1>
+        <p>Η τυχαία ομάδα που σας κληρώθηκε είναι:</p>
+        <div id="loading">Αποκάλυψη ομάδας...</div>
+        <div id="team-result" class="team-reveal" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Διαβάζουμε το OrderCode από το URL (?s=xxxxxx) που στέλνει η Viva
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderCode = urlParams.get('s');
+
+        async function revealTeam() {
+            if (!orderCode) {
+                document.getElementById('loading').innerText = "Δεν βρέθηκε κωδικός παραγγελίας.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/confirm-random-order?orderCode=${orderCode}`);
+                const data = await response.json();
+
+                if (data.teamId) {
+                    document.getElementById('loading').style.display = 'none';
+                    const resultDiv = document.getElementById('team-result');
+                    
+                    // ==========================================
+                    // ΦΑΣΗ 2: ΕΔΩ ΘΑ ΕΜΦΑΝΙΖΕΤΑΙ ΑΝ ΚΕΡΔΙΣΕ Η ΟΧΙ
+                    // Π.χ. if(data.win) { ... } else { "Δυστυχώς αυτή η θέση δεν κέρδισε" }
+                    // ==========================================
+                    
+                    resultDiv.innerText = `ΟΜΑΔΑ #${data.teamId}`; // Εδώ μπορείς να βάλεις ονόματα αντί για IDs
+                    resultDiv.style.display = 'block';
+                } else {
+                    document.getElementById('loading').innerText = "Σφάλμα κατά την ανάκτηση της ομάδας: " + data.error;
+                }
+            } catch (err) {
+                document.getElementById('loading').innerText = "Σφάλμα σύνδεσης με τον διακομιστή.";
+            }
+        }
+
+        revealTeam();
+    </script>
+</body>
+</html>
