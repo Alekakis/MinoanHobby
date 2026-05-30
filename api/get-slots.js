@@ -8,8 +8,8 @@ export default async function handler(req, res) {
 
     try {
         // Διαβάζουμε τα στοιχεία σύνδεσης της βάσης απευθείας από το Vercel
-        const kvUrl = process.env.KV_REST_API_URL;
-        const kvToken = process.env.KV_REST_API_TOKEN;
+        const kvUrl = process.env.STORAGE_REST_API_URL;
+        const kvToken = process.env.STORAGE_REST_API_TOKEN;
 
         // Παίρνουμε όλα τα κλειδιά που ξεκινάνε με team:status:
         const keysResponse = await fetch(`${kvUrl}/keys/team:status:*`, {
