@@ -9,14 +9,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
 
-        /* HEADER & NAVIGATION */
         .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
         .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
         .main-header nav a:hover { color: #ff0000; }
         .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
         .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
 
-        /* RIGHT SIDEBAR */
         .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
         .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
         .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -25,7 +23,6 @@
         .cart-container { position: relative; }
         .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
 
-        /* CONTAINER & GRID */
         .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         .main-banner { width: 100%; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
@@ -109,50 +106,61 @@
 
         function updateCartCount() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            document.getElementById('global-cart-count').innerText = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+            document.getElementById('global-cart-count').innerText = cart.length;
         }
 
         async function checkLocks() {
             try {
-                const response = await fetch('/api/reserve-euroleague');
+                const response = await fetch('/api/reserve-euroleagueSelect');
                 const data = await response.json();
                 euroleagueTeams.forEach(team => {
                     const btn = document.getElementById(`btn-${team.id}`);
-                    if (data.locked.includes(team.id)) {
-                        btn.disabled = true;
-                        btn.innerText = "Δεσμευμένο";
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "Επιλογή";
+                    if (btn) {
+                        if (data.locked.includes(team.id)) {
+                            btn.disabled = true;
+                            btn.innerText = "Δεσμευμένο";
+                        } else {
+                            btn.disabled = false;
+                            btn.innerText = "Επιλογή";
+                        }
                     }
                 });
             } catch (e) { console.error(e); }
         }
 
         async function addToCart(teamId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.find(t => t.teamId === teamId)) {
+                alert("Η ομάδα βρίσκεται ήδη στο καλάθι!");
+                return;
+            }
+
             const btn = document.getElementById(`btn-${teamId}`);
             btn.disabled = true;
             btn.innerText = "Αναμονή...";
             try {
-                const res = await fetch('/api/reserve-euroleague', {
+                const res = await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ teamId, action: 'add' })
                 });
                 if (res.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const team = euroleagueTeams.find(t => t.id === teamId);
-                    cart.push({ name: team.name, price: team.price, teamId: teamId });
+                    cart.push({ name: euroleagueTeams.find(t => t.id === teamId).name, teamId: teamId });
                     localStorage.setItem('cart', JSON.stringify(cart));
                     location.href = "../checkout.html";
                 } else {
-                    alert("Η ομάδα επιλέχθηκε μόλις τώρα!");
+                    alert("Η ομάδα επιλέχθηκε μόλις τώρα από άλλον!");
+                    btn.disabled = false;
+                    btn.innerText = "Επιλογή";
                     checkLocks();
                 }
-            } catch(e) { btn.disabled = false; btn.innerText = "Επιλογή"; }
+            } catch(e) { 
+                btn.disabled = false; 
+                btn.innerText = "Επιλογή"; 
+            }
         }
 
-        setInterval(checkLocks, 5000);
+        setInterval(checkLocks, 2000);
         window.onload = renderTeams;
     </script>
 </body>
