@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
         * {
             margin: 0;
             padding: 0;
@@ -21,6 +20,9 @@
             color: #ffffff;
             overflow-x: hidden;
             padding-right: 60px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* HEADER & NAVIGATION */
@@ -31,7 +33,6 @@
             padding: 15px 40px;
             background-color: #0b132b;
             border-bottom: 2px solid #ff0000;
-            position: relative;
             z-index: 10;
         }
 
@@ -45,9 +46,7 @@
             transition: color 0.3s;
         }
 
-        .main-header nav a:hover {
-            color: #ff0000;
-        }
+        .main-header nav a:hover { color: #ff0000; }
 
         .playful-logo {
             font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
@@ -82,112 +81,39 @@
             z-index: 100;
         }
 
-        .panel-top, .panel-bottom {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-        }
+        .panel-top, .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 25px; }
 
-        .right-side-panel a, .lang-selector {
-            color: #e0e0e0;
-            font-size: 18px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
+        .right-side-panel a, .lang-selector { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; }
 
-        .right-side-panel a:hover, .lang-selector:hover {
-            color: #ff0000;
-            transform: scale(1.1);
-        }
+        .right-side-panel a:hover, .lang-selector:hover { color: #ff0000; transform: scale(1.1); }
 
         .cart-container { position: relative; }
 
-        .cart-count {
-            background-color: #ff0000;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 50%;
-            font-size: 10px;
-            font-weight: bold;
-            position: absolute;
-            top: -8px;
-            right: -10px;
-        }
+        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
 
         .lang-selector { font-size: 12px !important; font-weight: bold; text-align: center; }
 
-        /* HERO SECTION */
+        /* HERO SECTION - Φωτογραφία που γεμίζει το κενό */
         .hero-section {
-            position: relative;
-            height: calc(100vh - 74px);
+            flex-grow: 1;
+            width: 100%;
             background: linear-gradient(rgba(13, 27, 42, 0.7), #0d1b2a), url('https://via.placeholder.com/1920x1080/112233/ffffff?text=Basketball+MinoanHobby') no-repeat center center/cover;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            padding: 20px 40px;
         }
 
         .hero-logo-image { max-width: 280px; height: auto; filter: drop-shadow(0px 5px 15px rgba(0,0,0,0.6)); }
-
-        .subtitle { font-size: 20px; letter-spacing: 5px; margin: 5px 0 35px; color: #e0e0e0; font-weight: bold; }
-
-        .features-container { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-
-        .feature-item { display: flex; align-items: center; text-align: left; max-width: 300px; }
-
-        .feature-icon {
-            border: 2px solid #ff0000;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            color: #ff0000;
-            margin-right: 15px;
-            background-color: rgba(0,0,0,0.3);
-        }
-
-        .feature-text strong { display: block; font-size: 13px; }
-        .feature-text span { font-size: 11px; color: #e0e0e0; }
-
-        .cards-preview { display: flex; gap: 20px; margin-top: 40px; }
-
-        .card-placeholder {
-            width: 120px;
-            height: 170px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .card-placeholder:hover { border-color: #ff0000; color: #ff0000; }
 
         /* CONTACT SECTION */
         .contact-section {
             text-align: center;
             padding: 40px;
             background: #0b132b;
+            border-top: 2px solid #ff0000;
         }
-        .contact-section h2 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        .contact-section p {
-            font-size: 40px;
-            font-weight: bold;
-            color: #ff0000;
-        }
+        .contact-section h2 { font-size: 32px; margin-bottom: 10px; }
+        .contact-section p { font-size: 40px; font-weight: bold; color: #ff0000; }
     </style>
 </head>
 <body>
@@ -221,11 +147,7 @@
     </header>
 
     <section class="hero-section">
-        <div class="hero-content">
-            <div class="hero-logo-container">
-                <img src="logo.png" alt="Minoan Hobby Logo" class="hero-logo-image">
-            
-        </div>
+        <img src="logo.png" alt="Minoan Hobby Logo" class="hero-logo-image">
     </section>
 
     <section class="contact-section">
@@ -241,10 +163,8 @@
             if (badge) badge.innerText = totalItems;
         }
 
-        // Αρχική φόρτωση
         window.onload = updateCartBadge;
 
-        // Ζωντανή ενημέρωση αν αλλάξει το καλάθι σε άλλη σελίδα
         window.addEventListener('storage', (event) => {
             if (event.key === 'cart') updateCartBadge();
         });
