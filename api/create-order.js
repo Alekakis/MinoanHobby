@@ -3,100 +3,82 @@ import Redis from 'ioredis';
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    let body = req.body;
-    if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch(e) {}
+    let event = req.body;
+    if (typeof event === 'string') {
+        try { event = JSON.parse(event); } catch(e) {}
     }
-    
-    const { amount, teamId, qty, firstName, lastName, email, phone, address, city, zip } = body || {};
-    const orderQty = qty ? parseInt(qty) : 1;
+
+    if (event && event.KeyVerification) {
+        return res.status(200).json({ KeyVerification: event.KeyVerification });
+    }
 
     try {
-        if (!amount) throw new Error("Missing amount");
-        if (!teamId) throw new Error("Missing teamId");
+        const eventData = event.EventData || {};
+        const orderCode = eventData.OrderCode;
+        const statusId = eventData.StatusId;
+        const eventTypeId = event.EventTypeId;
 
-        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS ---
-        if (teamId.toLowerCase() !== 'ducks' && 
-            teamId.toLowerCase() !== 'megabox half case' && 
-            teamId.toLowerCase() !== '2025-26 panini euroleague contenders basketball mega box' &&
-            teamId.toLowerCase() !== 'panini euroleague select box' &&
-            teamId.toLowerCase() !== 'panini la liga select box') {
+        if (!orderCode) return res.status(200).send('No order code');
+
+        // --- 1. ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ (F) ---
+        if (eventTypeId === 1796 || statusId === 'F') {
+            const orderDetailsRaw = await redis.get(`viva:order:details:${orderCode}`);
+            const details = orderDetailsRaw ? JSON.parse(orderDetailsRaw) : {};
+
+            // Αποστολή στο Web3Forms
+            await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
+                    subject: "💰 Πληρωμένη Παραγγελία: " + (details.firstName || ""),
+                    "Order Code": orderCode,
+                    "Ονομα": (details.firstName || "") + " " + (details.lastName || ""),
+                    "Είδος": details.teamName || "Άγνωστο",
+                    "Ποσό": (details.price || "0") + " €"
+                })
+            });
+
+            // Καθαρισμός όλων των pending keys (οριστικοποίηση)
+            await redis.del(`viva:pending:ducks:${orderCode}`, `viva:pending:megabox:${orderCode}`, `viva:pending:euroleague:${orderCode}`, `viva:pending:select:${orderCode}`, `viva:pending:laliga:${orderCode}`);
             
-            const currentStatus = await redis.get(`team:status:${teamId}`);
-            if (currentStatus === 'sold') return res.status(400).json({ error: 'Το slot έχει ήδη εξαντληθεί!' });
-            if (currentStatus === 'pending') return res.status(400).json({ error: 'Το slot είναι προσωρινά δεσμευμένο!' });
-            
-            await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
-        }
-
-        // --- ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET ---
-        const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
-        const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
-        
-        const amountCents = Math.round(parseFloat(amount) * 100).toString();
-        const auth = Buffer.from(`${merchantId}:${apiKey}`).toString('base64');
-
-        const vivaResponse = await fetch('https://www.vivapayments.com/api/orders', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Basic ${auth}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                'Amount': amountCents,
-                'CustomerTrns': 'Order from Minoan Hobby',
-                'RequestLang': 'el-GR',
-                'MaxVisits': '1',
-                'SourceCode': '4936'
-            })
-        });
-
-        const data = await vivaResponse.json();
-
-      if (data.OrderCode) {
-            // ΑΠΟΘΗΚΕΥΣΗ ΣΤΟΙΧΕΙΩΝ ΠΕΛΑΤΗ ΓΙΑ ΤΟ WEBHOOK
-            const customerData = {
-                firstName, lastName, email, phone, address, city, zip,
-                teamName: teamId,
-                price: amount
-            };
-            await redis.set(`viva:order:details:${data.OrderCode}`, JSON.stringify(customerData), 'EX', 3600);
-            
-            // Logic για το stock
-            const lowerTeamId = String(teamId).toLowerCase();
-
-            if (lowerTeamId === 'ducks') {
-                await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (lowerTeamId === 'megabox half case') {
-                await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (lowerTeamId === '2025-26 panini euroleague contenders basketball mega box') {
-                await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (lowerTeamId === 'panini euroleague select box') {
-                await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (lowerTeamId === 'panini la liga select box') {
-                await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
-            } 
-            // ΕΔΩ ΕΙΝΑΙ Η ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟ EUROLEAGUE SELECT (ΑΡΙΘΜΟΙ)
-            else if (!isNaN(parseInt(teamId)) && parseInt(teamId) >= 1 && parseInt(teamId) <= 23) {
-                // Αποθηκεύουμε το mapping για να ξέρει το webhook ποιο ID να κάνει sold στο stock
-                await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 3600);
-            } 
-            else {
-                await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
+            // Οριστικοποίηση Euroleague Select (Αριθμοί)
+            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.set(`team:stock:${teamId}`, 0);
             }
-            return res.status(200).json(data);
-        } else {
-            return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
+            
+            await redis.del(`viva:mapping:team:${orderCode}`, `viva:order:details:${orderCode}`);
+            return res.status(200).send('OK');
         }
+
+        // --- 2. ΑΚΥΡΩΣΗ / ΑΠΟΤΥΧΙΑ (E, X, C) ---
+        if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
+            // Επαναφορά στοκ Megabox
+            const megaboxQty = await redis.get(`viva:pending:megabox:${orderCode}`);
+            if (megaboxQty) await redis.incrby('product:stock:megabox', parseInt(megaboxQty));
+
+            // Επαναφορά Ducks
+            const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
+            if (ducksQty) await redis.incrby('ducks', parseInt(ducksQty));
+
+            // Επαναφορά Euroleague (Αριθμοί)
+            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.set(`team:stock:${teamId}`, 1);
+            }
+
+            // Καθαρισμός
+            await redis.del(`viva:pending:ducks:${orderCode}`, `viva:pending:megabox:${orderCode}`, `viva:mapping:team:${orderCode}`, `viva:order:details:${orderCode}`);
+            return res.status(200).send('Cancelled - Stock Released');
+        }
+
+        return res.status(200).send('Event received');
+
     } catch (error) {
-        console.error("Vercel Function Error:", error);
+        console.error("Webhook Error:", error);
         return res.status(500).json({ error: error.message });
     }
 }
