@@ -1,114 +1,114 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - MinoanHobby</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; }
-        
-        /* ... (διατήρησε τα υπόλοιπα styles σου όπως είναι, είναι μια χαρά) ... */
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; }
-        .checkout-container { max-width: 800px; margin: 40px auto; padding: 20px; }
-        .box-panel { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 25px; margin-bottom: 25px; }
-        .submit-btn { width: 100%; background: transparent; border: 2px solid #ff0000; color: white; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 18px; text-transform: uppercase; transition: 0.3s; }
-        .submit-btn:hover:not(:disabled) { background-color: #ff0000; }
-        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - MinoanHobby</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; }
+        
+        /* ... (διατήρησε τα υπόλοιπα styles σου όπως είναι, είναι μια χαρά) ... */
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; }
+        .checkout-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .box-panel { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 25px; margin-bottom: 25px; }
+        .submit-btn { width: 100%; background: transparent; border: 2px solid #ff0000; color: white; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 18px; text-transform: uppercase; transition: 0.3s; }
+        .submit-btn:hover:not(:disabled) { background-color: #ff0000; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
 </head>
 <body>
 
-    <main class="checkout-container">
-        <h1 class="checkout-title">Ολοκληρωση Αγορας</h1>
-        <div id="stock-timer" class="timer-banner" style="display:none;"></div>
+    <main class="checkout-container">
+        <h1 class="checkout-title">Ολοκληρωση Αγορας</h1>
+        <div id="stock-timer" class="timer-banner" style="display:none;"></div>
 
-        <div class="box-panel">
-            <h2>Τα Προϊόντα σας</h2>
-            <div id="cart-summary-list"></div>
-            <div class="cart-total">
-                <span>Σύνολο:</span>
-                <span id="cart-total-price">0.00 €</span>
-            </div>
-        </div>
+        <div class="box-panel">
+            <h2>Τα Προϊόντα σας</h2>
+            <div id="cart-summary-list"></div>
+            <div class="cart-total">
+                <span>Σύνολο:</span>
+                <span id="cart-total-price">0.00 €</span>
+            </div>
+        </div>
 
-        <div class="box-panel">
-            <h2>Στοιχεία Πελάτη</h2>
-            <form id="checkout-form">
-                <div class="form-group"><label>Όνομα *</label><input type="text" id="firstname" required></div>
-                <div class="form-group"><label>Επώνυμο *</label><input type="text" id="lastname" required></div>
-                <div class="form-group"><label>Email *</label><input type="email" id="email" required></div>
-                <div class="form-group"><label>Κινητό Τηλέφωνο *</label><input type="tel" id="phone" required></div>
-                <div class="form-group"><label>Διεύθυνση *</label><input type="text" id="address" required></div>
-                <div class="form-group"><label>Πόλη *</label><input type="text" id="city" required></div>
-                <div class="form-group"><label>Τ.Κ. *</label><input type="text" id="zip" required></div>
-                <div class="terms-group">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">Συμφωνώ με τους <a href="terms.html">Όρους</a></label>
-                </div>
-                <button type="button" class="submit-btn" id="submit-order-btn" onclick="handleCheckout()">Πληρωμη με Καρτα</button>
-            </form>
-        </div>
-    </main>
+        <div class="box-panel">
+            <h2>Στοιχεία Πελάτη</h2>
+            <form id="checkout-form">
+                <div class="form-group"><label>Όνομα *</label><input type="text" id="firstname" required></div>
+                <div class="form-group"><label>Επώνυμο *</label><input type="text" id="lastname" required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="email" required></div>
+                <div class="form-group"><label>Κινητό Τηλέφωνο *</label><input type="tel" id="phone" required></div>
+                <div class="form-group"><label>Διεύθυνση *</label><input type="text" id="address" required></div>
+                <div class="form-group"><label>Πόλη *</label><input type="text" id="city" required></div>
+                <div class="form-group"><label>Τ.Κ. *</label><input type="text" id="zip" required></div>
+                <div class="terms-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">Συμφωνώ με τους <a href="terms.html">Όρους</a></label>
+                </div>
+                <button type="button" class="submit-btn" id="submit-order-btn" onclick="handleCheckout()">Πληρωμη με Καρτα</button>
+            </form>
+        </div>
+    </main>
 
-    <script>
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-        function loadCartSummary() {
-            const list = document.getElementById('cart-summary-list');
-            let total = 0;
-            list.innerHTML = cart.map(item => {
-                const qty = item.qty || 1;
-                total += item.price * qty;
-                return `<div class="cart-item"><span>${item.name} (x${qty})</span><span>${(item.price * qty).toFixed(2)} €</span></div>`;
-            }).join('');
-            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
-        }
+        function loadCartSummary() {
+            const list = document.getElementById('cart-summary-list');
+            let total = 0;
+            list.innerHTML = cart.map(item => {
+                const qty = item.qty || 1;
+                total += item.price * qty;
+                return `<div class="cart-item"><span>${item.name} (x${qty})</span><span>${(item.price * qty).toFixed(2)} €</span></div>`;
+            }).join('');
+            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
+        }
 
-        async function handleCheckout() {
-            const btn = document.getElementById('submit-order-btn');
-            if (!document.getElementById('terms').checked) return alert("Αποδεχτείτε τους όρους!");
-            
-            btn.disabled = true;
-            btn.innerText = "Επεξεργασία...";
+        async function handleCheckout() {
+            const btn = document.getElementById('submit-order-btn');
+            if (!document.getElementById('terms').checked) return alert("Αποδεχτείτε τους όρους!");
+            
+            btn.disabled = true;
+            btn.innerText = "Επεξεργασία...";
 
-            const payload = {
-                amount: document.getElementById('cart-total-price').innerText.replace(' €', ''),
-                teamId: cart.length > 0 ? cart[0].name : 'unknown',
-                firstName: document.getElementById('firstname').value,
-                lastName: document.getElementById('lastname').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                zip: document.getElementById('zip').value
-            };
+            const payload = {
+                amount: document.getElementById('cart-total-price').innerText.replace(' €', ''),
+                teamId: cart.length > 0 ? cart[0].name : 'unknown',
+                firstName: document.getElementById('firstname').value,
+                lastName: document.getElementById('lastname').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                zip: document.getElementById('zip').value
+            };
 
-            try {
-                const res = await fetch('/api/create-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await res.json();
-                
-                if (data.OrderCode) {
-                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
-                } else {
-                    alert("Σφάλμα: " + (data.error || "Άγνωστο σφάλμα"));
-                    btn.disabled = false;
-                    btn.innerText = "Πληρωμη με Καρτα";
-                }
-            } catch (e) {
-                alert("Σφάλμα σύνδεσης");
-                btn.disabled = false;
-                btn.innerText = "Πληρωμη με Καρτα";
-            }
-        }
+            try {
+                const res = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (data.OrderCode) {
+                    window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
+                } else {
+                    alert("Σφάλμα: " + (data.error || "Άγνωστο σφάλμα"));
+                    btn.disabled = false;
+                    btn.innerText = "Πληρωμη με Καρτα";
+                }
+            } catch (e) {
+                alert("Σφάλμα σύνδεσης");
+                btn.disabled = false;
+                btn.innerText = "Πληρωμη με Καρτα";
+            }
+        }
 
-        window.onload = loadCartSummary;
-    </script>
+        window.onload = loadCartSummary;
+    </script>
 </body>
-</html>
+</html> 
