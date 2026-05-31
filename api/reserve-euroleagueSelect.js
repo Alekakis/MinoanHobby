@@ -10,18 +10,22 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        // --- GET: Επιστροφή κατάστασης όλων των ομάδων ---
         if (req.method === 'GET') {
-            // Παίρνουμε το stock για όλες τις ομάδες από 1 έως 23
             let status = {};
             for (let i = 1; i <= 23; i++) {
-                const stock = await redis.get(`team:stock:${i}`);
-                status[i] = stock !== null ? parseInt(stock) : 1; // 1 είναι το αρχικό stock
+                const key = `team:stock:${i}`;
+                let stock = await redis.get(key);
+                
+                // Αυτόματη αρχικοποίηση αν το κλειδί δεν υπάρχει
+                if (stock === null) {
+                    await redis.set(key, 1);
+                    stock = 1;
+                }
+                status[i] = parseInt(stock);
             }
             return res.status(200).json({ stocks: status });
         }
 
-        // --- POST: Αλλαγή στοκ για συγκεκριμένη ομάδα ---
         if (req.method === 'POST') {
             let body = req.body;
             if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
@@ -30,18 +34,16 @@ export default async function handler(req, res) {
             if (!teamId) return res.status(400).json({ error: 'Missing teamId' });
 
             const KEY = `team:stock:${teamId}`;
-            
-            // Αρχικοποίηση αν δεν υπάρχει (stock 1)
             const currentStock = parseInt(await redis.get(KEY)) ?? 1;
 
             if (action === 'add') {
                 if (currentStock <= 0) return res.status(400).json({ error: 'Εξαντλήθηκε!' });
-                await redis.decr(KEY); // Γίνεται 0
+                await redis.set(KEY, 0); // Δέσμευση
                 return res.status(200).json({ success: true, stock: 0 });
             } 
             
             if (action === 'remove') {
-                await redis.set(KEY, 1); // Επαναφορά στο 1
+                await redis.set(KEY, 1); // Απελευθέρωση
                 return res.status(200).json({ success: true, stock: 1 });
             }
 
