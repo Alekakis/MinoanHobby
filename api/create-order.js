@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         try { body = JSON.parse(body); } catch(e) {}
     }
     
-    const { amount, teamId, qty } = body || {};
+    const { amount, teamId, qty, firstName, lastName, email, phone, address, city, zip } = body || {};
     const orderQty = qty ? parseInt(qty) : 1;
 
     try {
@@ -60,8 +60,16 @@ export default async function handler(req, res) {
 
         const data = await vivaResponse.json();
 
-        // Εδώ ήταν το πρόβλημα - τα άγκιστρα ήταν λάθος
         if (data.OrderCode) {
+            // ΑΠΟΘΗΚΕΥΣΗ ΣΤΟΙΧΕΙΩΝ ΠΕΛΑΤΗ ΓΙΑ ΤΟ WEBHOOK (Σε περίπτωση επιτυχίας)
+            const customerData = {
+                firstName, lastName, email, phone, address, city, zip,
+                teamName: teamId,
+                price: amount
+            };
+            await redis.set(`viva:order:details:${data.OrderCode}`, JSON.stringify(customerData), 'EX', 3600);
+
+            // Logic για το stock
             if (teamId.toLowerCase() === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
             } else if (teamId.toLowerCase() === 'megabox half case') {
@@ -77,29 +85,11 @@ export default async function handler(req, res) {
             }
             return res.status(200).json(data);
         } else {
-            // Αποτυχία Viva Wallet
-            if (teamId.toLowerCase() !== 'ducks') {
-                await redis.del(`team:status:${teamId}`);
-            }
-            // Κρατάω τα δεδομένα καθε πελάτη για το wed3form
-            const customerData = {
-                teamName: teamId,
-                price: amount
-            };
-            // Αποθηκεύουμε τα στοιχεία για 1 ώρα στο Redis με το OrderCode που πήραμε από τη Viva
-            await redis.set(`viva:order:details:${data.OrderCode}`, JSON.stringify(customerData), 'EX', 3600);
             return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
         }
 
     } catch (error) {
         console.error("Vercel Function Error:", error);
-        
-        // Επαναφορά σε περίπτωση κρασαρίσματος
-        if (teamId && teamId.toLowerCase() !== 'ducks') {
-            try {
-                await redis.del(`team:status:${teamId}`);
-            } catch (_) {}
-        }
         return res.status(500).json({ error: error.message });
     }
 }
