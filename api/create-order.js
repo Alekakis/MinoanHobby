@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         const statusId = eventData.StatusId;
         const eventTypeId = event.EventTypeId;
 
-        if (!orderCode) return res.status(200).send('No order code');
+        if (!orderCode) return res.status(200).json({ error: 'No order code' });
 
         // --- 1. ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ (F) ---
         if (eventTypeId === 1796 || statusId === 'F') {
@@ -41,44 +41,40 @@ export default async function handler(req, res) {
                 })
             });
 
-            // Καθαρισμός όλων των pending keys (οριστικοποίηση)
+            // Καθαρισμός όλων των pending keys
             await redis.del(`viva:pending:ducks:${orderCode}`, `viva:pending:megabox:${orderCode}`, `viva:pending:euroleague:${orderCode}`, `viva:pending:select:${orderCode}`, `viva:pending:laliga:${orderCode}`);
             
-            // Οριστικοποίηση Euroleague Select (Αριθμοί)
+            // Οριστικοποίηση Euroleague Select
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
             if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.set(`team:stock:${teamId}`, 0);
             }
             
             await redis.del(`viva:mapping:team:${orderCode}`, `viva:order:details:${orderCode}`);
-            return res.status(200).send('OK');
+            return res.status(200).json({ status: 'success' });
         }
 
         // --- 2. ΑΚΥΡΩΣΗ / ΑΠΟΤΥΧΙΑ (E, X, C) ---
         if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
-            // Επαναφορά στοκ Megabox
             const megaboxQty = await redis.get(`viva:pending:megabox:${orderCode}`);
             if (megaboxQty) await redis.incrby('product:stock:megabox', parseInt(megaboxQty));
 
-            // Επαναφορά Ducks
             const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
             if (ducksQty) await redis.incrby('ducks', parseInt(ducksQty));
 
-            // Επαναφορά Euroleague (Αριθμοί)
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
             if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.set(`team:stock:${teamId}`, 1);
             }
 
-            // Καθαρισμός
             await redis.del(`viva:pending:ducks:${orderCode}`, `viva:pending:megabox:${orderCode}`, `viva:mapping:team:${orderCode}`, `viva:order:details:${orderCode}`);
-            return res.status(200).send('Cancelled - Stock Released');
+            return res.status(200).json({ status: 'cancelled' });
         }
 
-        return res.status(200).send('Event received');
+        return res.status(200).json({ status: 'received' });
 
     } catch (error) {
         console.error("Webhook Error:", error);
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message }); 
     }
 }
