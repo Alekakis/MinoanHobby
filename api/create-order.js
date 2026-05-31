@@ -81,6 +81,13 @@ export default async function handler(req, res) {
             if (teamId.toLowerCase() !== 'ducks') {
                 await redis.del(`team:status:${teamId}`);
             }
+            // Κρατάω τα δεδομένα καθε πελάτη για το wed3form
+            const customerData = {
+                teamName: teamId,
+                price: amount
+            };
+            // Αποθηκεύουμε τα στοιχεία για 1 ώρα στο Redis με το OrderCode που πήραμε από τη Viva
+            await redis.set(`viva:order:details:${data.OrderCode}`, JSON.stringify(customerData), 'EX', 3600);
             return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
         }
 
