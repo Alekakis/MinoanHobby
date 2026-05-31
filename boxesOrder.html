@@ -164,7 +164,7 @@
         /* PRODUCTS GRID */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 30px;
         }
 
@@ -176,9 +176,11 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            text-decoration: none; 
+            color: #ffffff;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             position: relative;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .product-card:hover {
@@ -203,7 +205,7 @@
         .product-image {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* Άλλαξα σε contain για να μην κόβονται τα κουτιά */
             padding: 15px;
             transition: transform 0.5s ease;
         }
@@ -233,7 +235,6 @@
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            justify-content: space-between;
         }
 
         .product-title {
@@ -242,65 +243,39 @@
             margin-bottom: 10px;
             line-height: 1.4;
             color: #ffffff;
+            transition: color 0.3s;
+        }
+
+        .product-card:hover .product-title {
+            color: #ff0000;
         }
 
         .product-price {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 900;
-            color: #ff0000;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
-        .stock-indicator {
-            font-size: 13px;
-            color: #22c55e;
-            font-weight: 600;
+            color: #ff0000; /* Έκανα την τιμή κόκκινη για να ξεχωρίζει */
+            margin-top: auto;
             margin-bottom: 15px;
         }
 
         /* Κουμπί */
         .product-btn {
-            width: 100%;
             background-color: transparent;
             border: 2px solid #ff0000;
             color: #ffffff;
             font-weight: 700;
             font-size: 13px;
             text-align: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-radius: 6px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .product-btn:hover:not(:disabled) {
+        .product-card:hover .product-btn {
             background-color: #ff0000;
             color: white;
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
-        }
-
-        .product-btn:disabled {
-            border-color: #475569;
-            color: #64748b;
-            cursor: not-allowed;
-            background-color: rgba(71, 85, 105, 0.1);
-        }
-
-        .remove-link {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: #ef4444;
-            font-size: 13px;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .remove-link:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -310,7 +285,7 @@
         <div class="panel-top">
             <a href="checkout.html" class="cart-container" title="Καλάθι Αγορών">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="global-cart-count">0</span>
+                <span class="cart-count">0</span>
             </a>
             <div class="lang-selector" title="Αλλαγή Γλώσσας">
                 🇬🇷<br>ΕΛ
@@ -347,382 +322,44 @@
 
         <div class="products-grid">
 
-            <!-- ΚΑΡΤΑ 1: EUROLEAGUE CONTENDERS MEGA BOX -->
-            <div class="product-card">
+            <a href="boxes/euroleagueMegaBoxBasketball.html" class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">Live Box</span>
                     <img src="images/euroleague-box.png" alt="EuroLeague Basketball Mega Box" class="product-image">
                 </div>
                 <div class="product-info">
-                    <div>
-                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
-                        <div class="product-price">49.99 €</div>
-                        <div id="euro-mega-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    </div>
-                    <div>
-                        <button class="product-btn" id="btn-euro-mega" onclick="addEuroMegaToCart()">Αγορα Κουτιου</button>
-                        <div id="remove-euro-mega-box"></div>
-                    </div>
+                    <h2 class="product-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
+                    <div class="product-price">49.99 €</div>
+                    <div class="product-btn">Αγορα Κουτιου</div>
                 </div>
-            </div>
+            </a>
 
-            <!-- ΚΑΡΤΑ 2: EUROLEAGUE SELECT BOX -->
-            <div class="product-card">
+            <a href="boxes/euroleagueSelectBox.html" class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">Premium Box</span>
                     <img src="images/euroleague-select-box.png" alt="EuroLeague Select Box" class="product-image">
                 </div>
                 <div class="product-info">
-                    <div>
-                        <h2 class="product-title">Panini EuroLeague Select Box</h2>
-                        <div class="product-price">189.00 €</div>
-                        <div id="euro-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    </div>
-                    <div>
-                        <button class="product-btn" id="btn-euro-select" onclick="addEuroSelectToCart()">Αγορα Κουτιου</button>
-                        <div id="remove-euro-select-box"></div>
-                    </div>
+                    <h2 class="product-title">Panini EuroLeague Select Box</h2>
+                    <div class="product-price">189.00 €</div>
+                    <div class="product-btn">Αγορα Κουτιου</div>
                 </div>
-            </div>
+            </a>
 
-            <!-- ΚΑΡΤΑ 3: LA LIGA SELECT BOX -->
-            <div class="product-card">
+            <a href="boxes/laLigaSelectBox.html" class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">New Release</span>
                     <img src="images/laliga-select-box.png" alt="La Liga Select Box" class="product-image">
                 </div>
                 <div class="product-info">
-                    <div>
-                        <h2 class="product-title">Panini La Liga Select Box</h2>
-                        <div class="product-price">54.90 €</div>
-                        <div id="laliga-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    </div>
-                    <div>
-                        <button class="product-btn" id="btn-laliga-select" onclick="addLaLigaSelectToCart()">Αγορα Κουτιου</button>
-                        <div id="remove-laliga-select-box"></div>
-                    </div>
+                    <h2 class="product-title">Panini La Liga Select Box</h2>
+                    <div class="product-price">54.90 €</div>
+                    <div class="product-btn">Αγορα Κουτιου</div>
                 </div>
-            </div>
+            </a>
 
         </div>
     </main>
 
-    <script>
-        // ΣΥΓΧΡΟΝΙΣΜΟΣ ΚΑΙ LIVE ΕΝΗΜΕΡΩΣΗ ΣΕΛΙΔΑΣ
-        async function updatePageState() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
-            // 1. Ενημέρωση του Global Badge στο καλάθι
-            const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
-            const badge = document.getElementById('global-cart-count');
-            if (badge) badge.innerText = totalItems;
-
-            // --- 2. LIVE STOCK ΓΙΑ EUROLEAGUE MEGA BOX ---
-            try {
-                const itemInCart = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
-                const userQty = itemInCart ? itemInCart.qty : 0;
-
-                const btn = document.getElementById('btn-euro-mega');
-                const stockText = document.getElementById('euro-mega-stock-text');
-                const removeBox = document.getElementById('remove-euro-mega-box');
-
-                if (btn && stockText && removeBox) {
-                    const response = await fetch('/api/get-euroleague-mega-stock'); 
-                    const data = await response.json();
-                    const realStock = data.stock !== undefined ? data.stock : 10;
-
-                    if (realStock <= 0) {
-                        btn.disabled = true;
-                        btn.innerText = "Εξαντλήθηκε";
-                        stockText.style.color = "#ef4444";
-                        stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroMegaFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
-                    } else if (userQty > 0) {
-                        btn.disabled = false;
-                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = `<span class="remove-link" onclick="removeEuroMegaFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "Αγορα Κουτιου";
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = "";
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading Euroleague Mega stock:", error);
-            }
-
-            // --- 3. LIVE STOCK ΓΙΑ EUROLEAGUE SELECT BOX ---
-            try {
-                const itemInCart = cart.find(item => item.name === 'EuroLeague Select Box');
-                const userQty = itemInCart ? itemInCart.qty : 0;
-
-                const btn = document.getElementById('btn-euro-select');
-                const stockText = document.getElementById('euro-select-stock-text');
-                const removeBox = document.getElementById('remove-euro-select-box');
-
-                if (btn && stockText && removeBox) {
-                    const response = await fetch('/api/get-euroleague-select-stock'); 
-                    const data = await response.json();
-                    const realStock = data.stock !== undefined ? data.stock : 5;
-
-                    if (realStock <= 0) {
-                        btn.disabled = true;
-                        btn.innerText = "Εξαντλήθηκε";
-                        stockText.style.color = "#ef4444";
-                        stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
-                    } else if (userQty > 0) {
-                        btn.disabled = false;
-                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = `<span class="remove-link" onclick="removeEuroSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "Αγορα Κουτιου";
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = "";
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading Euroleague Select stock:", error);
-            }
-
-            // --- 4. LIVE STOCK ΓΙΑ LA LIGA SELECT BOX ---
-            try {
-                const itemInCart = cart.find(item => item.name === 'La Liga Select Box');
-                const userQty = itemInCart ? itemInCart.qty : 0;
-
-                const btn = document.getElementById('btn-laliga-select');
-                const stockText = document.getElementById('laliga-select-stock-text');
-                const removeBox = document.getElementById('remove-laliga-select-box');
-
-                if (btn && stockText && removeBox) {
-                    const response = await fetch('/api/get-laliga-select-stock'); 
-                    const data = await response.json();
-                    const realStock = data.stock !== undefined ? data.stock : 12;
-
-                    if (realStock <= 0) {
-                        btn.disabled = true;
-                        btn.innerText = "Εξαντλήθηκε";
-                        stockText.style.color = "#ef4444";
-                        stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeLaLigaSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
-                    } else if (userQty > 0) {
-                        btn.disabled = false;
-                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = `<span class="remove-link" onclick="removeLaLigaSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "Αγορα Κουτιου";
-                        stockText.style.color = "#22c55e";
-                        stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
-                        removeBox.innerHTML = "";
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading La Liga Select stock:", error);
-            }
-        }
-
-        // --- FUNCTIONS ΓΙΑ EUROLEAGUE MEGA BOX ---
-        async function addEuroMegaToCart() {
-            const btn = document.getElementById('btn-euro-mega');
-            if (!btn) return;
-            btn.disabled = true;
-            btn.innerText = "Περιμένετε...";
-
-            try {
-                const response = await fetch('/api/reserve-euroleague-mega', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const existingItem = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
-
-                    if (existingItem) {
-                        existingItem.qty += 1;
-                    } else {
-                        cart.push({ name: 'EuroLeague Contenders Mega Box', price: 49.99, qty: 1 });
-                    }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
-                } else {
-                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
-                }
-            } catch (error) {
-                console.error("Error adding Euroleague Mega:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        async function removeEuroMegaFromCart() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const item = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
-            if (!item) return;
-
-            const btn = document.getElementById('btn-euro-mega');
-            if (btn) btn.disabled = true;
-
-            try {
-                for (let i = 0; i < item.qty; i++) {
-                    await fetch('/api/reserve-euroleague-mega', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-                cart = cart.filter(m => m.name !== 'EuroLeague Contenders Mega Box');
-                localStorage.setItem('cart', JSON.stringify(cart));
-            } catch (error) {
-                console.error("Error removing Euroleague Mega:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        // --- FUNCTIONS ΓΙΑ EUROLEAGUE SELECT BOX ---
-        async function addEuroSelectToCart() {
-            const btn = document.getElementById('btn-euro-select');
-            if (!btn) return;
-            btn.disabled = true;
-            btn.innerText = "Περιμένετε...";
-
-            try {
-                const response = await fetch('/api/reserve-euroleague-select', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const existingItem = cart.find(item => item.name === 'EuroLeague Select Box');
-
-                    if (existingItem) {
-                        existingItem.qty += 1;
-                    } else {
-                        cart.push({ name: 'EuroLeague Select Box', price: 189.00, qty: 1 });
-                    }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
-                } else {
-                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
-                }
-            } catch (error) {
-                console.error("Error adding Euroleague Select:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        async function removeEuroSelectFromCart() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const item = cart.find(item => item.name === 'EuroLeague Select Box');
-            if (!item) return;
-
-            const btn = document.getElementById('btn-euro-select');
-            if (btn) btn.disabled = true;
-
-            try {
-                for (let i = 0; i < item.qty; i++) {
-                    await fetch('/api/reserve-euroleague-select', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-                cart = cart.filter(m => m.name !== 'EuroLeague Select Box');
-                localStorage.setItem('cart', JSON.stringify(cart));
-            } catch (error) {
-                console.error("Error removing Euroleague Select:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        // --- FUNCTIONS ΓΙΑ LA LIGA SELECT BOX ---
-        async function addLaLigaSelectToCart() {
-            const btn = document.getElementById('btn-laliga-select');
-            if (!btn) return;
-            btn.disabled = true;
-            btn.innerText = "Περιμένετε...";
-
-            try {
-                const response = await fetch('/api/reserve-laliga-select', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const existingItem = cart.find(item => item.name === 'La Liga Select Box');
-
-                    if (existingItem) {
-                        existingItem.qty += 1;
-                    } else {
-                        cart.push({ name: 'La Liga Select Box', price: 54.90, qty: 1 });
-                    }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
-                } else {
-                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
-                }
-            } catch (error) {
-                console.error("Error adding La Liga Select:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        async function removeLaLigaSelectFromCart() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const item = cart.find(item => item.name === 'La Liga Select Box');
-            if (!item) return;
-
-            const btn = document.getElementById('btn-laliga-select');
-            if (btn) btn.disabled = true;
-
-            try {
-                for (let i = 0; i < item.qty; i++) {
-                    await fetch('/api/reserve-laliga-select', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-                cart = cart.filter(m => m.name !== 'La Liga Select Box');
-                localStorage.setItem('cart', JSON.stringify(cart));
-            } catch (error) {
-                console.error("Error removing La Liga Select:", error);
-            } finally {
-                await updatePageState();
-            }
-        }
-
-        // Εκτέλεση κατά το άνοιγμα της σελίδας
-        window.onload = updatePageState;
-    </script>
 </body>
 </html>
