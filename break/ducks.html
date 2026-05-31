@@ -84,22 +84,22 @@
         </div>
     </main>
 
-    <script>
+   <script>
         async function updatePageState() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             document.getElementById('global-cart-count').innerText = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
-
+    
             const ducksInCart = cart.find(item => item.name === 'Ducks');
             const userQty = ducksInCart ? ducksInCart.qty : 0;
             const btnDucks = document.getElementById('btn-ducks');
             const stockText = document.getElementById('ducks-stock-text');
             const removeBox = document.getElementById('remove-ducks-box');
-
+    
             try {
-                const response = await fetch('/api/reserve-ducks'); 
+                const response = await fetch('/api/reserve-ducks', { method: 'GET' }); 
                 const data = await response.json();
-                const realLiveStock = data.stock !== undefined ? data.stock : 10;
-
+                const realLiveStock = data.stock;
+    
                 if (realLiveStock <= 0) {
                     btnDucks.disabled = true;
                     btnDucks.innerText = "Εξαντλήθηκε";
@@ -118,30 +118,49 @@
                     removeBox.innerHTML = "";
                 }
             } catch (error) {
+                console.error(error);
                 stockText.innerText = "Σφάλμα φόρτωσης στοκ";
             }
         }
-
+    
         async function addDucksToCart() {
             try {
-                const response = await fetch('/api/reserve-ducks', { method: 'POST', body: JSON.stringify({ action: 'add' }) });
+                const response = await fetch('/api/reserve-ducks', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add' }) 
+                });
                 if (response.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const item = cart.find(i => i.name === 'Ducks');
                     item ? item.qty++ : cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
                     localStorage.setItem('cart', JSON.stringify(cart));
+                    updatePageState();
+                } else {
+                    const data = await response.json();
+                    alert(data.error);
                 }
             } catch (e) { alert("Σφάλμα σύνδεσης"); }
-            updatePageState();
         }
-
+    
         async function removeDucksFromCart() {
+            // Εδώ η λογική αφαίρεσης από το Redis για κάθε κομμάτι που έχει ο χρήστης
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const item = cart.find(i => i.name === 'Ducks');
+            if (item) {
+                for(let i=0; i<item.qty; i++) {
+                    await fetch('/api/reserve-ducks', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'remove' }) 
+                    });
+                }
+            }
             cart = cart.filter(i => i.name !== 'Ducks');
             localStorage.setItem('cart', JSON.stringify(cart));
             updatePageState();
         }
-
+    
         window.onload = updatePageState;
     </script>
 </body>
