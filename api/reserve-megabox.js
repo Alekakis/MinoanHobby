@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
         try {
             const exists = await redis.exists('product:stock:megabox');
-            if (!exists) await redis.set('product:stock:megabox', 16);
+            if (!exists) await redis.set('product:stock:megabox', 100);
 
             const currentStock = parseInt(await redis.get('product:stock:megabox')) || 0;
 
