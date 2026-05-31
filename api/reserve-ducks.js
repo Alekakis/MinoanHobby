@@ -9,12 +9,14 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    // Χρησιμοποιούμε το κλειδί 'ducks' όπως φαίνεται στο Redis σου
-    const REDIS_KEY = 'ducks';
+    const REDIS_KEY = 'ducks'; // Το κλειδί σου στο Redis
 
     try {
         // --- GET: Επιστροφή στοκ ---
         if (req.method === 'GET') {
+            const exists = await redis.exists(REDIS_KEY);
+            if (!exists) await redis.set(REDIS_KEY, 12); // Αρχικοποίηση αν δεν υπάρχει
+
             const currentStock = await redis.get(REDIS_KEY) || 0;
             return res.status(200).json({ stock: parseInt(currentStock) });
         }
@@ -24,6 +26,9 @@ export default async function handler(req, res) {
             let body = req.body;
             if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
             const { action } = body || {};
+
+            const exists = await redis.exists(REDIS_KEY);
+            if (!exists) await redis.set(REDIS_KEY, 12);
 
             const currentStock = parseInt(await redis.get(REDIS_KEY)) || 0;
 
@@ -42,7 +47,6 @@ export default async function handler(req, res) {
         }
 
         return res.status(405).json({ error: 'Method not allowed' });
-
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
