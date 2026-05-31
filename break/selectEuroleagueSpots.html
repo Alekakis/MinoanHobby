@@ -138,6 +138,9 @@
                 return;
             }
 
+            // Βρίσκουμε τα στοιχεία της ομάδας από το array σου
+            const teamData = euroleagueTeams.find(t => t.id === teamId);
+
             const btn = document.getElementById(`btn-${teamId}`);
             btn.disabled = true;
             btn.innerText = "Αναμονή...";
@@ -150,7 +153,13 @@
                 });
                 
                 if (res.ok) {
-                    cart.push({ name: euroleagueTeams.find(t => t.id === teamId).name, teamId: teamId });
+                    // ΕΔΩ ΠΡΟΣΘΕΤΟΥΜΕ ΚΑΙ ΤΟ PRICE
+                    cart.push({ 
+                        name: teamData.name, 
+                        price: teamData.price, 
+                        teamId: teamId 
+                    });
+                    
                     localStorage.setItem('cart', JSON.stringify(cart));
                     location.href = "../checkout.html";
                 } else {
