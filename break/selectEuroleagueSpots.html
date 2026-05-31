@@ -90,19 +90,24 @@
             { id: 23, name: "CSKA Moscow", price: 50.00, logo: "../images/imageCska.png" }
         ];
 
-        async function updatePageState() {
+       async function updatePageState() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             document.getElementById('global-cart-count').innerText = cart.length;
-
+        
             try {
                 const res = await fetch('/api/reserve-euroleagueSelect');
                 const data = await res.json();
                 const grid = document.getElementById('teams-grid');
-
-                grid.innerHTML = euroleagueTeams.map(team => {
+        
+                // Εδώ προσθέτουμε την ταξινόμηση (sort)
+                // b.price - a.price κάνει φθίνουσα σειρά (από το ακριβότερο στο φθηνότερο)
+                const sortedTeams = [...euroleagueTeams].sort((a, b) => b.price - a.price);
+        
+                grid.innerHTML = sortedTeams.map(team => {
                     const inCart = cart.find(t => t.teamId === team.id);
+                    // Χρησιμοποιούμε το data.stocks[team.id] που έρχεται από το API
                     const isSoldOut = data.stocks && data.stocks[team.id] === 0 && !inCart;
-
+        
                     return `
                         <div class="shipping-card">
                             <div class="card-image-container"><img src="${team.logo}" alt="${team.name}"></div>
