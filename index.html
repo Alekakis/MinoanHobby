@@ -22,8 +22,7 @@
             padding-right: 60px;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Το σώμα πιάνει όλη την οθόνη */
-            margin: 0;
+            min-height: 100vh;
         }
 
         /* HEADER & NAVIGATION */
@@ -94,17 +93,16 @@
 
         .lang-selector { font-size: 12px !important; font-weight: bold; text-align: center; }
 
-        /* HERO SECTION - Φωτογραφία που γεμίζει το κενό */
-      .hero-section {
-            flex: 1; /* Αναγκάζει το section να πιάσει όλο τον υπόλοιπο διαθέσιμο χώρο */
+        /* HERO SECTION */
+        .hero-section {
+            flex: 1;
             width: 100%;
-            background: linear-gradient(rgba(13, 27, 42, 0.7), #0d1b2a), url('https://via.placeholder.com/1920x1080/112233/ffffff?text=Basketball+MinoanHobby') no-repeat center center/cover;
+            background: linear-gradient(rgba(13, 27, 42, 0.5), rgba(13, 27, 42, 0.5)), url('logo.png') no-repeat center center;
+            background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 800px; /* Ελάχιστο ύψος για να μην εξαφανίζεται σε μικρές οθόνες */
         }
-        .hero-logo-image { max-width: 280px; height: auto; filter: drop-shadow(0px 5px 15px rgba(0,0,0,0.6)); }
 
         /* CONTACT SECTION */
         .contact-section {
@@ -148,7 +146,6 @@
     </header>
 
     <section class="hero-section">
-        <img src="logo.png" alt="Minoan Hobby Logo" class="hero-logo-image">
     </section>
 
     <section class="contact-section">
