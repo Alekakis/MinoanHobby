@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
         * {
             margin: 0;
             padding: 0;
@@ -17,20 +16,20 @@
         }
 
         body {
-            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
+            background-color: #0d1b2a; 
             color: #ffffff;
             overflow-x: hidden;
-            padding-right: 60px; /* Χώρος στα δεξιά για το πλαϊνό μενού */
+            padding-right: 60px; 
         }
 
-        /* MAIN HEADER & NAVIGATION */
+        /* MAIN HEADER */
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 40px;
-            background-color: #0b132b; /* Blue-black */
-            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
+            background-color: #0b132b; 
+            border-bottom: 2px solid #ff0000; 
             position: relative;
             z-index: 10;
         }
@@ -49,7 +48,6 @@
             color: #ff0000;
         }
 
-        /* ΠΑΙΧΝΙΔΙΑΡΙΚΟ STYLE ΓΙΑ ΤΑ ΓΡΑΜΜΑΤΑ */
         .playful-logo {
             font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
             font-size: 28px;
@@ -187,7 +185,6 @@
             box-shadow: 0 10px 25px rgba(255, 0, 0, 0.2);
         }
 
-        /* Φωτογραφία Προϊόντος */
         .product-image-wrapper {
             width: 100%;
             height: 280px;
@@ -227,7 +224,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* Πληροφορίες Προϊόντος */
         .product-info {
             padding: 20px;
             display: flex;
@@ -260,7 +256,6 @@
             margin-bottom: 15px;
         }
 
-        /* Κουμπί */
         .product-btn {
             width: 100%;
             background-color: transparent;
@@ -317,7 +312,6 @@
                 🇬🇷<br>ΕΛ
             </div>
         </div>
-
         <div class="panel-bottom">
             <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
@@ -330,14 +324,12 @@
             <a href="breakOrder.html">BREAKS</a>
             <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
-        
         <div class="playful-logo">
             Minoan<span>Hobby</span>
         </div>
-
         <nav class="nav-right">
             <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
-            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΣ</a>
             <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>
         </nav>
     </header>
@@ -355,8 +347,8 @@
                 </div>
                 <div class="product-info">
                     <div>
-                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
-                        <div class="product-price">54.90 €</div>
+                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Mega Box</h2>
+                        <div class="product-price">49.99 €</div>
                         <div id="euro-mega-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
                     </div>
                     <div>
@@ -406,16 +398,16 @@
     </main>
 
     <script>
-        // ΣΥΓΧΡΟΝΙΣΜΟΣ ΚΑΙ LIVE ΕΝΗΜΕΡΩΣΗ ΣΕΛΙΔΑΣ
+        // ΣΥΓΧΡΟΝΙΣΜΟΣ ΚΑΙ LIVE ΕΝΗΜΕΡΩΣΗ ΟΛΩΝ ΤΩΝ ΠΡΟΪΟΝΤΩΝ
         async function updatePageState() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
-            // 1. Ενημέρωση του Global Badge στο καλάθι
+            // 1. Ενημέρωση του Badge στο Καλάθι (Συνολικά κομμάτια)
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
             const badge = document.getElementById('global-cart-count');
             if (badge) badge.innerText = totalItems;
 
-            // --- 2. LIVE STOCK ΓΙΑ EUROLEAGUE MEGA BOX ---
+            // --- 2. ΕΛΕΓΧΟΣ LIVE STOCK: EUROLEAGUE MEGA BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -453,7 +445,7 @@
                 console.error("Error loading Euroleague Mega stock:", error);
             }
 
-            // --- 3. LIVE STOCK ΓΙΑ EUROLEAGUE SELECT BOX ---
+            // --- 3. ΕΛΕΓΧΟΣ LIVE STOCK: EUROLEAGUE SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -491,7 +483,7 @@
                 console.error("Error loading Euroleague Select stock:", error);
             }
 
-            // --- 4. LIVE STOCK ΓΙΑ LA LIGA SELECT BOX ---
+            // --- 4. ΕΛΕΓΧΟΣ LIVE STOCK: LA LIGA SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'La Liga Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -552,7 +544,7 @@
                     if (existingItem) {
                         existingItem.qty += 1;
                     } else {
-                        cart.push({ name: 'EuroLeague Contenders Mega Box', price: 54.90, qty: 1 });
+                        cart.push({ name: 'EuroLeague Contenders Mega Box', price: 49.99, qty: 1 });
                     }
                     localStorage.setItem('cart', JSON.stringify(cart));
                     if (!sessionStorage.getItem('checkout_timer_start')) {
@@ -719,7 +711,7 @@
             }
         }
 
-        // Εκτέλεση κατά το άνοιγμα της σελίδας
+        // Εκτέλεση ελέγχου με το που ανοίγει η σελίδα
         window.onload = updatePageState;
     </script>
 </body>
