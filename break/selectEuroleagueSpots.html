@@ -111,12 +111,15 @@
 
         async function checkLocks() {
             try {
+                // Τραβάμε το object με τα stocks όλων των ομάδων
                 const response = await fetch('/api/reserve-euroleagueSelect');
-                const data = await response.json();
+                const data = await response.json(); 
+                
                 euroleagueTeams.forEach(team => {
                     const btn = document.getElementById(`btn-${team.id}`);
                     if (btn) {
-                        if (data.locked.includes(team.id)) {
+                        // Αν το stock είναι 0, η ομάδα θεωρείται δεσμευμένη
+                        if (data.stocks && data.stocks[team.id] === 0) {
                             btn.disabled = true;
                             btn.innerText = "Δεσμευμένο";
                         } else {
@@ -138,12 +141,14 @@
             const btn = document.getElementById(`btn-${teamId}`);
             btn.disabled = true;
             btn.innerText = "Αναμονή...";
+            
             try {
                 const res = await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ teamId, action: 'add' })
                 });
+                
                 if (res.ok) {
                     cart.push({ name: euroleagueTeams.find(t => t.id === teamId).name, teamId: teamId });
                     localStorage.setItem('cart', JSON.stringify(cart));
