@@ -12,7 +12,6 @@ export default async function handler(req, res) {
         try { event = JSON.parse(event); } catch(e) {}
     }
 
-    // Επιβεβαίωση από τη Viva Wallet
     if (event && event.KeyVerification) {
         return res.status(200).json({ KeyVerification: event.KeyVerification });
     }
@@ -25,45 +24,45 @@ export default async function handler(req, res) {
 
         if (!orderCode) return res.status(200).send('No order code');
 
-        // --- ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ (StatusId: F ή EventTypeId: 1796) ---
+        // --- ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ ---
         if (eventTypeId === 1796 || statusId === 'F') { 
             
             const orderDetailsRaw = await redis.get(`viva:order:details:${orderCode}`);
             const details = orderDetailsRaw ? JSON.parse(orderDetailsRaw) : {};
 
-            const emailData = {
-                access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
-                subject: "💰 Νέα Παραγγελία: " + (details.firstName || "") + " " + (details.lastName || ""),
-                from_name: "Minoan Hobby System",
-                "Order Code": orderCode,
-                "Ονοματεπώνυμο": (details.firstName || "") + " " + (details.lastName || ""),
-                "Email": details.email || "Δ/Υ",
-                "Τηλέφωνο": details.phone || "Δ/Υ",
-                "Διεύθυνση": (details.address || "") + ", " + (details.city || "") + ", " + (details.zip || ""),
-                "Είδος/Ομάδα": details.teamName || "Άγνωστο",
-                "Ποσό": (details.price || "0") + " €",
-                "Κατάσταση": "Η πληρωμή ολοκληρώθηκε επιτυχώς!"
-            };
-
+            // Αποστολή Email μέσω Web3Forms
             await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(emailData)
+                body: JSON.stringify({
+                    access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
+                    subject: "💰 Νέα Παραγγελία: " + (details.firstName || "") + " " + (details.lastName || ""),
+                    from_name: "Minoan Hobby System",
+                    "Order Code": orderCode,
+                    "Ονοματεπωμυμο": (details.firstName || "") + " " + (details.lastName || ""),
+                    "Email": details.email || "Δ/Υ",
+                    "Τηλέφωνο": details.phone || "Δ/Υ",
+                    "Είδος/Ομάδα": details.teamName || "Άγνωστο",
+                    "Ποσό": (details.price || "0") + " €"
+                })
             });
 
-            // Οριστικοποίηση stock
+            // 1. Διαχείριση Stock για Euroleague Select (Αριθμοί)
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
-            if (teamId) {
-                // Αν είναι αριθμός, είναι Euroleague Select -> Μηδενισμός stock στο Redis
-                if (!isNaN(parseInt(teamId))) {
-                    await redis.set(`team:stock:${teamId}`, 0);
-                } else {
-                    // Διαφορετικά είναι κανονικό slot
-                    await redis.set(`team:status:${teamId}`, 'sold');
-                }
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.set(`team:stock:${teamId}`, 0);
                 await redis.del(`viva:mapping:team:${orderCode}`);
             }
 
+            // 2. Διαχείριση Stock για Ducks
+            const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
+            if (ducksQty) {
+                const currentDucks = parseInt(await redis.get('ducks')) || 0;
+                await redis.set('ducks', Math.max(0, currentDucks)); 
+                await redis.del(`viva:pending:ducks:${orderCode}`);
+            }
+
+            // Καθαρισμός γενικών δεδομένων
             await redis.del(`viva:order:details:${orderCode}`);
             return res.status(200).send('OK');
         }
@@ -72,12 +71,17 @@ export default async function handler(req, res) {
         if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
             
-            if (teamId) {
-                // Αν ήταν Euroleague Select, ξανακάνουμε το stock 1 (διαθέσιμο)
-                if (!isNaN(parseInt(teamId))) {
-                    await redis.set(`team:stock:${teamId}`, 1);
-                }
+            // Επαναφορά stock αν ήταν Euroleague Select
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.set(`team:stock:${teamId}`, 1);
                 await redis.del(`viva:mapping:team:${orderCode}`);
+            }
+
+            // Επαναφορά stock αν ήταν Ducks (αν είχες κάνει pre-decr στο checkout)
+            const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
+            if (ducksQty) {
+                await redis.incrby('ducks', parseInt(ducksQty));
+                await redis.del(`viva:pending:ducks:${orderCode}`);
             }
 
             await redis.del(`viva:order:details:${orderCode}`);
@@ -87,7 +91,4 @@ export default async function handler(req, res) {
         return res.status(200).send('Event received');
 
     } catch (error) {
-        console.error("Webhook Error:", error);
-        return res.status(500).json({ error: error.message });
-    }
-}
+        console.error("Webhook Error:",
