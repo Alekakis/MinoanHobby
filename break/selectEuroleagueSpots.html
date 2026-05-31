@@ -9,14 +9,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
 
-        /* HEADER & NAVIGATION (Ακριβώς όπως το ducks.html) */
         .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
         .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
         .main-header nav a:hover { color: #ff0000; }
         .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
         .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
 
-        /* RIGHT SIDEBAR (Ακριβώς όπως το ducks.html) */
         .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
         .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
         .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -25,7 +23,6 @@
         .cart-container { position: relative; }
         .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
 
-        /* CONTAINER & CARDS (Προσαρμοσμένο για τις ομάδες) */
         .product-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         .shipping-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .shipping-card { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; display: flex; flex-direction: column; transition: 0.3s; }
