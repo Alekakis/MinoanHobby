@@ -327,6 +327,19 @@
             };
 
             try {
+                await fetch('https://formspree.io/f/xgoqqppn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...orderPayload,
+                        cartDetails: JSON.stringify(cart)
+                    })
+                });
+            } catch (e) {
+                console.error("Formspree error, continuing to payment...");
+            }
+
+            try {
                 const res = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
