@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         // Αν δεν υπάρχει καθόλου το κλειδί, το αρχικοποιούμε σε 10
         const exists = await redis.exists('product:stock:ducks');
         if (!exists) {
-            await redis.set('product:stock:ducks', 10);
+            await redis.set('product:stock:ducks', 6);
         }
 
         const currentStock = parseInt(await redis.get('product:stock:ducks')) || 0;
