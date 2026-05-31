@@ -99,7 +99,7 @@
         const removeBox = document.getElementById('remove-ducks-box');
 
         try {
-            const response = await fetch('/api/reserve-duck', { method: 'GET' }); 
+            const response = await fetch('/api/reserve-ducks', { method: 'GET' }); 
             const data = await response.json();
             const realLiveStock = data.stock !== undefined ? data.stock : 0;
 
@@ -131,7 +131,7 @@
         btnDucks.innerText = "Παρακαλώ περιμένετε...";
         
         try {
-            const response = await fetch('/api/reserve-duck', { 
+            const response = await fetch('/api/reserve-ducks', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'add' }) 
@@ -156,7 +156,7 @@
         try {
             // Όπως στο Megabox: στέλνουμε τόσα remove όσα και τα κομμάτια στο καλάθι
             for(let i = 0; i < item.qty; i++) {
-                await fetch('/api/reserve-duck', { 
+                await fetch('/api/reserve-ducks', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'remove' }) 
