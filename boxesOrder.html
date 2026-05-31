@@ -4,68 +4,322 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Πακέτα - MinoanHobby</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
+        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        /* HEADER & NAVIGATION */
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
-        .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
-        .main-header nav a:hover { color: #ff0000; }
-        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
-        .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
+        body {
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-right: 60px; /* Χώρος στα δεξιά για το πλαϊνό μενού */
+        }
 
-        /* RIGHT SIDEBAR */
-        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
-        .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
-        .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .right-side-panel a, .right-side-panel .lang-selector { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; position: relative; }
-        .right-side-panel a:hover, .right-side-panel .lang-selector:hover { color: #ff0000; transform: scale(1.1); }
-        .cart-container { position: relative; }
-        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+        /* MAIN HEADER & NAVIGATION */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #0b132b; /* Blue-black */
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
+            position: relative;
+            z-index: 10;
+        }
 
-        /* CONTAINER & GRIDS */
-        .breaks-container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
-        .page-title { color: #ff0000; font-size: 36px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; letter-spacing: 1px; }
-        .page-subtitle { text-align: center; color: #cbd5e1; margin-bottom: 40px; font-size: 15px; }
-        
-        .products-grid { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin-bottom: 5px; }
-        
-        /* CARDS */
-        .team-box-product { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s; }
-        .team-box-product:hover { transform: translateY(-5px); }
-        
-        /* IMAGE CONTAINERS */
-        .card-image-container { width: 100%; height: 160px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 8px; }
-        .card-image-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .main-header nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
 
-        .card-title { font-size: 20px; color: #ffffff; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; line-height: 1.3; }
-        .card-price { font-size: 32px; color: #ff0000; font-weight: bold; margin-bottom: 5px; }
-        .stock-indicator { font-size: 13px; color: #22c55e; font-weight: 600; margin-bottom: 15px; }
-        .card-desc { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
+        .main-header nav a:hover {
+            color: #ff0000;
+        }
 
-        /* BUTTONS */
-        .add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; text-transform: uppercase; transition: 0.3s; letter-spacing: 0.5px; }
-        .add-btn:hover:not(:disabled) { background-color: #ff0000; box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
-        .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
-        .remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
-        .remove-link:hover { text-decoration: underline; }
+        /* ΠΑΙΧΝΙΔΙΑΡΙΚΟ STYLE ΓΙΑ ΤΑ ΓΡΑΜΜΑΤΑ */
+        .playful-logo {
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            text-transform: none;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .playful-logo span {
+            color: #ff0000;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-left: 5px;
+        }
+
+        /* ΔΕΞΙ ΚΑΘΕΤΟ PANEL */
+        .right-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            border-left: 2px solid #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            z-index: 100;
+        }
+
+        .panel-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .right-side-panel a, .right-side-panel .lang-selector {
+            color: #e0e0e0;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .right-side-panel a:hover, .right-side-panel .lang-selector:hover {
+            color: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .cart-container {
+            position: relative;
+        }
+
+        .cart-count {
+            background-color: #ff0000;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -10px;
+        }
+
+        .lang-selector {
+            font-size: 12px !important;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* PRODUCTS SECTION */
+        .products-section {
+            padding: 60px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            color: #ff0000;
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: #e0e0e0;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 500;
+        }
+
+        /* PRODUCTS GRID */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* PRODUCT CARD */
+        .product-card {
+            background-color: #0b132b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: #ff0000;
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.2);
+        }
+
+        /* Φωτογραφία Προϊόντος */
+        .product-image-wrapper {
+            width: 100%;
+            height: 280px;
+            background-color: rgba(255, 255, 255, 0.02);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 0, 0, 0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 15px;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: #ff0000;
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 10px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Πληροφορίες Προϊόντος */
+        .product-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            color: #ffffff;
+        }
+
+        .product-price {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ff0000;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .stock-indicator {
+            font-size: 13px;
+            color: #22c55e;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        /* Κουμπί */
+        .product-btn {
+            width: 100%;
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            padding: 12px 0;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .product-btn:hover:not(:disabled) {
+            background-color: #ff0000;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .product-btn:disabled {
+            border-color: #475569;
+            color: #64748b;
+            cursor: not-allowed;
+            background-color: rgba(71, 85, 105, 0.1);
+        }
+
+        .remove-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #ef4444;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .remove-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="checkout.html" title="Καλάθι Αγορών" class="cart-container">
+            <a href="checkout.html" class="cart-container" title="Καλάθι Αγορών">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count" id="global-cart-count">0</span>
             </a>
-            <div class="lang-selector">🇬🇷<br>ΕΛ</div>
+            <div class="lang-selector" title="Αλλαγή Γλώσσας">
+                🇬🇷<br>ΕΛ
+            </div>
         </div>
+
         <div class="panel-bottom">
-            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
         </div>
     </aside>
 
@@ -75,7 +329,11 @@
             <a href="breakOrder.html">BREAKS</a>
             <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
-        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        
+        <div class="playful-logo">
+            Minoan<span>Hobby</span>
+        </div>
+
         <nav class="nav-right">
             <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
             <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
@@ -83,60 +341,66 @@
         </nav>
     </header>
 
-    <main class="breaks-container">
-        <h1 class="page-title">Διαθέσιμα Πακέτα</h1>
-        <p class="page-subtitle">Επίλεξε το αγαπημένο σου κουτί και εξασφάλισε τη θέση σου τώρα!</p>
+    <main class="products-section">
+        <h1 class="section-title">Διαθέσιμα Πακέτα</h1>
+        <p class="section-subtitle">Επίλεξε το αγαπημένο σου κουτί και εξασφάλισε τη θέση σου τώρα!</p>
 
         <div class="products-grid">
-            
+
             <!-- ΚΑΡΤΑ 1: EUROLEAGUE CONTENDERS MEGA BOX -->
-            <div class="team-box-product">
-                <div>
-                    <div class="card-image-container">
-                        <img src="images/euroleague-box.png" alt="EuroLeague Basketball Mega Box">
-                    </div>
-                    <h2 class="card-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
-                    <div class="card-price">49.99 €</div>
-                    <div id="euro-mega-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    <p class="card-desc">Αποκτήστε το επίσημο Mega Box της Euroleague.<br>Περιορισμένο live στοκ διαθέσιμο.</p>
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <span class="product-badge">Live Box</span>
+                    <img src="images/euroleague-box.png" alt="EuroLeague Basketball Mega Box" class="product-image">
                 </div>
-                <div>
-                    <button class="add-btn" id="btn-euro-mega" onclick="addEuroMegaToCart()">Προσθηκη στο καλαθι</button>
-                    <div id="remove-euro-mega-box"></div>
+                <div class="product-info">
+                    <div>
+                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
+                        <div class="product-price">49.99 €</div>
+                        <div id="euro-mega-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+                    </div>
+                    <div>
+                        <button class="product-btn" id="btn-euro-mega" onclick="addEuroMegaToCart()">Αγορα Κουτιου</button>
+                        <div id="remove-euro-mega-box"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ΚΑΡΤΑ 2: EUROLEAGUE SELECT BOX -->
-            <div class="team-box-product">
-                <div>
-                    <div class="card-image-container">
-                        <img src="images/euroleague-select-box.png" alt="EuroLeague Select Box">
-                    </div>
-                    <h2 class="card-title">Panini EuroLeague Select Box</h2>
-                    <div class="card-price">189.00 €</div>
-                    <div id="euro-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    <p class="card-desc">Premium συλλεκτική έκδοση Select για την EuroLeague.<br>Υψηλή ποιότητα καρτών.</p>
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <span class="product-badge">Premium Box</span>
+                    <img src="images/euroleague-select-box.png" alt="EuroLeague Select Box" class="product-image">
                 </div>
-                <div>
-                    <button class="add-btn" id="btn-euro-select" onclick="addEuroSelectToCart()">Προσθηκη στο καλαθι</button>
-                    <div id="remove-euro-select-box"></div>
+                <div class="product-info">
+                    <div>
+                        <h2 class="product-title">Panini EuroLeague Select Box</h2>
+                        <div class="product-price">189.00 €</div>
+                        <div id="euro-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+                    </div>
+                    <div>
+                        <button class="product-btn" id="btn-euro-select" onclick="addEuroSelectToCart()">Αγορα Κουτιου</button>
+                        <div id="remove-euro-select-box"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ΚΑΡΤΑ 3: LA LIGA SELECT BOX -->
-            <div class="team-box-product">
-                <div>
-                    <div class="card-image-container">
-                        <img src="images/laliga-select-box.png" alt="La Liga Select Box">
-                    </div>
-                    <h2 class="card-title">Panini La Liga Select Box</h2>
-                    <div class="card-price">54.90 €</div>
-                    <div id="laliga-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    <p class="card-desc">Νέα επίσημη κυκλοφορία Select για το Ισπανικό Πρωτάθλημα.<br>Μην το χάσετε.</p>
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <span class="product-badge">New Release</span>
+                    <img src="images/laliga-select-box.png" alt="La Liga Select Box" class="product-image">
                 </div>
-                <div>
-                    <button class="add-btn" id="btn-laliga-select" onclick="addLaLigaSelectToCart()">Προσθηκη στο καλαθι</button>
-                    <div id="remove-laliga-select-box"></div>
+                <div class="product-info">
+                    <div>
+                        <h2 class="product-title">Panini La Liga Select Box</h2>
+                        <div class="product-price">54.90 €</div>
+                        <div id="laliga-select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+                    </div>
+                    <div>
+                        <button class="product-btn" id="btn-laliga-select" onclick="addLaLigaSelectToCart()">Αγορα Κουτιου</button>
+                        <div id="remove-laliga-select-box"></div>
+                    </div>
                 </div>
             </div>
 
@@ -153,7 +417,7 @@
             const badge = document.getElementById('global-cart-count');
             if (badge) badge.innerText = totalItems;
 
-            // --- 2. ΔΙΑΧΕΙΡΙΣΗ LIVE STOCK ΓΙΑ EUROLEAGUE MEGA BOX ---
+            // --- 2. LIVE STOCK ΓΙΑ EUROLEAGUE MEGA BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -172,16 +436,16 @@
                         btn.innerText = "Εξαντλήθηκε";
                         stockText.style.color = "#ef4444";
                         stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroMegaFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroMegaFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
                     } else if (userQty > 0) {
                         btn.disabled = false;
-                        btn.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
+                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = `<span class="remove-link" onclick="removeEuroMegaFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                     } else {
                         btn.disabled = false;
-                        btn.innerText = "Προσθήκη στο καλάθι";
+                        btn.innerText = "Αγορα Κουτιου";
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = "";
@@ -191,7 +455,7 @@
                 console.error("Error loading Euroleague Mega stock:", error);
             }
 
-            // --- 3. ΔΙΑΧΕΙΡΙΣΗ LIVE STOCK ΓΙΑ EUROLEAGUE SELECT BOX ---
+            // --- 3. LIVE STOCK ΓΙΑ EUROLEAGUE SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -210,16 +474,16 @@
                         btn.innerText = "Εξαντλήθηκε";
                         stockText.style.color = "#ef4444";
                         stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
                     } else if (userQty > 0) {
                         btn.disabled = false;
-                        btn.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
+                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = `<span class="remove-link" onclick="removeEuroSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                     } else {
                         btn.disabled = false;
-                        btn.innerText = "Προσθήκη στο καλάθι";
+                        btn.innerText = "Αγορα Κουτιου";
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = "";
@@ -229,7 +493,7 @@
                 console.error("Error loading Euroleague Select stock:", error);
             }
 
-            // --- 4. ΔΙΑΧΕΙΡΙΣΗ LIVE STOCK ΓΙΑ LA LIGA SELECT BOX ---
+            // --- 4. LIVE STOCK ΓΙΑ LA LIGA SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'La Liga Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -248,16 +512,16 @@
                         btn.innerText = "Εξαντλήθηκε";
                         stockText.style.color = "#ef4444";
                         stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeLaLigaSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+                        removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeLaLigaSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
                     } else if (userQty > 0) {
                         btn.disabled = false;
-                        btn.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
+                        btn.innerText = `Αγορά ξανά (+1) | Έχετε: ${userQty}`;
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `✔️ Live Απόθεμα: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = `<span class="remove-link" onclick="removeLaLigaSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                     } else {
                         btn.disabled = false;
-                        btn.innerText = "Προσθήκη στο καλάθι";
+                        btn.innerText = "Αγορα Κουτιου";
                         stockText.style.color = "#22c55e";
                         stockText.innerText = `🔥 Live Stock: ${realStock} διαθέσιμα`;
                         removeBox.innerHTML = "";
@@ -273,7 +537,7 @@
             const btn = document.getElementById('btn-euro-mega');
             if (!btn) return;
             btn.disabled = true;
-            btn.innerText = "Παρακαλώ περιμένετε...";
+            btn.innerText = "Περιμένετε...";
 
             try {
                 const response = await fetch('/api/reserve-euroleague-mega', {
@@ -336,7 +600,7 @@
             const btn = document.getElementById('btn-euro-select');
             if (!btn) return;
             btn.disabled = true;
-            btn.innerText = "Παρακαλώ περιμένετε...";
+            btn.innerText = "Περιμένετε...";
 
             try {
                 const response = await fetch('/api/reserve-euroleague-select', {
@@ -399,7 +663,7 @@
             const btn = document.getElementById('btn-laliga-select');
             if (!btn) return;
             btn.disabled = true;
-            btn.innerText = "Παρακαλώ περιμένετε...";
+            btn.innerText = "Περιμένετε...";
 
             try {
                 const response = await fetch('/api/reserve-laliga-select', {
