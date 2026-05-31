@@ -137,7 +137,7 @@
                 // Χτυπάμε το GET του νέου endpoint
                 const response = await fetch('/api/reserve-megabox'); 
                 const data = await response.json();
-                const realLiveStock = data.stock !== undefined ? data.stock : 18;
+                const realLiveStock = data.stock !== undefined ? data.stock : 100;
 
                 if (realLiveStock <= 0) {
                     btnMegabox.disabled = true;
