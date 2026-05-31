@@ -10,37 +10,55 @@
         body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
 
         /* HEADER & NAVIGATION */
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; }
-        .playful-logo { font-family: 'Comic Sans MS', sans-serif; font-size: 28px; font-weight: bold; }
-        .playful-logo span { color: #ff0000; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
+        .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
+        .main-header nav a:hover { color: #ff0000; }
+        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+        .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
 
-        .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+        /* RIGHT SIDEBAR */
+        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
+        .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .right-side-panel a { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; }
+        .right-side-panel a:hover { color: #ff0000; transform: scale(1.1); }
+        .cart-container { position: relative; }
+        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+
+        /* CONTAINER & GRID */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         .main-banner { width: 100%; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-
         .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .team-card { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; transition: 0.3s; }
+        .team-card:hover { border-color: #ff0000; }
         .team-card img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; }
         .team-name { font-size: 13px; font-weight: bold; margin-bottom: 8px; min-height: 35px; }
-        .team-price { color: #ff0000; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
+        .team-price { color: #ff0000; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
 
-        .add-btn { background: #ff0000; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .add-btn:hover:not(:disabled) { background: #cc0000; }
-        .add-btn:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
-        
-        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background: rgba(0,0,0,0.9); border-left: 2px solid #ff0000; display: flex; flex-direction: column; align-items: center; padding: 25px 0; z-index: 100; }
-        .cart-count { background: #ff0000; color: white; padding: 2px 6px; border-radius: 50%; font-size: 10px; position: absolute; top: -5px; right: -5px; }
+        .add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
+        .add-btn:hover:not(:disabled) { background-color: #ff0000; }
+        .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
     </style>
 </head>
 <body>
 
     <aside class="right-side-panel">
-        <a href="../checkout.html" style="color: white; position: relative;"><i class="fas fa-shopping-cart"></i><span class="cart-count" id="global-cart-count">0</span></a>
+        <div class="panel-top">
+            <a href="../checkout.html" title="Καλάθι Αγορών" class="cart-container">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="global-cart-count">0</span>
+            </a>
+        </div>
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
     </aside>
 
     <header class="main-header">
-        <nav><a href="../boxesOrder.html" style="color:white; text-decoration:none;">BOXES</a></nav>
+        <nav><a href="../boxesOrder.html">BOXES</a> <a href="../breakOrder.html">BREAKS</a> <a href="../shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a></nav>
         <div class="playful-logo">Minoan<span>Hobby</span></div>
-        <nav><a href="../breakOrder.html" style="color:white; text-decoration:none;">BREAKS</a></nav>
+        <nav><a href="../howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a> <a href="../terms.html">ΟΡΟΙ</a> <a href="../newUpdate.html">ΝΕΑ</a></nav>
     </header>
 
     <main class="container">
@@ -50,28 +68,28 @@
 
     <script>
         const euroleagueTeams = [
-            { id: 1, name: "Anadolu Efes Istanbul", price: 25.00, logo: "images/imageAna.png" },
+            { id: 1, name: "Anadolu Efes", price: 25.00, logo: "images/imageAna.png" },
             { id: 2, name: "AS Monaco", price: 30.00, logo: "images/imageMon.png" },
-            { id: 3, name: "Crvena Zvezda Meridianbet Belgrade", price: 20.00, logo: "images/imageZve.png" },
-            { id: 4, name: "Dubai Basketball", price: 20.00, logo: "images/imageDub.png" },
-            { id: 5, name: "EA7 Emporio Armani Milan", price: 25.00, logo: "images/imageMil.png" },
+            { id: 3, name: "Crvena Zvezda", price: 20.00, logo: "images/imageZve.png" },
+            { id: 4, name: "Dubai BC", price: 20.00, logo: "images/imageDub.png" },
+            { id: 5, name: "Olimpia Milan", price: 25.00, logo: "images/imageMil.png" },
             { id: 6, name: "FC Barcelona", price: 50.00, logo: "images/imageBar.png" },
-            { id: 7, name: "FC Bayern Munich", price: 20.00, logo: "images/imageBay.png" },
-            { id: 8, name: "Fenerbahce Beko Istanbul", price: 35.00, logo: "images/imageFen.png" },
-            { id: 9, name: "Hapoel IBI Tel Aviv", price: 20.00, logo: "images/imageHap.png" },
-            { id: 10, name: "Kosner Baskonia Vitoria-Gasteiz", price: 30.00, logo: "images/imageBasc.png" },
-            { id: 11, name: "LDLC ASVEL Villeurbanne", price: 70.00, logo: "images/imageVil.png" },
-            { id: 12, name: "Maccabi Rapyd Tel Aviv", price: 35.00, logo: "images/imageMac.png" },
-            { id: 13, name: "Olympiacos Piraeus", price: 70.00, logo: "images/imageOly.png" },
-            { id: 14, name: "Panathinaikos AKTOR Athens", price: 110.00, logo: "images/imagePan.png" },
+            { id: 7, name: "Bayern Munich", price: 20.00, logo: "images/imageBay.png" },
+            { id: 8, name: "Fenerbahce", price: 35.00, logo: "images/imageFen.png" },
+            { id: 9, name: "Hapoel Tel Aviv", price: 20.00, logo: "images/imageHap.png" },
+            { id: 10, name: "Baskonia", price: 30.00, logo: "images/imageBasc.png" },
+            { id: 11, name: "ASVEL", price: 70.00, logo: "images/imageVil.png" },
+            { id: 12, name: "Maccabi Tel Aviv", price: 35.00, logo: "images/imageMac.png" },
+            { id: 13, name: "Olympiacos", price: 70.00, logo: "images/imageOly.png" },
+            { id: 14, name: "Panathinaikos", price: 110.00, logo: "images/imagePan.png" },
             { id: 15, name: "Paris Basketball", price: 25.00, logo: "images/imagePar.png" },
-            { id: 16, name: "Partizan Mozzart Bet Belgrade", price: 50.00, logo: "images/imagePart.png" },
+            { id: 16, name: "Partizan", price: 50.00, logo: "images/imagePart.png" },
             { id: 17, name: "Real Madrid", price: 115.00, logo: "images/imageMad.png" },
             { id: 18, name: "Virtus Bologna", price: 30.00, logo: "images/imageBol.png" },
             { id: 19, name: "Valencia Basket", price: 35.00, logo: "images/imageVal.png" },
             { id: 20, name: "Zalgiris Kaunas", price: 25.00, logo: "images/imageZal.png" },
-            { id: 21, name: "Olympiacos Piraeus LEGEND", price: 100.00, logo: "images/imageOly.png" },
-            { id: 22, name: "Panathinaikos AKTOR Athens LEGEND", price: 150.00, logo: "images/imagePan.png" },
+            { id: 21, name: "Olympiacos Legend", price: 100.00, logo: "images/imageOly.png" },
+            { id: 22, name: "Panathinaikos Legend", price: 150.00, logo: "images/imagePan.png" },
             { id: 23, name: "CSKA Moscow", price: 50.00, logo: "images/imageCska.png" }
         ];
 
@@ -86,13 +104,18 @@
                 </div>
             `).join('');
             checkLocks();
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            document.getElementById('global-cart-count').innerText = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
         }
 
         async function checkLocks() {
             try {
                 const response = await fetch('/api/reserve-euroleague');
                 const data = await response.json();
-                
                 euroleagueTeams.forEach(team => {
                     const btn = document.getElementById(`btn-${team.id}`);
                     if (data.locked.includes(team.id)) {
@@ -103,21 +126,19 @@
                         btn.innerText = "Επιλογή";
                     }
                 });
-            } catch (e) { console.error("Σφάλμα σύνδεσης με server:", e); }
+            } catch (e) { console.error(e); }
         }
 
         async function addToCart(teamId) {
             const btn = document.getElementById(`btn-${teamId}`);
             btn.disabled = true;
             btn.innerText = "Αναμονή...";
-
             try {
                 const res = await fetch('/api/reserve-euroleague', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ teamId, action: 'add' })
                 });
-
                 if (res.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const team = euroleagueTeams.find(t => t.id === teamId);
@@ -125,17 +146,12 @@
                     localStorage.setItem('cart', JSON.stringify(cart));
                     location.href = "../checkout.html";
                 } else {
-                    alert("Η ομάδα επιλέχθηκε μόλις τώρα από άλλον χρήστη!");
+                    alert("Η ομάδα επιλέχθηκε μόλις τώρα!");
                     checkLocks();
                 }
-            } catch(e) { 
-                alert("Σφάλμα σύνδεσης");
-                btn.disabled = false;
-                btn.innerText = "Επιλογή";
-            }
+            } catch(e) { btn.disabled = false; btn.innerText = "Επιλογή"; }
         }
 
-        // Αυτόματη ανανέωση κάθε 5 δευτερόλεπτα για ενημέρωση των slots
         setInterval(checkLocks, 5000);
         window.onload = renderTeams;
     </script>
