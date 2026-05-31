@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Megabox Break - MinoanHobby</title>
+    <title>Ducks Break - MinoanHobby</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -13,106 +13,69 @@
         .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
         .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; letter-spacing: 1px; transition: color 0.3s; }
         .main-header nav a:hover { color: #ff0000; }
-        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
         .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
 
         /* RIGHT SIDEBAR */
         .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
-        .panel-top { display: flex; flex-direction: column; align-items: center; gap: 25px; }
-        .panel-bottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .right-side-panel a, .right-side-panel .lang-selector { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; position: relative; }
-        .right-side-panel a:hover, .right-side-panel .lang-selector:hover { color: #ff0000; transform: scale(1.1); }
-        .cart-container { position: relative; }
-        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+        .right-side-panel a { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: 0.3s; }
+        .right-side-panel a:hover { color: #ff0000; }
+        .cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; position: absolute; top: -8px; right: -10px; }
 
-        /* CONTAINER & CARDS */
-        .shipping-container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
-        .page-title { color: #ff0000; font-size: 32px; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 10px; }
-        .page-subtitle { text-align: center; color: #cbd5e1; margin-bottom: 40px; font-size: 15px; }
+        /* MAIN CONTENT */
+        .product-wrapper { max-width: 900px; margin: 50px auto; padding: 20px; }
+        .shipping-grid { display: flex; justify-content: center; }
+        .shipping-card { background-color: #0b132b; border: 1px solid rgba(255, 0, 0, 0.3); border-radius: 12px; padding: 40px; width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .shipping-grid { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
-        .shipping-card { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s; }
+        .card-image-container { font-size: 80px; color: #ff0000; text-align: center; margin-bottom: 20px; }
+        .card-title { font-size: 24px; color: #ffffff; margin-bottom: 10px; }
+        .card-price { font-size: 28px; color: #ff0000; font-weight: bold; margin-bottom: 10px; }
+        .card-desc { color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; }
         
-        .card-icon { font-size: 45px; color: #ff0000; margin-bottom: 15px; }
-        .card-title { font-size: 20px; color: #ffffff; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-price { font-size: 32px; color: #ff0000; font-weight: bold; margin-bottom: 5px; }
-        .stock-indicator { font-size: 13px; color: #22c55e; font-weight: 600; margin-bottom: 15px; }
+        .stock-indicator { font-size: 14px; font-weight: bold; margin-bottom: 15px; color: #ffffff; }
         .stock-indicator.out { color: #ef4444; }
-        .card-desc { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
-
-        /* BUTTONS */
-        .add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 15px; text-transform: uppercase; transition: 0.3s; }
-        .add-btn:hover:not(:disabled) { background-color: #ff0000; box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
-        .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
-        .remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
-        .remove-link:hover { text-decoration: underline; }
-        /* Πρόσθεσε αυτά στο style σου */
-        .card-image-container { 
-            width: 100%; 
-            height: 160px; 
-            margin-bottom: 15px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            overflow: hidden; 
-            border-radius: 8px; 
-        }
-        .card-image-container img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-        }
+        
+        .add-btn { background-color: #ff0000; color: #ffffff; border: none; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 8px; width: 100%; transition: 0.3s; }
+        .add-btn:hover:not(:disabled) { background-color: #cc0000; }
+        .add-btn:disabled { background-color: #475569; cursor: not-allowed; }
+        
+        .remove-link { display: block; text-align: center; color: #94a3b8; cursor: pointer; margin-top: 10px; font-size: 13px; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="../checkout.html" title="Καλάθι Αγορών" class="cart-container">
+            <a href="../checkout.html" class="cart-container" style="position:relative;">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count" id="global-cart-count">0</span>
             </a>
-            <div class="lang-selector">🇬🇷<br>ΕΛ</div>
         </div>
         <div class="panel-bottom">
-            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/minoanhobby/"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie"><i class="fab fa-youtube"></i></a>
         </div>
     </aside>
 
-     <header class="main-header">
-        <nav class="nav-left">
-            <a href="../boxesOrder.html">BOXES</a>
-            <a href="../breakOrder.html">BREAKS</a>
-            <a href="../shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
-        </nav>
+    <header class="main-header">
+        <nav><a href="../boxesOrder.html">BOXES</a> <a href="../breakOrder.html">BREAKS</a> <a href="../shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a></nav>
         <div class="playful-logo">Minoan<span>Hobby</span></div>
-        <nav class="nav-right">
-            <a href="../howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
-            <a href="../terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
-            <a href="../newUpdate.html">ΜΑΘΕΤΕ ΝΕΑ</a>
-        </nav>
+        <nav><a href="../howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a> <a href="../terms.html">ΟΡΟΙ</a> <a href="../newUpdate.html">ΝΕΑ</a></nav>
     </header>
 
-
-    <main class="shipping-container">
-        <h1 class="page-title">Megabox Random Team</h1>
-        <p class="page-subtitle">Κλείστε τη θέση σας στο Half Case Random Team Break.</p>
-
+    <main class="product-wrapper">
         <div class="shipping-grid">
             <div class="shipping-card">
                 <div>
-                    <div class="card-image-container">
-                    <img src="../images/megabox-photo.png" alt="Megabox">
-                    </div>
-                    <h2 class="card-title">2025-26 Panini Contenders Euroleague Basketball Mega Box Half Case Break</h2>
-                    <div class="card-price">27.49 €</div>
-                    <div id="megabox-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
-                    <p class="card-desc">Συμμετοχή στο μεγάλο Megabox Break. Live απόθεμα 18 slots.</p>
+                    <div class="card-image-container"><i class="fas fa-box-open"></i></div>
+                    <h2 class="card-title">Ducks Live Break</h2>
+                    <div class="card-price">9.99 €</div>
+                    <div id="ducks-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+                    <p class="card-desc">Spot 1: Olympiakos | Spot 2: Pao | Spot 3: ASVEL. Μην χάσετε την ευκαιρία!</p>
                 </div>
                 <div>
-                    <button class="add-btn" id="btn-megabox" onclick="addMegaboxToCart()">Προσθηκη στο καλαθι</button>
-                    <div id="remove-megabox-box"></div>
+                    <button class="add-btn" id="btn-ducks" onclick="addDucksToCart()">Προσθηκη στο καλαθι</button>
+                    <div id="remove-ducks-box"></div>
                 </div>
             </div>
         </div>
@@ -121,112 +84,61 @@
     <script>
         async function updatePageState() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
-            const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
-            const badge = document.getElementById('global-cart-count');
-            if (badge) badge.innerText = totalItems;
+            document.getElementById('global-cart-count').innerText = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
 
-            const megaboxInCart = cart.find(item => item.name === 'Megabox Half Case');
-            const userQty = megaboxInCart ? megaboxInCart.qty : 0;
-
-            const btnMegabox = document.getElementById('btn-megabox');
-            const stockText = document.getElementById('megabox-stock-text');
-            const removeBox = document.getElementById('remove-megabox-box');
+            const ducksInCart = cart.find(item => item.name === 'Ducks');
+            const userQty = ducksInCart ? ducksInCart.qty : 0;
+            const btnDucks = document.getElementById('btn-ducks');
+            const stockText = document.getElementById('ducks-stock-text');
+            const removeBox = document.getElementById('remove-ducks-box');
 
             try {
-                // Χτυπάμε το GET του νέου endpoint
-                const response = await fetch('/api/reserve-megabox'); 
+                // Αντικαταστήστε το URL με το δικό σας API
+                const response = await fetch('/api/reserve-ducks'); 
                 const data = await response.json();
-                const realLiveStock = data.stock !== undefined ? data.stock : 100;
+                const realLiveStock = data.stock !== undefined ? data.stock : 10;
 
                 if (realLiveStock <= 0) {
-                    btnMegabox.disabled = true;
-                    btnMegabox.innerText = "Εξαντλήθηκε";
+                    btnDucks.disabled = true;
+                    btnDucks.innerText = "Εξαντλήθηκε";
                     stockText.className = "stock-indicator out";
                     stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                    removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeMegaboxFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+                    removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>` : "";
                 } else if (userQty > 0) {
-                    btnMegabox.disabled = false;
-                    btnMegabox.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
-                    stockText.className = "stock-indicator";
-                    stockText.innerText = `✔️ Live Απόθεμα στο Redis: ${realLiveStock} διαθέσιμα`;
-                    removeBox.innerHTML = `<span class="remove-link" onclick="removeMegaboxFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
+                    btnDucks.disabled = false;
+                    btnDucks.innerText = `Προσθήκη (+1) | Έχετε: ${userQty}`;
+                    stockText.innerText = `✔️ Διαθέσιμα: ${realLiveStock}`;
+                    removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                 } else {
-                    btnMegabox.disabled = false;
-                    btnMegabox.innerText = "Προσθηκη στο καλαθι";
-                    stockText.className = "stock-indicator";
+                    btnDucks.disabled = false;
+                    btnDucks.innerText = "Προσθηκη στο καλαθι";
                     stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
                     removeBox.innerHTML = "";
                 }
             } catch (error) {
-                console.error("Error loading stock:", error);
                 stockText.innerText = "Σφάλμα φόρτωσης στοκ";
             }
         }
 
-        async function addMegaboxToCart() {
-            const btnMegabox = document.getElementById('btn-megabox');
-            btnMegabox.disabled = true;
-            btnMegabox.innerText = "Παρακαλώ περιμένετε...";
-
+        async function addDucksToCart() {
             try {
-                const response = await fetch('/api/reserve-megabox', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
-
-                const data = await response.json();
-
+                // API Call για κράτηση στοκ
+                const response = await fetch('/api/reserve-ducks', { method: 'POST', body: JSON.stringify({ action: 'add' }) });
                 if (response.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const existingItem = cart.find(item => item.name === 'Megabox Half Case');
-
-                    if (existingItem) {
-                        existingItem.qty += 1;
-                    } else {
-                        cart.push({ name: 'Megabox Half Case', price: 27.49, qty: 1 });
-                    }
-
+                    const item = cart.find(i => i.name === 'Ducks');
+                    item ? item.qty++ : cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
-                } else {
-                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
                 }
-            } catch (error) {
-                console.error("Error:", error);
-            } finally {
-                await updatePageState();
-            }
+            } catch (e) { alert("Σφάλμα σύνδεσης"); }
+            updatePageState();
         }
 
-        async function removeMegaboxFromCart() {
+        async function removeDucksFromCart() {
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const megaboxItem = cart.find(item => item.name === 'Megabox Half Case');
-            
-            if (!megaboxItem) return;
-
-            const btnMegabox = document.getElementById('btn-megabox');
-            btnMegabox.disabled = true;
-
-            try {
-                for (let i = 0; i < megaboxItem.qty; i++) {
-                    await fetch('/api/reserve-megabox', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-                cart = cart.filter(item => item.name !== 'Megabox Half Case');
-                localStorage.setItem('cart', JSON.stringify(cart));
-            } catch (error) {
-                console.error("Error:", error);
-            } finally {
-                await updatePageState();
-            }
+            cart = cart.filter(i => i.name !== 'Ducks');
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updatePageState();
         }
 
         window.onload = updatePageState;
