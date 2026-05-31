@@ -60,34 +60,41 @@ export default async function handler(req, res) {
 
         const data = await vivaResponse.json();
 
-        if (data.OrderCode) {
-            // ΑΠΟΘΗΚΕΥΣΗ ΣΤΟΙΧΕΙΩΝ ΠΕΛΑΤΗ ΓΙΑ ΤΟ WEBHOOK (Σε περίπτωση επιτυχίας)
+      if (data.OrderCode) {
+            // ΑΠΟΘΗΚΕΥΣΗ ΣΤΟΙΧΕΙΩΝ ΠΕΛΑΤΗ ΓΙΑ ΤΟ WEBHOOK
             const customerData = {
                 firstName, lastName, email, phone, address, city, zip,
                 teamName: teamId,
                 price: amount
             };
             await redis.set(`viva:order:details:${data.OrderCode}`, JSON.stringify(customerData), 'EX', 3600);
-
+            
             // Logic για το stock
-            if (teamId.toLowerCase() === 'ducks') {
+            const lowerTeamId = String(teamId).toLowerCase();
+
+            if (lowerTeamId === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (teamId.toLowerCase() === 'megabox half case') {
+            } else if (lowerTeamId === 'megabox half case') {
                 await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (teamId.toLowerCase() === '2025-26 panini euroleague contenders basketball mega box') {
+            } else if (lowerTeamId === '2025-26 panini euroleague contenders basketball mega box') {
                 await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (teamId.toLowerCase() === 'panini euroleague select box') {
+            } else if (lowerTeamId === 'panini euroleague select box') {
                 await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else if (teamId.toLowerCase() === 'panini la liga select box') {
+            } else if (lowerTeamId === 'panini la liga select box') {
                 await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
-            } else {
+            } 
+            // ΕΔΩ ΕΙΝΑΙ Η ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟ EUROLEAGUE SELECT (ΑΡΙΘΜΟΙ)
+            else if (!isNaN(parseInt(teamId)) && parseInt(teamId) >= 1 && parseInt(teamId) <= 23) {
+                // Αποθηκεύουμε το mapping για να ξέρει το webhook ποιο ID να κάνει sold στο stock
+                await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 3600);
+            } 
+            else {
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
             }
             return res.status(200).json(data);
         } else {
             return res.status(400).json({ error: "Αποτυχία Viva Wallet", details: data });
         }
-
     } catch (error) {
         console.error("Vercel Function Error:", error);
         return res.status(500).json({ error: error.message });
