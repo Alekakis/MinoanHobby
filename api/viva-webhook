@@ -26,11 +26,9 @@ export default async function handler(req, res) {
 
         // --- ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ ---
         if (eventTypeId === 1796 || statusId === 'F') { 
-            
             const orderDetailsRaw = await redis.get(`viva:order:details:${orderCode}`);
             const details = orderDetailsRaw ? JSON.parse(orderDetailsRaw) : {};
 
-            // Αποστολή Email μέσω Web3Forms
             await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -39,7 +37,7 @@ export default async function handler(req, res) {
                     subject: "💰 Νέα Παραγγελία: " + (details.firstName || "") + " " + (details.lastName || ""),
                     from_name: "Minoan Hobby System",
                     "Order Code": orderCode,
-                    "Ονοματεπωμυμο": (details.firstName || "") + " " + (details.lastName || ""),
+                    "Ονοματεπώνυμο": (details.firstName || "") + " " + (details.lastName || ""),
                     "Email": details.email || "Δ/Υ",
                     "Τηλέφωνο": details.phone || "Δ/Υ",
                     "Είδος/Ομάδα": details.teamName || "Άγνωστο",
@@ -47,22 +45,25 @@ export default async function handler(req, res) {
                 })
             });
 
-            // 1. Διαχείριση Stock για Euroleague Select (Αριθμοί)
+            // 1. Stock Euroleague
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
             if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.set(`team:stock:${teamId}`, 0);
                 await redis.del(`viva:mapping:team:${orderCode}`);
             }
 
-            // 2. Διαχείριση Stock για Ducks
+            // 2. Stock Ducks
             const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
             if (ducksQty) {
-                const currentDucks = parseInt(await redis.get('ducks')) || 0;
-                await redis.set('ducks', Math.max(0, currentDucks)); 
                 await redis.del(`viva:pending:ducks:${orderCode}`);
             }
 
-            // Καθαρισμός γενικών δεδομένων
+            // 3. Stock Megabox
+            const megaboxQty = await redis.get(`viva:pending:megabox:${orderCode}`);
+            if (megaboxQty) {
+                await redis.del(`viva:pending:megabox:${orderCode}`);
+            }
+
             await redis.del(`viva:order:details:${orderCode}`);
             return res.status(200).send('OK');
         }
@@ -70,18 +71,23 @@ export default async function handler(req, res) {
         // --- ΑΚΥΡΩΣΗ / ΑΠΟΤΥΧΙΑ ---
         if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
             const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
-            
-            // Επαναφορά stock αν ήταν Euroleague Select
             if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.set(`team:stock:${teamId}`, 1);
                 await redis.del(`viva:mapping:team:${orderCode}`);
             }
 
-            // Επαναφορά stock αν ήταν Ducks (αν είχες κάνει pre-decr στο checkout)
+            // Επαναφορά Ducks
             const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
             if (ducksQty) {
                 await redis.incrby('ducks', parseInt(ducksQty));
                 await redis.del(`viva:pending:ducks:${orderCode}`);
+            }
+
+            // Επαναφορά Megabox
+            const megaboxQty = await redis.get(`viva:pending:megabox:${orderCode}`);
+            if (megaboxQty) {
+                await redis.incrby('product:stock:megabox', parseInt(megaboxQty));
+                await redis.del(`viva:pending:megabox:${orderCode}`);
             }
 
             await redis.del(`viva:order:details:${orderCode}`);
@@ -91,4 +97,7 @@ export default async function handler(req, res) {
         return res.status(200).send('Event received');
 
     } catch (error) {
-        console.error("Webhook Error:",
+        console.error("Webhook Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+}
