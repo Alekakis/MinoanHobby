@@ -1,35 +1,55 @@
-const express = require('express');
-const router = express.Router();
+import Redis from 'ioredis';
 
-// GET: Επιστρέφει την κατάσταση όλων των ομάδων
-router.get('/reserve-euroleagueSelect', async (req, res) => {
-    // Εδώ δεν χρειαζόμαστε πλέον map, απλά επιστρέφουμε ποιες είναι κλειδωμένες
-    const keys = await redis.keys('team:lock:*');
-    const lockedIds = keys.map(key => parseInt(key.split(':')[2]));
-    res.json({ locked: lockedIds });
-});
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
-// POST: Διαχείριση κράτησης για συγκεκριμένη ομάδα
-router.post('/reserve-euroleagueSelect', async (req, res) => {
-    const { teamId, action } = req.body;
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (action === 'add') {
-        // 1. Ελέγχουμε αν έχει ήδη πουληθεί (μονιμοποιηθεί)
-        const isSold = await redis.get(`team:sold:${teamId}`);
-        if (isSold) return res.status(400).json({ error: "Η ομάδα έχει εξαντληθεί." });
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
-        // 2. Προσπαθούμε να κλειδώσουμε ΜΟΝΟ αυτή την ομάδα (NX = Not Exists)
-        // Το κλειδί είναι μοναδικό: team:lock:1, team:lock:2, κλπ.
-        const locked = await redis.set(`team:lock:${teamId}`, 'locked', 'EX', 300, 'NX');
-        
-        if (!locked) return res.status(400).json({ error: "Η ομάδα δεσμεύτηκε μόλις τώρα." });
-        
-        return res.json({ success: true });
+    try {
+        // --- GET: Επιστροφή κατάστασης όλων των ομάδων ---
+        if (req.method === 'GET') {
+            // Παίρνουμε το stock για όλες τις ομάδες από 1 έως 23
+            let status = {};
+            for (let i = 1; i <= 23; i++) {
+                const stock = await redis.get(`team:stock:${i}`);
+                status[i] = stock !== null ? parseInt(stock) : 1; // 1 είναι το αρχικό stock
+            }
+            return res.status(200).json({ stocks: status });
+        }
+
+        // --- POST: Αλλαγή στοκ για συγκεκριμένη ομάδα ---
+        if (req.method === 'POST') {
+            let body = req.body;
+            if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
+            const { teamId, action } = body || {};
+
+            if (!teamId) return res.status(400).json({ error: 'Missing teamId' });
+
+            const KEY = `team:stock:${teamId}`;
+            
+            // Αρχικοποίηση αν δεν υπάρχει (stock 1)
+            const currentStock = parseInt(await redis.get(KEY)) ?? 1;
+
+            if (action === 'add') {
+                if (currentStock <= 0) return res.status(400).json({ error: 'Εξαντλήθηκε!' });
+                await redis.decr(KEY); // Γίνεται 0
+                return res.status(200).json({ success: true, stock: 0 });
+            } 
+            
+            if (action === 'remove') {
+                await redis.set(KEY, 1); // Επαναφορά στο 1
+                return res.status(200).json({ success: true, stock: 1 });
+            }
+
+            return res.status(400).json({ error: 'Invalid action' });
+        }
+
+        return res.status(405).json({ error: 'Method not allowed' });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
     }
-
-    if (action === 'remove') {
-        // Διαγράφουμε το lock της συγκεκριμένης ομάδας
-        await redis.del(`team:lock:${teamId}`);
-        return res.json({ success: true });
-    }
-});
+}
