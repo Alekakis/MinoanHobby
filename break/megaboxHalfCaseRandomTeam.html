@@ -46,6 +46,22 @@
         .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
         .remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
         .remove-link:hover { text-decoration: underline; }
+        /* Πρόσθεσε αυτά στο style σου */
+        .card-image-container { 
+            width: 100%; 
+            height: 160px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            border-radius: 8px; 
+        }
+        .card-image-container img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
     </style>
 </head>
 <body>
@@ -86,7 +102,9 @@
         <div class="shipping-grid">
             <div class="shipping-card">
                 <div>
-                    <div class="card-image-container"><img src="../images/megabox-photo.png" alt="Megabox"></div>
+                    <div class="card-image-container">
+                    <img src="../images/megabox-photo.png" alt="Megabox">
+                    </div>
                     <h2 class="card-title">Megabox Half Case</h2>
                     <div class="card-price">27.49 €</div>
                     <div id="megabox-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
