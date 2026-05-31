@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* Μηδενισμός περιθωρίων και βασικές ρυθμίσεις */
         * {
             margin: 0;
             padding: 0;
@@ -16,20 +17,20 @@
         }
 
         body {
-            background-color: #0d1b2a; 
+            background-color: #0d1b2a; /* Σκούρο Μπλε φόντο */
             color: #ffffff;
             overflow-x: hidden;
-            padding-right: 60px; 
+            padding-right: 60px; /* Χώρος στα δεξιά για το πλαϊνό μενού */
         }
 
-        /* MAIN HEADER */
+        /* MAIN HEADER & NAVIGATION */
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 40px;
-            background-color: #0b132b; 
-            border-bottom: 2px solid #ff0000; 
+            background-color: #0b132b; /* Blue-black */
+            border-bottom: 2px solid #ff0000; /* Έντονο κόκκινο border */
             position: relative;
             z-index: 10;
         }
@@ -48,6 +49,7 @@
             color: #ff0000;
         }
 
+        /* ΠΑΙΧΝΙΔΙΑΡΙΚΟ STYLE ΓΙΑ ΤΑ ΓΡΑΜΜΑΤΑ */
         .playful-logo {
             font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
             font-size: 28px;
@@ -185,6 +187,7 @@
             box-shadow: 0 10px 25px rgba(255, 0, 0, 0.2);
         }
 
+        /* Φωτογραφία Προϊόντος */
         .product-image-wrapper {
             width: 100%;
             height: 280px;
@@ -224,6 +227,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
+        /* Πληροφορίες Προϊόντος */
         .product-info {
             padding: 20px;
             display: flex;
@@ -256,6 +260,7 @@
             margin-bottom: 15px;
         }
 
+        /* Κουμπί */
         .product-btn {
             width: 100%;
             background-color: transparent;
@@ -302,7 +307,6 @@
 </head>
 <body>
 
-    <!-- ΠΛΑΪΝΟ ΜΕΝΟΥ -->
     <aside class="right-side-panel">
         <div class="panel-top">
             <a href="checkout.html" class="cart-container" title="Καλάθι Αγορών">
@@ -313,37 +317,37 @@
                 🇬🇷<br>ΕΛ
             </div>
         </div>
+
         <div class="panel-bottom">
             <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
         </div>
     </aside>
 
-    <!-- HEADER -->
     <header class="main-header">
         <nav class="nav-left">
             <a href="boxesOrder.html" style="color: #ff0000;">BOXES</a>
             <a href="breakOrder.html">BREAKS</a>
             <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
+        
         <div class="playful-logo">
             Minoan<span>Hobby</span>
         </div>
+
         <nav class="nav-right">
             <a href="#">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
-            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΣ</a>
+            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
             <a href="#">ΜΑΘΕΤΕ ΝΕΑ</a>
         </nav>
     </header>
 
-    <!-- ΚΥΡΙΩΣ ΠΕΡΙΕΧΟΜΕΝΟ -->
     <main class="products-section">
         <h1 class="section-title">Διαθέσιμα Πακέτα</h1>
         <p class="section-subtitle">Επίλεξε το αγαπημένο σου κουτί και εξασφάλισε τη θέση σου τώρα!</p>
 
         <div class="products-grid">
 
-            <!-- ΠΡΟΪΟΝ 1: EUROLEAGUE MEGA BOX (Διορθωμένη τιμή: 54.90 €) -->
             <div class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">Live Box</span>
@@ -351,7 +355,7 @@
                 </div>
                 <div class="product-info">
                     <div>
-                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Mega Box</h2>
+                        <h2 class="product-title">2025-26 Panini EuroLeague Contenders Basketball Mega Box</h2>
                         <div class="product-price">54.90 €</div>
                         <div id="euro-mega-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
                     </div>
@@ -362,7 +366,6 @@
                 </div>
             </div>
 
-            <!-- ΠΡΟΪΟΝ 2: EUROLEAGUE SELECT BOX -->
             <div class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">Premium Box</span>
@@ -381,7 +384,6 @@
                 </div>
             </div>
 
-            <!-- ΠΡΟΪΟΝ 3: LA LIGA SELECT BOX -->
             <div class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">New Release</span>
@@ -404,16 +406,16 @@
     </main>
 
     <script>
-        // ΣΥΓΧΡΟΝΙΣΜΟΣ ΚΑΙ LIVE ΕΝΗΜΕΡΩΣΗ ΟΛΩΝ ΤΩΝ ΠΡΟΪΟΝΤΩΝ
+        // ΣΥΓΧΡΟΝΙΣΜΟΣ ΚΑΙ LIVE ΕΝΗΜΕΡΩΣΗ ΣΕΛΙΔΑΣ
         async function updatePageState() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
-            // 1. Ενημέρωση του Badge στο Καλάθι (Συνολικά κομμάτια)
+            // 1. Ενημέρωση του Global Badge στο καλάθι
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
             const badge = document.getElementById('global-cart-count');
             if (badge) badge.innerText = totalItems;
 
-            // --- 2. LIVE STOCK & UI: EUROLEAGUE MEGA BOX ---
+            // --- 2. LIVE STOCK ΓΙΑ EUROLEAGUE MEGA BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Contenders Mega Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -451,7 +453,7 @@
                 console.error("Error loading Euroleague Mega stock:", error);
             }
 
-            // --- 3. LIVE STOCK & UI: EUROLEAGUE SELECT BOX ---
+            // --- 3. LIVE STOCK ΓΙΑ EUROLEAGUE SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'EuroLeague Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -489,7 +491,7 @@
                 console.error("Error loading Euroleague Select stock:", error);
             }
 
-            // --- 4. LIVE STOCK & UI: LA LIGA SELECT BOX ---
+            // --- 4. LIVE STOCK ΓΙΑ LA LIGA SELECT BOX ---
             try {
                 const itemInCart = cart.find(item => item.name === 'La Liga Select Box');
                 const userQty = itemInCart ? itemInCart.qty : 0;
@@ -717,7 +719,7 @@
             }
         }
 
-        // Εκτέλεση ελέγχου με το που ανοίγει η σελίδα
+        // Εκτέλεση κατά το άνοιγμα της σελίδας
         window.onload = updatePageState;
     </script>
 </body>
