@@ -1,48 +1,51 @@
-// reserve-euroleagueSelect.js
 const express = require('express');
 const router = express.Router();
+// Υποθέτω ότι έχεις ήδη ορίσει το 'redis' client στο πάνω μέρος του αρχείου
+// π.χ. const redis = new Redis(...);
 
-// Σε πραγματική εφαρμογή, αυτά θα βρίσκονται στη βάση δεδομένων ή στο Redis
-// Το 'lockedTeams' αποθηκεύει το ID της ομάδας και τον χρόνο που κλειδώθηκε
-let lockedTeams = new Map(); 
+// Χρόνος δέσμευσης σε δευτερόλεπτα (π.χ. 300 για 5 λεπτά)
+const LOCK_DURATION = 300; 
 
-// Χρόνος δέσμευσης σε milliseconds (π.χ. 5 λεπτά)
-const LOCK_DURATION = 300000; 
-
-// GET: Επιστρέφει την κατάσταση όλων των slots
-router.get('/reserve-euroleague', (req, res) => {
-    // Καθαρισμός ληγμένων κρατήσεων
-    const now = Date.now();
-    for (let [teamId, timestamp] of lockedTeams) {
-        if (now - timestamp > LOCK_DURATION) {
-            lockedTeams.delete(teamId);
-        }
+// GET: Επιστρέφει την κατάσταση όλων των δεσμευμένων slots
+router.get('/reserve-euroleague', async (req, res) => {
+    try {
+        // Παίρνουμε όλα τα keys που αφορούν locks
+        const keys = await redis.keys('team:lock:*');
+        // Εξάγουμε το ID της ομάδας από το κλειδί (π.χ. team:lock:1 -> 1)
+        const lockedIds = keys.map(key => parseInt(key.split(':')[2]));
+        
+        res.json({ locked: lockedIds });
+    } catch (error) {
+        res.status(500).json({ error: "Σφάλμα ανάκτησης δεδομένων" });
     }
-
-    res.json({
-        locked: Array.from(lockedTeams.keys())
-    });
 });
 
-// POST: Διαχείριση κράτησης ή ακύρωσης
-router.post('/reserve-euroleague', (req, res) => {
+// POST: Διαχείριση κράτησης
+router.post('/reserve-euroleague', async (req, res) => {
     const { teamId, action } = req.body;
 
     if (action === 'add') {
-        // Έλεγχος αν είναι ήδη δεσμευμένη
-        if (lockedTeams.has(teamId)) {
+        // Ελέγχουμε πρώτα αν έχει πουληθεί οριστικά (προαιρετικό, αν αποθηκεύεις sold στο redis)
+        const isSold = await redis.exists(`team:sold:${teamId}`);
+        if (isSold) {
+            return res.status(400).json({ error: "Η ομάδα έχει ήδη πουληθεί!" });
+        }
+
+        // SET με NX: επιτυγχάνει μόνο αν το κλειδί ΔΕΝ υπάρχει ήδη.
+        // Εγγυάται ότι αν 2 άτομα πατήσουν μαζί, ο ένας θα πάρει false.
+        const locked = await redis.set(`team:lock:${teamId}`, 'locked', 'EX', LOCK_DURATION, 'NX');
+        
+        if (!locked) {
             return res.status(400).json({ error: "Η ομάδα έχει ήδη δεσμευτεί από άλλον χρήστη." });
         }
         
-        // Κλείδωμα της ομάδας
-        lockedTeams.set(teamId, Date.now());
-        console.log(`Ομάδα ${teamId} δεσμεύτηκε.`);
+        console.log(`Ομάδα ${teamId} δεσμεύτηκε προσωρινά.`);
         return res.json({ success: true });
     }
 
     if (action === 'remove') {
-        // Απελευθέρωση της ομάδας
-        lockedTeams.delete(teamId);
+        // Απελευθέρωση της ομάδας (μόνο αν δεν έχει πουληθεί)
+        await redis.del(`team:lock:${teamId}`);
         return res.json({ success: true });
     }
 
