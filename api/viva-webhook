@@ -28,11 +28,9 @@ export default async function handler(req, res) {
         // --- ΕΠΙΤΥΧΗΣ ΠΛΗΡΩΜΗ (StatusId: F ή EventTypeId: 1796) ---
         if (eventTypeId === 1796 || statusId === 'F') { 
             
-            // 1. Ανάκτηση όλων των στοιχείων του πελάτη από το Redis
             const orderDetailsRaw = await redis.get(`viva:order:details:${orderCode}`);
             const details = orderDetailsRaw ? JSON.parse(orderDetailsRaw) : {};
 
-            // 2. Σύνθεση μηνύματος για το Web3Forms
             const emailData = {
                 access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
                 subject: "💰 Νέα Παραγγελία: " + (details.firstName || "") + " " + (details.lastName || ""),
@@ -47,32 +45,43 @@ export default async function handler(req, res) {
                 "Κατάσταση": "Η πληρωμή ολοκληρώθηκε επιτυχώς!"
             };
 
-            // 3. Αποστολή στο Web3Forms
             await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(emailData)
             });
 
-            // 4. Οριστικοποίηση stock
-            const teamIdMapped = await redis.get(`viva:mapping:team:${orderCode}`);
-            if (teamIdMapped) {
-                await redis.set(`team:status:${teamIdMapped}`, 'sold');
+            // Οριστικοποίηση stock
+            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
+            if (teamId) {
+                // Αν είναι αριθμός, είναι Euroleague Select -> Μηδενισμός stock στο Redis
+                if (!isNaN(parseInt(teamId))) {
+                    await redis.set(`team:stock:${teamId}`, 0);
+                } else {
+                    // Διαφορετικά είναι κανονικό slot
+                    await redis.set(`team:status:${teamId}`, 'sold');
+                }
                 await redis.del(`viva:mapping:team:${orderCode}`);
             }
 
-            // 5. Καθαρισμός
             await redis.del(`viva:order:details:${orderCode}`);
-            await redis.del(`viva:pending:ducks:${orderCode}`);
-
             return res.status(200).send('OK');
         }
 
         // --- ΑΚΥΡΩΣΗ / ΑΠΟΤΥΧΙΑ ---
         if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
+            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
+            
+            if (teamId) {
+                // Αν ήταν Euroleague Select, ξανακάνουμε το stock 1 (διαθέσιμο)
+                if (!isNaN(parseInt(teamId))) {
+                    await redis.set(`team:stock:${teamId}`, 1);
+                }
+                await redis.del(`viva:mapping:team:${orderCode}`);
+            }
+
             await redis.del(`viva:order:details:${orderCode}`);
-            // (Εδώ προσθέτεις την υπόλοιπη λογική επιστροφής stock αν χρειάζεται)
-            return res.status(200).send('Order Cancelled');
+            return res.status(200).send('Order Cancelled - Stock Released');
         }
 
         return res.status(200).send('Event received');
