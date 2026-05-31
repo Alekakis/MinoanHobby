@@ -22,9 +22,8 @@ export default async function handler(req, res) {
         if (!amount) throw new Error("Missing amount");
         if (!teamId) throw new Error("Missing teamId");
 
-        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks) ---
-        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS (Όχι για Ducks & Megabox) ---
-         if (teamId.toLowerCase() !== 'ducks' && 
+        // --- ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΥΠΟΛΟΙΠΑ ΚΑΝΟΝΙΚΑ SLOTS ---
+        if (teamId.toLowerCase() !== 'ducks' && 
             teamId.toLowerCase() !== 'megabox half case' && 
             teamId.toLowerCase() !== '2025-26 panini euroleague contenders basketball mega box' &&
             teamId.toLowerCase() !== 'panini euroleague select box' &&
@@ -36,6 +35,7 @@ export default async function handler(req, res) {
             
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
         }
+
         // --- ΕΠΙΚΟΙΝΩΝΙΑ ΜΕ VIVA WALLET ---
         const merchantId = 'db03347e-8d36-4139-83cd-d45449e2d44c';
         const apiKey = '05dreaYv174ROJz6NHvqZ4RtO8JU5P';
@@ -60,7 +60,8 @@ export default async function handler(req, res) {
 
         const data = await vivaResponse.json();
 
-       if (data.OrderCode) {
+        // Εδώ ήταν το πρόβλημα - τα άγκιστρα ήταν λάθος
+        if (data.OrderCode) {
             if (teamId.toLowerCase() === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
             } else if (teamId.toLowerCase() === 'megabox half case') {
@@ -70,16 +71,13 @@ export default async function handler(req, res) {
             } else if (teamId.toLowerCase() === 'panini euroleague select box') {
                 await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
             } else if (teamId.toLowerCase() === 'panini la liga select box') {
-                // Νέο pending κλειδί για το La Liga Webhook
                 await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
             } else {
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 120);
             }
-            
             return res.status(200).json(data);
-        }
         } else {
-            // Αποτυχία Viva Wallet -> Αν είναι κανονικό slot, το ξεκλειδώνουμε αμέσως
+            // Αποτυχία Viva Wallet
             if (teamId.toLowerCase() !== 'ducks') {
                 await redis.del(`team:status:${teamId}`);
             }
@@ -89,7 +87,7 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error("Vercel Function Error:", error);
         
-        // Επαναφορά/Καθαρισμός σε περίπτωση κρασαρίσματος
+        // Επαναφορά σε περίπτωση κρασαρίσματος
         if (teamId && teamId.toLowerCase() !== 'ducks') {
             try {
                 await redis.del(`team:status:${teamId}`);
