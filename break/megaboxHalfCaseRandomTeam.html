@@ -119,9 +119,53 @@
     </main>
 
     <script>
+
+        const CART_EXPIRE_TIME = 7 * 60 * 1000;
+
+async function cleanExpiredMegaboxItems() {
+
+    const now = Date.now();
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const validItems = [];
+
+    for (const item of cart) {
+
+        if (
+            item.name === 'Megabox Half Case' &&
+            item.addedAt &&
+            (now - item.addedAt) >= CART_EXPIRE_TIME
+        ) {
+
+            try {
+                for (let i = 0; i < (item.qty || 1); i++) {
+                    await fetch('/api/reserve-megabox', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'remove'
+                        })
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+
+        } else {
+            validItems.push(item);
+        }
+    }
+
+    localStorage.setItem('cart', JSON.stringify(validItems));
+}
         async function updatePageState() {
+            await cleanExpiredMegaboxItems();
+        
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
+                    
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
             const badge = document.getElementById('global-cart-count');
             if (badge) badge.innerText = totalItems;
@@ -184,10 +228,15 @@
 
                     if (existingItem) {
                         existingItem.qty += 1;
+                        existingItem.addedAt = existingItem.addedAt || Date.now();
                     } else {
-                        cart.push({ name: 'Megabox Half Case', price: 27.49, qty: 1 });
+                        cart.push({
+                            name: 'Megabox Half Case',
+                            price: 27.49,
+                            qty: 1,
+                            addedAt: Date.now()
+                        });
                     }
-
                     localStorage.setItem('cart', JSON.stringify(cart));
                     if (
                         !localStorage.getItem(
