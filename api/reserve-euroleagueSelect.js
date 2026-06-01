@@ -40,17 +40,17 @@ export default async function handler(req, res) {
 
            if (action === 'add') {
                 if (currentStock <= 0) {
-                return res.status(400).json({ error: 'Εξαντλήθηκε!' });
+                    return res.status(400).json({ error: 'Εξαντλήθηκε!' });
+                }
+            
+                // Δέσμευση για 7 λεπτά
+                await redis.set(KEY, 0, 'EX', 420);
+            
+                return res.status(200).json({
+                    success: true,
+                    stock: 0
+                });
             }
-
-            // Δέσμευση για 10 λεπτά
-           await redis.set(KEY, 0, 'EX', 300);
-
-           return res.status(200).json({
-                success: true,
-                stock: 0
-            });
-}
             
             if (action === 'remove') {
         
