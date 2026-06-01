@@ -290,7 +290,7 @@ async function removeFromCart(index) {
             for (let i = 0; i < (item.qty || 1); i++) {
 
                 
-                    await fetch('/api/reserve-euroleague', {
+                    await fetch('/api/reserve-BoxEuroleague', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
