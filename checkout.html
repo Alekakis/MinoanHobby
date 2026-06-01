@@ -42,6 +42,7 @@
         /* NOTIFICATIONS */
         .shipping-alert { background-color: #1b263b ; border-left: 4px solid #ff0000; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; line-height: 1.5; color: #e0e0e0; }
         .shipping-alert strong { color: #ff0000; }
+        .timer-banner { background-color: #ff0000; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; display: none; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(255, 0, 0, 0.2); }
 
         /* FORM INPUTS */
         .form-group { margin-bottom: 18px; }
@@ -73,6 +74,7 @@
                 🇬🇷<br>ΕΛ
             </div>
         </div>
+
         <div class="panel-bottom">
             <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
@@ -85,7 +87,11 @@
             <a href="breakOrder.html">BREAKS</a>
             <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
         </nav>
-        <div class="playful-logo">Minoan<span>Hobby</span></div>
+        
+        <div class="playful-logo">
+            Minoan<span>Hobby</span>
+        </div>
+
         <nav class="nav-right">
             <a href="howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
             <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
@@ -96,6 +102,8 @@
     <main class="checkout-container">
         <h1 class="checkout-title">Ολοκληρωση Αγορας</h1>
         
+        <div id="stock-timer" class="timer-banner"></div>
+
         <div class="box-panel">
             <h2>Τα Προϊόντα σας</h2>
             <div id="cart-summary-list"></div>
@@ -108,31 +116,59 @@
         <div class="box-panel">
             <h2>Στοιχεία Πελάτη</h2>
             <form id="checkout-form" onsubmit="handleCheckout(event)">
-                <div class="form-group"><label for="firstname">Όνομα *</label><input type="text" id="firstname" required></div>
-                <div class="form-group"><label for="lastname">Επώνυμο *</label><input type="text" id="lastname" required></div>
-                <div class="form-group"><label for="email">Email (Gmail) *</label><input type="email" id="email" required></div>
-                <div class="form-group"><label for="phone">Κινητό Τηλέφωνο *</label><input type="tel" id="phone" required></div>
-                <div class="form-group"><label for="address">Διεύθυνση (Οδός & Αριθμός) *</label><input type="text" id="address" required></div>
-                <div class="form-group"><label for="city">Πόλη *</label><input type="text" id="city" required></div>
-                <div class="form-group"><label for="zip">Ταχυδρομικός Κώδικας (Τ.Κ.) *</label><input type="text" id="zip" required></div>
+                <div class="form-group">
+                    <label for="firstname">Όνομα *</label>
+                    <input type="text" id="firstname" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastname">Επώνυμο *</label>
+                    <input type="text" id="lastname" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email (Gmail) *</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Κινητό Τηλέφωνο *</label>
+                    <input type="tel" id="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Διεύθυνση (Οδός & Αριθμός) *</label>
+                    <input type="text" id="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Πόλη *</label>
+                    <input type="text" id="city" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="zip">Ταχυδρομικός Κώδικας (Τ.Κ.) *</label>
+                    <input type="text" id="zip" required>
+                </div>
 
                 <div class="terms-group">
                     <input type="checkbox" id="terms" required>
                     <label for="terms">Έχω διαβάσει και συμφωνώ απόλυτα με τους <a href="terms.html" target="_blank">Όρους και Προϋποθέσεις</a> του MinoanHobby.</label>
                 </div>
+
                 <button type="submit" class="submit-btn" id="submit-order-btn">Πληρωμη με Καρτα (Viva Wallet)</button>
             </form>
 
             <div class="shipping-alert" style="margin-top: 25px;">
                 <i class="fas fa-info-circle" style="color: #ff0000; margin-right: 8px;"></i>
                 <strong>ΣΗΜΑΝΤΙΚΗ ΕΝΗΜΕΡΩΣΗ:</strong> Οι κάρτες από τα <strong>Live Breaks</strong> ανοίγονται κατά τη διάρκεια των live μεταδόσεων.
-                <em>* Για αγορές άνω των <strong>160€</strong>, τα μεταφορικά είναι <strong>ΔΩΡΕΑΝ</strong>.</em>
             </div>
         </div>
     </main>
 
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let timerInterval;
 
         function loadCartSummary() {
             const listContainer = document.getElementById('cart-summary-list');
@@ -145,7 +181,6 @@
                 listContainer.innerHTML = "<p style='color:#e0e0e0; text-align:center;'>Το καλάθι σας είναι άδειο.</p>";
                 if (submitBtn) submitBtn.disabled = true;
                 if (badge) badge.innerText = "0";
-                document.getElementById('cart-total-price').innerText = "0.00 €";
                 return;
             }
 
@@ -156,9 +191,11 @@
                 return `
                     <div class="cart-item">
                         <span>${item.name} (x${itemQty})</span>
-                        <div>
-                            <span style="font-weight: bold; margin-right: 15px;">${(item.price * itemQty).toFixed(2)} €</span>
-                            <i class="fas fa-trash" style="cursor:pointer; color:#ff0000;" onclick="removeItem(${index})" title="Διαγραφή"></i>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="font-weight: bold;">${(item.price * itemQty).toFixed(2)} €</span>
+                            <button onclick="removeItem(${index})" style="background:transparent; border:none; color:#ff0000; cursor:pointer; font-size:16px;">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -166,50 +203,76 @@
 
             document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
             if (badge) badge.innerText = totalItems;
-            if (submitBtn) submitBtn.disabled = false;
         }
 
-       async function removeItem(index) {
-            const itemToRemove = cart[index];
+        async function removeItem(index) {
+            const item = cart[index];
+            const serverItems = ['Panini La Liga Select Box', 'Panini EuroLeague Select Box', '2025-26 Panini EuroLeague Contenders Basketball Mega Box', 'Ducks', 'Megabox Half Case'];
             
-            // Λίστα με προϊόντα που ΕΧΟΥΝ stock στον server
-            const endpoints = {
-                'Panini La Liga Select Box': '/api/reserve-laliga',
-                'Panini EuroLeague Select Box': '/api/reserve-euroleague-select',
-                '2025-26 Panini EuroLeague Contenders Basketball Mega Box': '/api/reserve-euroleague',
-                'Ducks': '/api/reserve-duck',
-                'Megabox Half Case': '/api/reserve-megabox'
-            };
-        
-            // Ελέγχουμε αν το προϊόν βρίσκεται στη λίστα των προϊόντων με stock
-            if (endpoints[itemToRemove.name]) {
-                try {
-                    const qty = itemToRemove.qty || 1;
-                    for (let i = 0; i < qty; i++) {
-                        await fetch(endpoints[itemToRemove.name], { 
+            if (serverItems.includes(item.name)) {
+                let endpoint = '';
+                if (item.name === 'Panini La Liga Select Box') endpoint = '/api/reserve-laliga';
+                else if (item.name === 'Panini EuroLeague Select Box') endpoint = '/api/reserve-euroleague-select';
+                else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') endpoint = '/api/reserve-euroleague';
+                else if (item.name === 'Ducks') endpoint = '/api/reserve-duck';
+                else if (item.name === 'Megabox Half Case') endpoint = '/api/reserve-megabox';
+
+                if (endpoint) {
+                    try {
+                        await fetch(endpoint, { 
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json' }, 
                             body: JSON.stringify({ action: 'remove' }) 
                         });
-                    }
-                } catch (e) { 
-                    console.error("Error updating stock:", e); 
+                    } catch (e) { console.error("Σφάλμα:", e); }
                 }
             }
-        
-            // Αφαίρεση από το τοπικό array και αποθήκευση (γίνεται πάντα)
+
             cart.splice(index, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
             loadCartSummary();
         }
+
+        function startStockTimer() {
+            const timerBanner = document.getElementById('stock-timer');
+            let duration = 10 * 60; 
+
+            if (!sessionStorage.getItem('checkout_timer_start')) {
+                sessionStorage.setItem('checkout_timer_start', Date.now());
+            } else {
+                const elapsed = Math.floor((Date.now() - sessionStorage.getItem('checkout_timer_start')) / 1000);
+                duration = duration - elapsed;
+            }
+
+            if (duration <= 0) {
+                timerBanner.innerHTML = "Ο χρόνος έληξε.";
+                timerBanner.style.display = 'block';
+                return;
+            }
+
+            timerBanner.style.display = 'block';
+            timerInterval = setInterval(() => {
+                let minutes = Math.floor(duration / 60);
+                let seconds = duration % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                timerBanner.innerHTML = `<i class="fas fa-clock"></i> Το stock έχει δεσμευτεί για εσάς! Χρόνος για ολοκλήρωση: ${minutes}:${seconds}`;
+                if (--duration < 0) {
+                    clearInterval(timerInterval);
+                    timerBanner.innerHTML = "Ο χρόνος έληξε.";
+                    document.getElementById('submit-order-btn').disabled = true;
+                }
+            }, 1000);
+        }
+
         async function handleCheckout(event) {
             event.preventDefault();
             const submitBtn = document.getElementById('submit-order-btn');
             submitBtn.disabled = true;
             submitBtn.innerText = "Δημιουργία Παραγγελίας...";
 
-            let totalAmount = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
-            
+            let totalAmount = 0;
+            cart.forEach(item => totalAmount += item.price * (item.qty || 1));
+
             const orderPayload = {
                 amount: totalAmount.toFixed(2),
                 firstName: document.getElementById('firstname').value,
@@ -218,8 +281,7 @@
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
                 city: document.getElementById('city').value,
-                zip: document.getElementById('zip').value,
-                cartDetails: JSON.stringify(cart)
+                zip: document.getElementById('zip').value
             };
 
             try {
@@ -229,12 +291,11 @@
                     body: JSON.stringify(orderPayload)
                 });
                 const data = await res.json();
-                
                 if (data.OrderCode) {
                     localStorage.removeItem('cart');
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
-                    alert(data.error || "Παρουσιάστηκε πρόβλημα.");
+                    alert(data.error || "Πρόβλημα πληρωμής.");
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Πληρωμη με Καρτα (Viva Wallet)";
                 }
@@ -244,7 +305,10 @@
             }
         }
 
-        window.onload = loadCartSummary;
+        window.onload = () => {
+            loadCartSummary();
+            if (cart.length > 0) startStockTimer();
+        };
     </script>
 </body>
 </html>
