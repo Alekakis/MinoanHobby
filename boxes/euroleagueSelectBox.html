@@ -105,7 +105,64 @@
     </main>
 
     <script>
+        async function cleanExpiredEuroleagueBox() {
+        
+            let cart =
+                JSON.parse(
+                    localStorage.getItem('cart')
+                ) || [];
+        
+            const now = Date.now();
+        
+            const selectItem = cart.find(
+                item =>
+                    item.name ===
+                    'Panini EuroLeague Select Box'
+            );
+        
+            if (
+                selectItem &&
+                selectItem.addedAt &&
+                now - selectItem.addedAt >
+                    7 * 60 * 1000
+            ) {
+        
+                for (
+                    let i = 0;
+                    i < (selectItem.qty || 1);
+                    i++
+                ) {
+        
+                    await fetch(
+                        '/ api/reserve-BoxEuroleague',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+                            body: JSON.stringify({
+                                action: 'remove'
+                            })
+                        }
+                    );
+                }
+        
+                cart = cart.filter(
+                    item =>
+                        item.name !==
+                        'Panini EuroLeague Select Box'
+                );
+        
+                localStorage.setItem(
+                    'cart',
+                    JSON.stringify(cart)
+                );
+            }
+        }
+                
         async function updatePageState() {
+            await cleanExpiredEuroleagueBox();
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
@@ -120,7 +177,7 @@
             const removeBox = document.getElementById('remove-select-box');
 
             try {
-                const response = await fetch('/api/reserve-euroleague'); 
+                const response = await fetch('/ api/reserve-BoxEuroleague'); 
                 const data = await response.json();
                 const realLiveStock = data.stock !== undefined ? data.stock : 12;
 
@@ -155,7 +212,7 @@
             btnSelect.innerText = "Παρακαλώ περιμένετε...";
 
             try {
-                const response = await fetch('/api/reserve-euroleague', {
+                const response = await fetch('/ api/reserve-BoxEuroleague', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'add' })
@@ -167,10 +224,19 @@
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const existingItem = cart.find(item => item.name === 'Panini EuroLeague Select Box');
 
-                    if (existingItem) {
+                   if (existingItem) {
+
                         existingItem.qty += 1;
+                        existingItem.addedAt = Date.now();
+                    
                     } else {
-                        cart.push({ name: 'Panini EuroLeague Select Box', price: 189.90, qty: 1 });
+                    
+                        cart.push({
+                            name: 'Panini EuroLeague Select Box',
+                            price: 189.90,
+                            qty: 1,
+                            addedAt: Date.now()
+                        });
                     }
 
                     localStorage.setItem('cart', JSON.stringify(cart));
@@ -199,7 +265,7 @@
 
             try {
                 for (let i = 0; i < selectItem.qty; i++) {
-                    await fetch('/api/reserve-euroleague', {
+                    await fetch('/ api/reserve-BoxEuroleague', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'remove' })
