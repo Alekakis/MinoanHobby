@@ -88,7 +88,40 @@
     </main>
 
     <script>
+
+        const CART_EXPIRE_TIME = 7 * 60 * 1000;
+    
+    async function cleanExpiredDucksItems() {
+        const now = Date.now();
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const validItems = [];
+    
+        for (const item of cart) {
+            if (
+                item.name === 'Ducks' &&
+                item.addedAt &&
+                (now - item.addedAt) >= CART_EXPIRE_TIME
+            ) {
+                try {
+                    for (let i = 0; i < (item.qty || 1); i++) {
+                        await fetch('/api/reserve-ducks', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'remove' })
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                validItems.push(item);
+            }
+        }
+    
+        localStorage.setItem('cart', JSON.stringify(validItems));
+    }
         async function updatePageState() {
+            await cleanExpiredDucksItems();
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
             document.getElementById('global-cart-count').innerText = totalItems;
@@ -135,7 +168,17 @@
                 if (res.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const item = cart.find(i => i.name === 'Ducks');
-                    item ? item.qty++ : cart.push({ name: 'Ducks', price: 9.99, qty: 1 });
+                    if (item) {
+                        item.qty++;
+                        item.addedAt = item.addedAt || Date.now();
+                    } else {
+                        cart.push({
+                            name: 'Ducks',
+                            price: 9.99,
+                            qty: 1,
+                            addedAt: Date.now()
+                        });
+                    }
                     localStorage.setItem('cart', JSON.stringify(cart));
                     if (
                             !localStorage.getItem(
@@ -150,7 +193,7 @@
                     if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
                 } else { alert("Το προϊόν εξαντλήθηκε!"); }
             } catch(e) { console.error(e); }
-            updatePageState();
+            await updatePageState();
         }
 
         async function removeDucksFromCart() {
