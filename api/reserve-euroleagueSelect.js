@@ -44,7 +44,7 @@ export default async function handler(req, res) {
             }
 
             // Δέσμευση για 10 λεπτά
-           await redis.set(KEY, 0, 'EX', 30);
+           await redis.set(KEY, 0, 'EX', 300);
 
            return res.status(200).json({
                 success: true,
