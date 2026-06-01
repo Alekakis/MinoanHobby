@@ -38,11 +38,19 @@ export default async function handler(req, res) {
             const KEY = `team:stock:${teamId}`;
             const currentStock = parseInt(await redis.get(KEY)) ?? 1;
 
-            if (action === 'add') {
-                if (currentStock <= 0) return res.status(400).json({ error: 'Εξαντλήθηκε!' });
-                await redis.set(KEY, 0); // Δέσμευση
-                return res.status(200).json({ success: true, stock: 0 });
-            } 
+           if (action === 'add') {
+                if (currentStock <= 0) {
+                return res.status(400).json({ error: 'Εξαντλήθηκε!' });
+            }
+
+            // Δέσμευση για 10 λεπτά
+           await redis.set(KEY, 0, 'EX', 30);
+
+           return res.status(200).json({
+                success: true,
+                stock: 0
+            });
+}
             
             if (action === 'remove') {
         
