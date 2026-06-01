@@ -31,6 +31,8 @@ export default async function handler(req, res) {
             if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
             const { teamId, action } = body || {};
 
+            console.log('REQUEST', { teamId, action });
+
             if (!teamId) return res.status(400).json({ error: 'Missing teamId' });
 
             const KEY = `team:stock:${teamId}`;
@@ -43,10 +45,16 @@ export default async function handler(req, res) {
             } 
             
             if (action === 'remove') {
-                await redis.set(KEY, 1); // Απελευθέρωση
-                return res.status(200).json({ success: true, stock: 1 });
-            }
-
+        
+            console.log('RELEASE TEAM', teamId);
+        
+            await redis.set(KEY, 1);
+        
+            return res.status(200).json({
+                success: true,
+                stock: 1
+            });
+        }
             return res.status(400).json({ error: 'Invalid action' });
         }
 
