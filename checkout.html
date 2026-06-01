@@ -268,7 +268,8 @@ async function removeFromCart(index) {
 
             for (let i = 0; i < (item.qty || 1); i++) {
 
-                await fetch('/api/reserve-BoxEuroleague', {
+                
+                    await fetch('/api/reserve-euroleague', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -288,7 +289,8 @@ async function removeFromCart(index) {
 
             for (let i = 0; i < (item.qty || 1); i++) {
 
-                await fetch('/api/reserve-euroleague', {
+                
+                    await fetch('/api/reserve-euroleague', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
