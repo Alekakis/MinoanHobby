@@ -104,7 +104,39 @@
     </main>
 
     <script>
+        const CART_EXPIRE_TIME = 7 * 60 * 1000;
+
+        async function cleanExpiredEuroleagueItems() {
+            const now = Date.now();
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const validItems = [];
+        
+            for (const item of cart) {
+                if (
+                    item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box' &&
+                    item.addedAt &&
+                    (now - item.addedAt) >= CART_EXPIRE_TIME
+                ) {
+                    try {
+                        for (let i = 0; i < (item.qty || 1); i++) {
+                            await fetch('/api/reserve-euroleague', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'remove' })
+                            });
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                } else {
+                    validItems.push(item);
+                }
+            }
+        
+            localStorage.setItem('cart', JSON.stringify(validItems));
+        }
         async function updatePageState() {
+            await cleanExpiredEuroleagueItems();
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
@@ -168,10 +200,15 @@
 
                     if (existingItem) {
                         existingItem.qty += 1;
+                        existingItem.addedAt = existingItem.addedAt || Date.now();
                     } else {
-                        cart.push({ name: '2025-26 Panini EuroLeague Contenders Basketball Mega Box', price: 54.90, qty: 1 });
+                        cart.push({
+                            name: '2025-26 Panini EuroLeague Contenders Basketball Mega Box',
+                            price: 54.90,
+                            qty: 1,
+                            addedAt: Date.now()
+                        });
                     }
-
                     localStorage.setItem('cart', JSON.stringify(cart));
                     if (
                         !localStorage.getItem(
