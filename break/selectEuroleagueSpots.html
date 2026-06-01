@@ -134,7 +134,17 @@
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const team = euroleagueTeams.find(t => t.id === teamId);
                     cart.push({ name: team.name, price: team.price, teamId: teamId });
-                    localStorage.setItem('cart', JSON.stringify(cart));
+                    localStorage.setItem('cart', JSON.stringify(cart)); 
+                    if (
+                        !localStorage.getItem(
+                            'cartStartTime'
+                        )
+                    ) {
+                        localStorage.setItem(
+                            'cartStartTime',
+                            Date.now()
+                        );
+                    }
                     updatePageState();
                 } else { alert("Η ομάδα μόλις δεσμεύτηκε!"); }
             } catch(e) { console.error(e); }
