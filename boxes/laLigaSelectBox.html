@@ -107,7 +107,38 @@
     </main>
 
     <script>
+
+        async function cleanExpiredLaLigaItems() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const now = Date.now();
+        
+            const laLigaItem = cart.find(
+                item => item.name === 'Panini La Liga Select Box'
+            );
+        
+            if (
+                laLigaItem &&
+                laLigaItem.addedAt &&
+                now - laLigaItem.addedAt > 7 * 60 * 1000
+            ) {
+                for (let i = 0; i < (laLigaItem.qty || 1); i++) {
+                    await fetch('/api/reserve-laliga', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'remove' })
+                    });
+                }
+        
+                cart = cart.filter(
+                    item => item.name !== 'Panini La Liga Select Box'
+                );
+        
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }
+        }
         async function updatePageState() {
+            
+            await cleanExpiredLaLigaItems();
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
@@ -171,8 +202,14 @@
 
                     if (existingItem) {
                         existingItem.qty += 1;
+                        existingItem.addedAt = Date.now();
                     } else {
-                        cart.push({ name: 'Panini La Liga Select Box', price: 54.90, qty: 1 });
+                        cart.push({
+                            name: 'Panini La Liga Select Box',
+                            price: 54.90,
+                            qty: 1,
+                            addedAt: Date.now()
+                        });
                     }
 
                     localStorage.setItem('cart', JSON.stringify(cart));
