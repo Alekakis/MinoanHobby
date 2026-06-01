@@ -134,7 +134,7 @@
                 ) {
         
                     await fetch(
-                        '/ api/reserve-BoxEuroleague',
+                        '/api/reserve-BoxEuroleague',
                         {
                             method: 'POST',
                             headers: {
@@ -177,7 +177,7 @@
             const removeBox = document.getElementById('remove-select-box');
 
             try {
-                const response = await fetch('/ api/reserve-BoxEuroleague'); 
+                const response = await fetch('/api/reserve-BoxEuroleague'); 
                 const data = await response.json();
                 const realLiveStock = data.stock !== undefined ? data.stock : 12;
 
@@ -212,7 +212,7 @@
             btnSelect.innerText = "Παρακαλώ περιμένετε...";
 
             try {
-                const response = await fetch('/ api/reserve-BoxEuroleague', {
+                const response = await fetch('/api/reserve-BoxEuroleague', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'add' })
@@ -265,7 +265,7 @@
 
             try {
                 for (let i = 0; i < selectItem.qty; i++) {
-                    await fetch('/ api/reserve-BoxEuroleague', {
+                    await fetch('/api/reserve-BoxEuroleague', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'remove' })
