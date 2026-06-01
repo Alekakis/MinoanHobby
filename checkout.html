@@ -341,19 +341,19 @@ async function removeFromCart(index) {
         }
 
         // Team Breaks
-        else if (item.teamId) {
+else if (item.teamId) {
 
-            await fetch('/api/reserve-team', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    teamId: item.teamId,
-                    action: 'remove'
-                })
-            });
-        }
+    await fetch('/api/reserve-euroleagueSelect', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            teamId: item.teamId,
+            action: 'remove'
+        })
+    });
+}
 
         cart.splice(index, 1);
 
