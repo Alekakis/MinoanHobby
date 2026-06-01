@@ -48,21 +48,91 @@ export default async function handler(req, res) {
             return res.status(200).json({ status: 'success' });
         }
 
-        // --- ΑΚΥΡΩΣΗ ---
         if (statusId === 'E' || statusId === 'X' || statusId === 'C') {
-            const megaboxQty = await redis.get(`viva:pending:megabox:${orderCode}`);
-            if (megaboxQty) await redis.incrby('product:stock:megabox', parseInt(megaboxQty));
-            
-            const ducksQty = await redis.get(`viva:pending:ducks:${orderCode}`);
-            if (ducksQty) await redis.incrby('ducks', parseInt(ducksQty));
 
-            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
-            if (teamId && !isNaN(parseInt(teamId))) await redis.set(`team:stock:${teamId}`, 1);
+    // Megabox
+    const megaboxQty =
+        await redis.get(`viva:pending:megabox:${orderCode}`);
 
-            await redis.del(`viva:pending:ducks:${orderCode}`, `viva:pending:megabox:${orderCode}`, `viva:mapping:team:${orderCode}`, `viva:order:details:${orderCode}`);
-            return res.status(200).json({ status: 'cancelled' });
-        }
+    if (megaboxQty) {
+        await redis.incrby(
+            'product:stock:megabox',
+            parseInt(megaboxQty)
+        );
+    }
 
+    // Euroleague Contenders
+    const euroleagueQty =
+        await redis.get(`viva:pending:euroleague:${orderCode}`);
+
+    if (euroleagueQty) {
+        await redis.incrby(
+            'product:stock:euroleague',
+            parseInt(euroleagueQty)
+        );
+    }
+
+    // Euroleague Select
+    const selectQty =
+        await redis.get(`viva:pending:select:${orderCode}`);
+
+    if (selectQty) {
+        await redis.incrby(
+            'product:stock:euroleague_select',
+            parseInt(selectQty)
+        );
+    }
+
+    // La Liga Select
+    const laligaQty =
+        await redis.get(`viva:pending:laliga:${orderCode}`);
+
+    if (laligaQty) {
+        await redis.incrby(
+            'product:stock:laliga_select',
+            parseInt(laligaQty)
+        );
+    }
+
+    // Ducks
+    const ducksQty =
+        await redis.get(`viva:pending:ducks:${orderCode}`);
+
+    if (ducksQty) {
+        await redis.incrby(
+            'ducks',
+            parseInt(ducksQty)
+        );
+    }
+
+    // Team Breaks
+    const teamId =
+        await redis.get(`viva:mapping:team:${orderCode}`);
+
+    if (
+        teamId &&
+        !isNaN(parseInt(teamId))
+    ) {
+        await redis.set(
+            `team:stock:${teamId}`,
+            1
+        );
+    }
+
+    await redis.del(
+        `viva:pending:ducks:${orderCode}`,
+        `viva:pending:megabox:${orderCode}`,
+        `viva:pending:euroleague:${orderCode}`,
+        `viva:pending:select:${orderCode}`,
+        `viva:pending:laliga:${orderCode}`,
+        `viva:mapping:team:${orderCode}`,
+        `viva:order:details:${orderCode}`
+    );
+
+    return res.status(200).json({
+        status: 'cancelled'
+    });
+}
         return res.status(200).json({ status: 'received' });
     } catch (error) {
         return res.status(500).json({ error: error.message });
