@@ -169,10 +169,10 @@
             if (submitBtn) submitBtn.disabled = false;
         }
 
-        async function removeItem(index) {
+       async function removeItem(index) {
             const itemToRemove = cart[index];
             
-            // Live ενημέρωση stock για κάθε προϊόν
+            // Λίστα με προϊόντα που ΕΧΟΥΝ stock στον server
             const endpoints = {
                 'Panini La Liga Select Box': '/api/reserve-laliga',
                 'Panini EuroLeague Select Box': '/api/reserve-euroleague-select',
@@ -180,21 +180,28 @@
                 'Ducks': '/api/reserve-duck',
                 'Megabox Half Case': '/api/reserve-megabox'
             };
-
-            const endpoint = endpoints[itemToRemove.name];
-            if (endpoint) {
+        
+            // Ελέγχουμε αν το προϊόν βρίσκεται στη λίστα των προϊόντων με stock
+            if (endpoints[itemToRemove.name]) {
                 try {
-                    for (let i = 0; i < (itemToRemove.qty || 1); i++) {
-                        await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'remove' }) });
+                    const qty = itemToRemove.qty || 1;
+                    for (let i = 0; i < qty; i++) {
+                        await fetch(endpoints[itemToRemove.name], { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({ action: 'remove' }) 
+                        });
                     }
-                } catch (e) { console.error("Error updating stock:", e); }
+                } catch (e) { 
+                    console.error("Error updating stock:", e); 
+                }
             }
-
+        
+            // Αφαίρεση από το τοπικό array και αποθήκευση (γίνεται πάντα)
             cart.splice(index, 1);
             localStorage.setItem('cart', JSON.stringify(cart));
             loadCartSummary();
         }
-
         async function handleCheckout(event) {
             event.preventDefault();
             const submitBtn = document.getElementById('submit-order-btn');
