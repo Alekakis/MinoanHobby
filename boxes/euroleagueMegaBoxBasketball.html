@@ -173,6 +173,16 @@
                     }
 
                     localStorage.setItem('cart', JSON.stringify(cart));
+                    if (
+                        !localStorage.getItem(
+                            'cartStartTime'
+                        )
+                    ) {
+                        localStorage.setItem(
+                            'cartStartTime',
+                            Date.now()
+                        );
+                    }
                     
                     if (!sessionStorage.getItem('checkout_timer_start')) {
                         sessionStorage.setItem('checkout_timer_start', Date.now());
