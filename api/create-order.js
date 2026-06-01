@@ -17,6 +17,20 @@ export default async function handler(req, res) {
     
     const { amount, teamId, qty, firstName, lastName, email, phone, address, city, zip } = body || {};
     const orderQty = qty ? parseInt(qty) : 1;
+    const lowerTeamId = String(teamId).toLowerCase();
+
+    if (lowerTeamId.includes('euroleague select')) {
+    
+        const stock = parseInt(
+            await redis.get('product:stock:euroleague_select')
+        ) || 0;
+    
+        if (stock < orderQty) {
+            return res.status(400).json({
+                error: 'Δεν υπάρχει αρκετό stock'
+            });
+        }
+    }
 
     try {
         if (!amount || !teamId) throw new Error("Missing required fields");
@@ -53,7 +67,19 @@ export default async function handler(req, res) {
             if (lowerTeamId === 'ducks') await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 120);
             else if (lowerTeamId === 'megabox half case') await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 120);
             else if (lowerTeamId.includes('euroleague contenders')) await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 120);
-            else if (lowerTeamId.includes('euroleague select')) await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 120);
+            else if (lowerTeamId.includes('euroleague select')) {
+                await redis.set(
+                    `viva:pending:select:${data.OrderCode}`,
+                    orderQty,
+                    'EX',
+                    120
+                );
+            
+                await redis.decrby(
+                    'product:stock:euroleague_select',
+                    orderQty
+                );
+            }
             else if (lowerTeamId.includes('la liga')) await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
             else await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 3600);
 
