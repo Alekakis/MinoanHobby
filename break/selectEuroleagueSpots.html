@@ -133,7 +133,7 @@
                 if (res.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const team = euroleagueTeams.find(t => t.id === teamId);
-                    cart.push({ name: team.name, price: team.price, teamId: teamId });
+                    cart.push({     name: team.name,     price: team.price,     teamId: teamId,     addedAt: Date.now() });
                     localStorage.setItem('cart', JSON.stringify(cart)); 
                     if (
                         !localStorage.getItem(
