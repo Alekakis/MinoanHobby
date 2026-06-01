@@ -101,9 +101,7 @@
 
     <main class="checkout-container">
         <h1 class="checkout-title">Ολοκληρωση Αγορας</h1>
-        
-        <div id="stock-timer" class="timer-banner"></div>
-
+    
         <div class="box-panel">
             <h2>Τα Προϊόντα σας</h2>
             <div id="cart-summary-list"></div>
@@ -162,119 +160,247 @@
             <div class="shipping-alert" style="margin-top: 25px;">
                 <i class="fas fa-info-circle" style="color: #ff0000; margin-right: 8px;"></i>
                 <strong>ΣΗΜΑΝΤΙΚΗ ΕΝΗΜΕΡΩΣΗ:</strong> Οι κάρτες από τα <strong>Live Breaks</strong> ανοίγονται κατά τη διάρκεια των live μεταδόσεων.
+                Μετά το πέρας του live, εάν έχει εξοφληθεί το Shipping, οι κάρτες αποστέλλονται. 
+                Σε αντίθετη περίπτωση, οι κάρτες σας φυλάσσονται με ασφάλεια έως ότου ολοκληρωθεί η πληρωμή των μεταφορικών.
+                <br><br>
+                <em>* Για αγορές άνω των <strong>160€</strong>, τα μεταφορικά είναι <strong>ΔΩΡΕΑΝ</strong>.</em>
             </div>
         </div>
     </main>
 
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let timerInterval;
+ 
+      function loadCartSummary() {
+    const listContainer = document.getElementById('cart-summary-list');
+    const badge = document.getElementById('global-cart-count');
+    const submitBtn = document.getElementById('submit-order-btn');
 
-        function loadCartSummary() {
-            const listContainer = document.getElementById('cart-summary-list');
-            const badge = document.getElementById('global-cart-count');
-            const submitBtn = document.getElementById('submit-order-btn');
-            let total = 0;
-            let totalItems = 0;
+    let total = 0;
+    let totalItems = 0;
 
-            if (cart.length === 0) {
-                listContainer.innerHTML = "<p style='color:#e0e0e0; text-align:center;'>Το καλάθι σας είναι άδειο.</p>";
-                if (submitBtn) submitBtn.disabled = true;
-                if (badge) badge.innerText = "0";
-                return;
+    if (cart.length === 0) {
+        listContainer.innerHTML =
+            "<p style='color:#e0e0e0; text-align:center;'>Το καλάθι σας είναι άδειο.</p>";
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (badge) badge.innerText = "0";
+
+        document.getElementById('cart-total-price').innerText = "0.00 €";
+        return;
+    }
+
+    if (submitBtn) submitBtn.disabled = false;
+
+    listContainer.innerHTML = cart.map((item, index) => {
+
+        const itemQty = item.qty || 1;
+
+        total += item.price * itemQty;
+        totalItems += itemQty;
+
+        return `
+        <div class="cart-item">
+
+            <span>${item.name} (x${itemQty})</span>
+
+            <div style="display:flex;align-items:center;gap:10px;">
+
+                <span style="font-weight:bold;">
+                    ${(item.price * itemQty).toFixed(2)} €
+                </span>
+
+                <button
+                    onclick="removeFromCart(${index})"
+                    style="
+                        background:#ff0000;
+                        color:white;
+                        border:none;
+                        padding:6px 10px;
+                        border-radius:5px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    ">
+                    ✕
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    }).join('');
+
+    document.getElementById('cart-total-price').innerText =
+        total.toFixed(2) + " €";
+
+    if (badge) {
+        badge.innerText = totalItems;
+    }
+}
+async function removeFromCart(index) {
+
+    const item = cart[index];
+
+    try {
+
+        // Ducks
+        if (item.name === 'Ducks') {
+
+            for (let i = 0; i < (item.qty || 1); i++) {
+
+                await fetch('/api/reserve-duck', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'remove'
+                    })
+                });
             }
-
-            listContainer.innerHTML = cart.map((item, index) => {
-                const itemQty = item.qty || 1;
-                total += item.price * itemQty;
-                totalItems += itemQty;
-                return `
-                    <div class="cart-item">
-                        <span>${item.name} (x${itemQty})</span>
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span style="font-weight: bold;">${(item.price * itemQty).toFixed(2)} €</span>
-                            <button onclick="removeItem(${index})" style="background:transparent; border:none; color:#ff0000; cursor:pointer; font-size:16px;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " €";
-            if (badge) badge.innerText = totalItems;
         }
 
-        async function removeItem(index) {
-            const item = cart[index];
-            const serverItems = ['Panini La Liga Select Box', 'Panini EuroLeague Select Box', '2025-26 Panini EuroLeague Contenders Basketball Mega Box', 'Ducks', 'Megabox Half Case'];
-            
-            if (serverItems.includes(item.name)) {
-                let endpoint = '';
-                if (item.name === 'Panini La Liga Select Box') endpoint = '/api/reserve-laliga';
-                else if (item.name === 'Panini EuroLeague Select Box') endpoint = '/api/reserve-euroleague-select';
-                else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') endpoint = '/api/reserve-euroleague';
-                else if (item.name === 'Ducks') endpoint = '/api/reserve-duck';
-                else if (item.name === 'Megabox Half Case') endpoint = '/api/reserve-megabox';
+        // Euroleague Contenders
+        else if (
+            item.name ===
+            '2025-26 Panini EuroLeague Contenders Basketball Mega Box'
+        ) {
 
-                if (endpoint) {
-                    try {
-                        await fetch(endpoint, { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'application/json' }, 
-                            body: JSON.stringify({ action: 'remove' }) 
-                        });
-                    } catch (e) { console.error("Σφάλμα:", e); }
-                }
+            for (let i = 0; i < (item.qty || 1); i++) {
+
+                await fetch('/api/reserve-euroleague', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'remove'
+                    })
+                });
             }
-
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            loadCartSummary();
         }
 
-        function startStockTimer() {
-            const timerBanner = document.getElementById('stock-timer');
-            let duration = 10 * 60; 
+        // Euroleague Select
+        else if (
+            item.name ===
+            'Panini EuroLeague Select Box'
+        ) {
 
-            if (!sessionStorage.getItem('checkout_timer_start')) {
-                sessionStorage.setItem('checkout_timer_start', Date.now());
-            } else {
-                const elapsed = Math.floor((Date.now() - sessionStorage.getItem('checkout_timer_start')) / 1000);
-                duration = duration - elapsed;
+            for (let i = 0; i < (item.qty || 1); i++) {
+
+                await fetch('/api/reserve-euroleague-select', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'remove'
+                    })
+                });
             }
-
-            if (duration <= 0) {
-                timerBanner.innerHTML = "Ο χρόνος έληξε.";
-                timerBanner.style.display = 'block';
-                return;
-            }
-
-            timerBanner.style.display = 'block';
-            timerInterval = setInterval(() => {
-                let minutes = Math.floor(duration / 60);
-                let seconds = duration % 60;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-                timerBanner.innerHTML = `<i class="fas fa-clock"></i> Το stock έχει δεσμευτεί για εσάς! Χρόνος για ολοκλήρωση: ${minutes}:${seconds}`;
-                if (--duration < 0) {
-                    clearInterval(timerInterval);
-                    timerBanner.innerHTML = "Ο χρόνος έληξε.";
-                    document.getElementById('submit-order-btn').disabled = true;
-                }
-            }, 1000);
         }
+
+        // La Liga Select
+        else if (
+            item.name ===
+            'Panini La Liga Select Box'
+        ) {
+
+            for (let i = 0; i < (item.qty || 1); i++) {
+
+                await fetch('/api/reserve-laliga', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'remove'
+                    })
+                });
+            }
+        }
+
+        // Megabox
+        else if (
+            item.name ===
+            'Megabox Half Case'
+        ) {
+
+            for (let i = 0; i < (item.qty || 1); i++) {
+
+                await fetch('/api/reserve-megabox', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'remove'
+                    })
+                });
+            }
+        }
+
+        // Team Breaks
+        else if (item.teamId) {
+
+            await fetch('/api/reserve-team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    teamId: item.teamId,
+                    action: 'remove'
+                })
+            });
+        }
+
+        cart.splice(index, 1);
+
+        localStorage.setItem(
+            'cart',
+            JSON.stringify(cart)
+        );
+
+        loadCartSummary();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Παρουσιάστηκε πρόβλημα κατά την αφαίρεση του προϊόντος."
+        );
+    }
+}
+       
+
 
         async function handleCheckout(event) {
             event.preventDefault();
+
+            if (!document.getElementById('terms').checked) {
+                alert("Παρακαλώ αποδεχτείτε τους όρους και τις προϋποθέσεις για να συνεχίσετε.");
+                return false;
+            }
+
             const submitBtn = document.getElementById('submit-order-btn');
             submitBtn.disabled = true;
             submitBtn.innerText = "Δημιουργία Παραγγελίας...";
 
             let totalAmount = 0;
-            cart.forEach(item => totalAmount += item.price * (item.qty || 1));
+            cart.forEach(item => {
+                totalAmount += item.price * (item.qty || 1);
+            });
+
+            const ducksInCart = cart.find(item => item.name === 'Ducks');
+            const targetTeamId = ducksInCart ? 'ducks' : (cart[0] ? cart[0].name : 'unknown');
+            const totalQty = ducksInCart ? ducksInCart.qty : 1;
 
             const orderPayload = {
                 amount: totalAmount.toFixed(2),
+                teamId: targetTeamId,
+                qty: totalQty,
                 firstName: document.getElementById('firstname').value,
                 lastName: document.getElementById('lastname').value,
                 email: document.getElementById('email').value,
@@ -285,30 +411,48 @@
             };
 
             try {
+                await fetch('https://formspree.io/f/xgoqqppn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...orderPayload,
+                        cartDetails: JSON.stringify(cart)
+                    })
+                });
+            } catch (e) {
+                console.error("Formspree error, continuing to payment...");
+            }
+
+            try {
                 const res = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderPayload)
                 });
+                
                 const data = await res.json();
+                
                 if (data.OrderCode) {
                     localStorage.removeItem('cart');
+                    sessionStorage.removeItem('checkout_timer_start');
                     window.location.href = `https://www.vivapayments.com/web/checkout?ref=${data.OrderCode}`;
                 } else {
-                    alert(data.error || "Πρόβλημα πληρωμής.");
+                    alert(data.error || "Παρουσιάστηκε πρόβλημα κατά τη δημιουργία της πληρωμής.");
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Πληρωμη με Καρτα (Viva Wallet)";
                 }
             } catch (error) {
-                alert("Σφάλμα σύνδεσης.");
+                console.error("Checkout Error:", error);
+                alert("Σφάλμα σύνδεσης με τον server. Δοκιμάστε ξανά σε λίγα λεπτά.");
                 submitBtn.disabled = false;
+                submitBtn.innerText = "Πληρωμη με Καρτα (Viva Wallet)";
             }
         }
+    
 
         window.onload = () => {
-            loadCartSummary();
-            if (cart.length > 0) startStockTimer();
-        };
+    loadCartSummary();
+};
     </script>
 </body>
 </html>
