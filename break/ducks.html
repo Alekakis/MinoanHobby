@@ -44,6 +44,74 @@
         .add-btn:disabled { border-color: #475569; color: #64748b; cursor: not-allowed; background-color: rgba(71, 85, 105, 0.1); }
         .remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
         .remove-link:hover { text-decoration: underline; }
+        @media (max-width: 768px) {
+    body {
+        padding-right: 0;
+    }
+
+    .right-side-panel {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        right: 0;
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        padding: 0 20px;
+        border-left: none;
+        border-top: 2px solid #ff0000;
+    }
+
+    .panel-top,
+    .panel-bottom {
+        flex-direction: row;
+        gap: 22px;
+    }
+
+    .main-header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 10px;
+        text-align: center;
+    }
+
+    .main-header nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .main-header nav a {
+        margin: 0;
+        font-size: 12px;
+    }
+
+    .playful-logo {
+        font-size: 24px;
+        order: -1;
+    }
+
+    .hero-section {
+        min-height: 60vh;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .contact-section {
+        padding: 30px 15px 90px;
+    }
+
+    .contact-section h2 {
+        font-size: 24px;
+    }
+
+    .contact-section p {
+        font-size: 20px;
+        word-break: break-word;
+    }
+}
     </style>
 </head>
 <body>
