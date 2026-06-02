@@ -1,17 +1,17 @@
 import Redis from 'ioredis';
 
-const WEBHOOK_KEY = process.env.VIVA_WEBHOOK_KEY;
+
 
 export default async function handler(req, res) {
 
     console.log('METHOD:', req.method);
     console.log('QUERY:', req.query);
 
-    if (req.method === 'GET') {
-        return res.status(200).json({
-            Key: WEBHOOK_KEY
-        });
-    }
+  if (req.method === 'GET') {
+    return res.status(200).json({
+        status: 'ok'
+    });
+}
 
     if (req.method !== 'POST') {
         return res.status(405).json({
