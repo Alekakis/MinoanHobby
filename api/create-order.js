@@ -23,8 +23,13 @@ export default async function handler(req, res) {
         if (!amount || !teamId) throw new Error("Missing required fields");
 
         // --- 1. ΛΟΓΙΚΗ STOCK ---
-        if (!['ducks', 'megabox half case', '2025-26 panini euroleague contenders basketball mega box', 'panini euroleague select box', 'panini la liga select box'].includes(teamId.toLowerCase())) {
-            const currentStatus = await redis.get(`team:status:${teamId}`);
+        if (![
+    'ducks',
+    'megabox half case',
+    '2025-26 panini euroleague contenders basketball mega box',
+    'panini euroleague select box',
+    'panini la liga select box'
+].includes(lowerTeamId)) {const currentStatus = await redis.get(`team:status:${teamId}`);
             if (currentStatus === 'sold') return res.status(400).json({ error: 'Το slot έχει εξαντληθεί!' });
             if (currentStatus === 'pending') return res.status(400).json({ error: 'Το slot είναι δεσμευμένο!' });
             await redis.set(`team:status:${teamId}`, 'pending', 'EX', 120);
