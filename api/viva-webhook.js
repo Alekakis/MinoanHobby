@@ -3,6 +3,11 @@ import Redis from 'ioredis';
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
 export default async function handler(req, res) {
+
+    console.log('METHOD:', req.method);
+    console.log('QUERY:', req.query);
+    console.log('BODY:', req.body);
+    
     if (req.query && req.query.KeyVerification) {
         return res.status(200).json({
             KeyVerification: req.query.KeyVerification
