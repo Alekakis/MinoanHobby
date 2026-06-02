@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const REDIS_KEY = 'ducks'; // Το κλειδί σου στο Redis
+    const REDIS_KEY = 'product:stock:ducks'; // Το κλειδί σου στο Redis
 
     try {
         // --- GET: Επιστροφή στοκ ---
