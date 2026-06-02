@@ -202,9 +202,10 @@ async function cleanExpiredTeamItems() {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            teamId: item.teamId,
-                            action: 'remove'
-                        })
+                        teamId: item.teamId,
+                        action: 'remove',
+                        cartId: item.cartId || getCartId()
+                    })
                     }
                 );
 
