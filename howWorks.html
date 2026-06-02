@@ -32,6 +32,74 @@
         .highlight-box { background: rgba(255, 0, 0, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #ff0000; margin: 20px 0; }
         .back-home-btn { display: inline-flex; align-items: center; gap: 10px; background-color: #ff0000; color: #ffffff; text-decoration: none; font-weight: 700; padding: 12px 25px; border-radius: 25px; margin-top: 30px; transition: 0.3s; }
         .back-home-btn:hover { background-color: #ffffff; color: #0d1b2a; }
+        @media (max-width: 768px) {
+    body {
+        padding-right: 0;
+    }
+
+    .right-side-panel {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        right: 0;
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        padding: 0 20px;
+        border-left: none;
+        border-top: 2px solid #ff0000;
+    }
+
+    .panel-top,
+    .panel-bottom {
+        flex-direction: row;
+        gap: 22px;
+    }
+
+    .main-header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 10px;
+        text-align: center;
+    }
+
+    .main-header nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .main-header nav a {
+        margin: 0;
+        font-size: 12px;
+    }
+
+    .playful-logo {
+        font-size: 24px;
+        order: -1;
+    }
+
+    .hero-section {
+        min-height: 60vh;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .contact-section {
+        padding: 30px 15px 90px;
+    }
+
+    .contact-section h2 {
+        font-size: 24px;
+    }
+
+    .contact-section p {
+        font-size: 20px;
+        word-break: break-word;
+    }
+}
     </style>
 </head>
 <body>
