@@ -94,8 +94,8 @@ export default async function handler(req, res) {
                 teamId &&
                 !isNaN(parseInt(teamId))
             ) {
-                await redis.set(`team:sold:${teamId}`, 1);
-                await redis.del(`team:hold:${teamId}`);
+                await redis.set(`SELECT:team:sold:${teamId}`, 1);
+                await redis.del(`SELECT:team:hold:${teamId}`);
                     }
 
             await redis.del(
@@ -182,8 +182,8 @@ export default async function handler(req, res) {
                 teamId &&
                 !isNaN(parseInt(teamId))
             ) {
-                await redis.del(`team:hold:${teamId}`);
-               
+                await redis.del(`SELECT:team:hold:${teamId}`);
+
             }
 
             await redis.del(
