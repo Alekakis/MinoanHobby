@@ -19,19 +19,6 @@ export default async function handler(req, res) {
     const orderQty = qty ? parseInt(qty) : 1;
     const lowerTeamId = String(teamId).toLowerCase();
 
-    if (lowerTeamId.includes('euroleague select')) {
-    
-        const stock = parseInt(
-            await redis.get('product:stock:euroleague_select')
-        ) || 0;
-    
-        if (stock < orderQty) {
-            return res.status(400).json({
-                error: 'Δεν υπάρχει αρκετό stock'
-            });
-        }
-    }
-
     try {
         if (!amount || !teamId) throw new Error("Missing required fields");
 
