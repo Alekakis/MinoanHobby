@@ -260,7 +260,7 @@ async function updatePageState() {
                             Date.now()
                         );
                     }
-                    updatePageState();
+                    await updatePageState();
                 } else { alert("Η ομάδα μόλις δεσμεύτηκε!"); }
             } catch(e) { console.error(e); }
         }
