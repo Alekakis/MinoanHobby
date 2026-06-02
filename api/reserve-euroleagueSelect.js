@@ -1,6 +1,7 @@
 import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,23 +12,48 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
+    if (req.method !== 'GET') {
+        return res.status(405).json({
+            error: 'Method not allowed'
+        });
+    }
+
     try {
-        if (req.method === 'GET') {
-            const stocks = {};
+        const stocks = {};
+        const debug = {};
 
-            for (let i = 1; i <= 23; i++) {
-                const sold = await redis.get(`team:sold:${i}`);
-                const hold = await redis.get(`team:hold:${i}`);
+        for (let i = 1; i <= 23; i++) {
+            const soldKey = `team:sold:${i}`;
+            const holdKey = `team:hold:${i}`;
+            const oldStockKey = `team:stock:${i}`;
 
-                stocks[i] = sold || hold ? 0 : 1;
-            }
+            const sold = await redis.get(soldKey);
+            const hold = await redis.get(holdKey);
+            const oldStock = await redis.get(oldStockKey);
+            const holdTtl = await redis.ttl(holdKey);
 
-            return res.status(200).json({ stocks });
+            stocks[i] = sold || hold ? 0 : 1;
+
+            debug[i] = {
+                soldKey,
+                sold,
+                holdKey,
+                hold,
+                holdTtl,
+                oldStockKey,
+                oldStock,
+                stockReturned: stocks[i]
+            };
         }
 
-        return res.status(405).json({ error: 'Method not allowed' });
+        return res.status(200).json({
+            stocks,
+            debug
+        });
 
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            error: error.message
+        });
     }
 }

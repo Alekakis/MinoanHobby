@@ -1,6 +1,7 @@
 import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
