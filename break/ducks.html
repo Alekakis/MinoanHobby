@@ -559,7 +559,8 @@
 
                     if (item) {
                         item.qty++;
-                        item.addedAt = item.addedAt || Date.now();
+                        item.addedAt = Date.now();
+                    }
                     } else {
                         cart.push({
                             name: 'Ducks',
