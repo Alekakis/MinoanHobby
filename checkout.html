@@ -239,9 +239,23 @@
 }
 async function removeFromCart(index) {
 
+    
+
     const item = cart[index];
+    if (
+    item.name === 'Shipping' ||
+    item.name === 'Αποστολή' ||
+    item.name === 'Shipping Ελλάδα' ||
+    item.name === 'Shipping Abroad'
+) {
+    cart.splice(index, 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCartSummary();
+    return;
+}
 
     try {
+    
 
         // Ducks
         if (item.name === 'Ducks') {
@@ -395,8 +409,21 @@ else if (item.teamId) {
                 totalAmount += item.price * (item.qty || 1);
             });
 
-           const ducksInCart = cart.find(item => item.name === 'Ducks');
-const targetTeamId = ducksInCart ? 'ducks' : (cart[0] ? cart[0].name : 'unknown');
+           
+const realProducts = cart.filter(item =>
+    item.name !== 'Shipping' &&
+    item.name !== 'Αποστολή' &&
+    item.name !== 'Shipping Ελλάδα' &&
+    item.name !== 'Shipping Abroad'
+);
+
+const ducksInCart = realProducts.find(item => item.name === 'Ducks');
+
+const targetTeamId = ducksInCart
+    ? 'ducks'
+    : (realProducts[0] ? (realProducts[0].teamId || realProducts[0].name) : 'shipping-only');
+
+
 const totalQty = ducksInCart ? ducksInCart.qty : 1;
             const orderPayload = {
                 amount: totalAmount.toFixed(2),
