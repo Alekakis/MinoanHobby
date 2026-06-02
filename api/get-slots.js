@@ -10,16 +10,16 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        const slots = [];
+        const spots = [];
         // Διαβάζουμε τα status για τις 24 ομάδες (1 έως 24)
         for (let i = 1; i <= 24; i++) {
             const status = await redis.get(`team:status:${i}`);
-            slots.push({
+            spots.push({
                 id: i,
                 status: status || 'available' // Αν δεν υπάρχει, είναι διαθέσιμο
             });
         }
-        return res.status(200).json(slots);
+        return res.status(200).json(spots);
     } catch (error) {
         console.error("Redis Error:", error);
         return res.status(500).json({ error: error.message });

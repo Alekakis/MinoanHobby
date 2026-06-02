@@ -38,11 +38,11 @@ export default async function handler(req, res) {
             const oldStock = await redis.get(`team:stock:${teamId}`);
 
             if (sold || oldStock === '0') {
-                return res.status(400).json({ error: 'Το slot έχει εξαντληθεί!' });
+                return res.status(400).json({ error: 'Το spot έχει εξαντληθεί!' });
             }
 
             if (hold) {
-                return res.status(400).json({ error: 'Το slot είναι δεσμευμένο!' });
+                return res.status(400).json({ error: 'Το spot είναι δεσμευμένο!' });
             }
 
             await redis.set(`team:hold:${teamId}`, 1, 'EX', 420);
