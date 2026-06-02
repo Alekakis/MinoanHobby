@@ -1,6 +1,20 @@
 import Redis from 'ioredis';
 
-const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+const redis = new Redis(process.env.REDIS_URL);
+
+const TEAM_COUNT = 23;
+const HOLD_TTL = 7 * 60; // seconds
+const SELECT_PREFIX = 'SELECT';
+
+async function ensureSelectMapping() {
+    for (let i = 1; i <= TEAM_COUNT; i++) {
+        const key = `${SELECT_PREFIX}:team:${i}`;
+
+        await redis.hsetnx(key, 'id', String(i));
+        await redis.hsetnx(key, 'maxStock', '1');
+        await redis.hsetnx(key, 'name', `Team ${i}`);
+    }
+}
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,99 +23,140 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    // --- GET: return available stocks for each team ---
-    if (req.method === 'GET') {
-        try {
+    try {
+        await ensureSelectMapping();
+
+        if (req.method === 'GET') {
             const stocks = {};
+            const teams = {};
             const debug = {};
 
-            for (let i = 1; i <= 23; i++) {
-                const soldKey = `team:sold:${i}`;
-                const holdKey = `team:hold:${i}`;
-                const oldStockKey = `team:stock:${i}`;
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                const teamKey = `${SELECT_PREFIX}:team:${i}`;
+                const soldKey = `${SELECT_PREFIX}:team:sold:${i}`;
+                const holdKey = `${SELECT_PREFIX}:team:hold:${i}`;
 
+                const team = await redis.hgetall(teamKey);
                 const sold = await redis.get(soldKey);
                 const hold = await redis.get(holdKey);
-                const oldStock = await redis.get(oldStockKey);
                 const holdTtl = await redis.ttl(holdKey);
 
-            // return explicit state: 'sold' | 'held' | 'available'
-            if (sold) {
-                stocks[i] = 'sold';
-            } else if (hold) {
-                stocks[i] = 'held';
-            } else {
-                stocks[i] = 'available';
+                teams[i] = {
+                    id: Number(team.id),
+                    name: team.name,
+                    maxStock: Number(team.maxStock)
+                };
+
+                if (sold) {
+                    stocks[i] = 'sold';
+                } else if (hold) {
+                    stocks[i] = 'held';
+                } else {
+                    stocks[i] = 'available';
+                }
+
+                debug[i] = {
+                    teamKey,
+                    soldKey,
+                    sold,
+                    holdKey,
+                    hold,
+                    holdTtl,
+                    stockReturned: stocks[i]
+                };
             }
 
-            debug[i] = {
-                soldKey,
-                sold,
-                holdKey,
-                hold,
-                holdTtl,
-                oldStockKey,
-                oldStock,
-                stockReturned: stocks[i]
-            };
+            return res.status(200).json({ teams, stocks, debug });
+        }
+
+        if (req.method === 'POST') {
+            let body = req.body;
+            if (typeof body === 'string') {
+                try { body = JSON.parse(body); } catch (e) {}
             }
 
-            return res.status(200).json({ stocks, debug });
-        } catch (error) {
-            return res.status(500).json({ error: error.message });
-        }
-    }
+            const { action, teamId, cartId } = body || {};
+            if (!teamId) return res.status(400).json({ error: 'teamId required' });
 
-    // --- POST: reserve or release a team hold ---
-    if (req.method === 'POST') {
-        let body = req.body;
-        if (typeof body === 'string') {
-            try { body = JSON.parse(body); } catch (e) {}
-        }
+            const tid = Number(teamId);
+            if (!tid || tid < 1 || tid > TEAM_COUNT) {
+                return res.status(400).json({ error: 'invalid teamId' });
+            }
 
-        const { action, teamId, cartId } = body || {};
-        if (!teamId) return res.status(400).json({ error: 'teamId required' });
+            const teamKey = `${SELECT_PREFIX}:team:${tid}`;
+            const holdKey = `${SELECT_PREFIX}:team:hold:${tid}`;
+            const soldKey = `${SELECT_PREFIX}:team:sold:${tid}`;
 
-        const tid = Number(teamId);
-        if (!tid || tid < 1 || tid > 23) return res.status(400).json({ error: 'invalid teamId' });
+            const maxStock = Number(await redis.hget(teamKey, 'maxStock') || 1);
 
-        const holdKey = `team:hold:${tid}`;
-        const soldKey = `team:sold:${tid}`;
-        const HOLD_TTL = 7 * 60; // seconds
-
-        try {
             if (action === 'reserve') {
+                if (maxStock <= 0) {
+                    return res.status(400).json({ error: 'no_stock' });
+                }
+
                 const sold = await redis.get(soldKey);
                 if (sold) return res.status(400).json({ error: 'sold' });
 
-                // Set hold with NX and expiry
-                const result = await redis.set(holdKey, cartId || 'unknown', 'EX', HOLD_TTL, 'NX');
+                const result = await redis.set(
+                    holdKey,
+                    String(cartId || 'unknown'),
+                    'EX',
+                    HOLD_TTL,
+                    'NX'
+                );
+
                 if (result === 'OK') {
-                    return res.status(200).json({ success: true, reserved: true, ttl: HOLD_TTL });
+                    return res.status(200).json({
+                        success: true,
+                        reserved: true,
+                        teamId: tid,
+                        maxStock,
+                        ttl: HOLD_TTL
+                    });
                 }
 
                 const current = await redis.get(holdKey);
                 const ttl = await redis.ttl(holdKey);
-                return res.status(409).json({ error: 'already_reserved', reservedBy: current, ttl });
+
+                return res.status(409).json({
+                    error: 'already_reserved',
+                    reservedBy: current,
+                    ttl
+                });
             }
 
             if (action === 'release') {
                 const current = await redis.get(holdKey);
-                if (!current) return res.status(200).json({ success: true, released: false, reason: 'not_found' });
+
+                if (!current) {
+                    return res.status(200).json({
+                        success: true,
+                        released: false,
+                        reason: 'not_found'
+                    });
+                }
 
                 if (cartId && current !== String(cartId)) {
-                    return res.status(403).json({ error: 'forbidden', ownedBy: current });
+                    return res.status(403).json({
+                        error: 'forbidden',
+                        ownedBy: current
+                    });
                 }
 
                 await redis.del(holdKey);
-                return res.status(200).json({ success: true, released: true });
+
+                return res.status(200).json({
+                    success: true,
+                    released: true
+                });
             }
 
             return res.status(400).json({ error: 'invalid action' });
-        } catch (error) {
-            return res.status(500).json({ error: error.message });
         }
-    }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+        return res.status(405).json({ error: 'Method not allowed' });
+
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
 }
