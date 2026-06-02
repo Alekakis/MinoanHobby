@@ -1,11 +1,32 @@
 export default async function handler(req, res) {
-    console.log('VIVA WEBHOOK METHOD:', req.method);
-    console.log('VIVA WEBHOOK QUERY:', req.query);
 
     if (req.method === 'GET') {
-        return res.status(200).json({
-            status: 'ok'
-        });
+        try {
+            const auth = Buffer.from(
+                `${process.env.VIVA_MERCHANT_ID}:${process.env.VIVA_API_KEY}`
+            ).toString('base64');
+
+            const vivaRes = await fetch(
+                'https://www.vivapayments.com/api/messages/config/token',
+                {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Basic ${auth}`
+                    }
+                }
+            );
+
+            const data = await vivaRes.json();
+
+            return res.status(200).json({
+                Key: data.Key
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message
+            });
+        }
     }
 
     if (req.method !== 'POST') {
@@ -13,6 +34,8 @@ export default async function handler(req, res) {
             error: 'Method not allowed'
         });
     }
+
+    // από εδώ και κάτω αφήνεις το υπάρχον POST logic σου
 
     try {
         const response = await fetch(
