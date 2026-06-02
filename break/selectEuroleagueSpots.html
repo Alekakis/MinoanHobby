@@ -295,7 +295,7 @@
 				<button
 					class="add-btn"
 					id="btn-${team.id}"
-					   isSold="" || isHeld="" || inCart="") ? 'disabled' :=''
+					${ (isSold || isHeld || inCart) ? 'disabled' : '' }
 					onclick="addToCart(${team.id})">
 					${buttonText}
 				</button>
