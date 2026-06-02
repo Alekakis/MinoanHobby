@@ -248,7 +248,7 @@ async function removeFromCart(index) {
 
             for (let i = 0; i < (item.qty || 1); i++) {
 
-                await fetch('/api/reserve-duck', {
+                await fetch('/api/reserve-ducks', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
