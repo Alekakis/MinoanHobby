@@ -1,33 +1,27 @@
 import Redis from 'ioredis';
 
-const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+const WEBHOOK_KEY = process.env.VIVA_WEBHOOK_KEY;
 
 export default async function handler(req, res) {
+
     console.log('METHOD:', req.method);
     console.log('QUERY:', req.query);
 
-    // 1. Έλεγχος Επαλήθευσης (Verification)
-    const keyVerification = req.query.KeyVerification || req.headers['keyverification'];
-
-    if (req.method === 'GET' && keyVerification) {
+    if (req.method === 'GET') {
         return res.status(200).json({
-            KeyVerification: keyVerification
+            Key: WEBHOOK_KEY
         });
     }
 
-    // 2. Αν είναι GET αλλά δεν έχει KeyVerification (π.χ. κάποιος μπαίνει στο URL)
-    if (req.method === 'GET') {
-        return res.status(200).json({ status: 'webhook-ready' });
-    }
-
-    // 3. Χειρισμός POST (Webhook events)
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        return res.status(405).json({
+            error: 'Method not allowed'
+        });
     }
 
-    // Συνέχεια της λογικής σας από εδώ και κάτω...
+    const redis = new Redis(process.env.REDIS_URL);
+
     let event = req.body;
-    // ...
     if (typeof event === 'string') {
         try { event = JSON.parse(event); } catch(e) {}
     }
