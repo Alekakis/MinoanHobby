@@ -132,6 +132,8 @@
     </main>
 
     <script>
+
+
         const euroleagueTeams = [
             { id: 1, name: "Anadolu Efes", price: 25.00, logo: "../images/imageAna.png" },
             { id: 2, name: "AS Monaco", price: 30.00, logo: "../images/imageMon.png" },
@@ -159,6 +161,17 @@
         ];
 
       const CART_EXPIRE_TIME = 7 * 60 * 1000;
+
+      function getCartId() {
+    let cartId = localStorage.getItem('cartId');
+
+    if (!cartId) {
+        cartId = crypto.randomUUID();
+        localStorage.setItem('cartId', cartId);
+    }
+
+    return cartId;
+}
 
 async function cleanExpiredTeamItems() {
 
@@ -311,12 +324,12 @@ async function updatePageState() {
                 const res = await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ teamId, action: 'add' })
+                  body: JSON.stringify({teamId,action: 'add',cartId: getCartId()})  
                 });
                 if (res.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
                     const team = euroleagueTeams.find(t => t.id === teamId);
-                    cart.push({     name: team.name,     price: team.price,     teamId: teamId,     addedAt: Date.now() });
+                    cart.push({name: team.name,price: team.price,teamId: teamId,addedAt: Date.now(),cartId: getCartId()});
                     localStorage.setItem('cart', JSON.stringify(cart)); 
                     if (
                         !localStorage.getItem(
@@ -338,7 +351,7 @@ async function updatePageState() {
                 await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ teamId, action: 'remove' })
+                    body: JSON.stringify({teamId,action: 'remove',cartId: getCartId()})
                 });
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
                 cart = cart.filter(t => t.teamId !== teamId);

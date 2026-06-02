@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         try { body = JSON.parse(body); } catch (e) {}
     }
 
-    const { amount, teamId, qty, firstName, lastName, email, phone, address, city, zip } = body || {};
+    const { amount, teamId, qty, cartId, firstName, lastName, email, phone, address, city, zip } = body || {};
     const orderQty = qty ? parseInt(qty) : 1;
     const lowerTeamId = String(teamId).toLowerCase();
 
@@ -41,11 +41,11 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Το spot έχει εξαντληθεί!' });
             }
 
-            if (hold) {
-                return res.status(400).json({ error: 'Το spot είναι δεσμευμένο!' });
+            if (hold && hold !== cartId) {
+              return res.status(400).json({ error: 'Το spot είναι δεσμευμένο από άλλον!' });
             }
 
-            await redis.set(`team:hold:${teamId}`, 1, 'EX', 420);
+            await redis.set(`team:hold:${teamId}`, cartId, 'EX', 420);
         }
 
         const auth = Buffer.from(

@@ -170,6 +170,16 @@
 
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        function getCartId() {
+    let cartId = localStorage.getItem('cartId');
+
+    if (!cartId) {
+        cartId = crypto.randomUUID();
+        localStorage.setItem('cartId', cartId);
+    }
+
+    return cartId;
+}
  
       function loadCartSummary() {
     const listContainer = document.getElementById('cart-summary-list');
@@ -429,6 +439,7 @@ const totalQty = ducksInCart ? ducksInCart.qty : 1;
                 amount: totalAmount.toFixed(2),
                 teamId: targetTeamId,
                 qty: totalQty,
+                cartId: getCartId(),
                 firstName: document.getElementById('firstname').value,
                 lastName: document.getElementById('lastname').value,
                 email: document.getElementById('email').value,

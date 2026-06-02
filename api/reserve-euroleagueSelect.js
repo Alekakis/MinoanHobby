@@ -38,7 +38,7 @@ export default async function handler(req, res) {
                 } catch (e) {}
             }
 
-            const { teamId, action } = body || {};
+            const { teamId, action, cartId } = body || {};
 
             if (!teamId) {
                 return res.status(400).json({ error: 'Missing teamId' });
@@ -59,11 +59,13 @@ export default async function handler(req, res) {
                     });
                 }
 
-                if (hold) {
+                if (hold && hold !== cartId) {
                     return res.status(400).json({
-                        error: 'Η ομάδα είναι δεσμευμένη!'
-                    });
+                    error: 'Η ομάδα είναι δεσμευμένη!'
+                  });
                 }
+
+await redis.set(HOLD_KEY, cartId, 'EX', 420);
 
                 await redis.set(HOLD_KEY, 1, 'EX', 420);
 
@@ -77,10 +79,12 @@ export default async function handler(req, res) {
                 const sold = await redis.get(SOLD_KEY);
                 const oldStock = await redis.get(OLD_STOCK_KEY);
 
-                // Αν έχει πουληθεί μόνιμα, δεν το απελευθερώνουμε.
-                if (!sold && oldStock !== '0') {
-                    await redis.del(HOLD_KEY);
-                }
+                
+                const hold = await redis.get(HOLD_KEY);
+
+            if (!sold && oldStock !== '0' && hold === cartId) {
+              await redis.del(HOLD_KEY);
+            }
 
                 return res.status(200).json({
                     success: true,
