@@ -229,9 +229,6 @@
                 grid.innerHTML = sortedTeams.map(team => {
                 const inCart = cart.find(t => Number(t.teamId) === Number(team.id));
 
-                    const isReservedOrSold =
-                        data.stocks &&
-                        Number(data.stocks[team.id]) === 0;
                     const state = data.stocks ? data.stocks[team.id] : 'available';
 
                     const isSold = state === 'sold';
@@ -250,13 +247,9 @@
                             <button
                                 class="add-btn"
                                 id="btn-${team.id}"
-                                ${isReservedOrSold || inCart ? 'disabled' : ''}
                                 ${(isSold || isHeld || inCart) ? 'disabled' : ''}
                                 onclick="addToCart(${team.id})">
                                 ${
-                                    isReservedOrSold
-                                    ? 'Δεσμευμένο'
-                                    : (inCart ? 'Στο καλάθι' : 'Επιλογή')
                                     isSold ? 'Πωλήθηκε' : (isHeld ? 'Δεσμευμένο' : (inCart ? 'Στο καλάθι' : 'Επιλογή'))
                                 }
                             </button>
