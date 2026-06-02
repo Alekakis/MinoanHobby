@@ -7,24 +7,22 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
     try {
         if (req.method === 'GET') {
-            let status = {};
+            const stocks = {};
 
             for (let i = 1; i <= 23; i++) {
-                const key = `team:stock:${i}`;
-                let stock = await redis.get(key);
+                const sold = await redis.get(`team:sold:${i}`);
+                const hold = await redis.get(`team:hold:${i}`);
 
-                if (stock === null) {
-                    stock = 0;
-                }
-
-                status[i] = parseInt(stock);
+                stocks[i] = sold || hold ? 0 : 1;
             }
 
-            return res.status(200).json({ stocks: status });
+            return res.status(200).json({ stocks });
         }
 
         if (req.method === 'POST') {
@@ -39,21 +37,30 @@ export default async function handler(req, res) {
             const { teamId, action } = body || {};
 
             if (!teamId) {
-                return res.status(400).json({ error: 'Missing teamId' });
+                return res.status(400).json({
+                    error: 'Missing teamId'
+                });
             }
 
-            const KEY = `team:stock:${teamId}`;
+            const SOLD_KEY = `team:sold:${teamId}`;
             const HOLD_KEY = `team:hold:${teamId}`;
-            const currentStock = parseInt(await redis.get(KEY) ?? '1');
 
             if (action === 'add') {
-                if (currentStock <= 0) {
+                const sold = await redis.get(SOLD_KEY);
+                const hold = await redis.get(HOLD_KEY);
+
+                if (sold) {
                     return res.status(400).json({
-                        error: 'Εξαντλήθηκε!'
+                        error: 'Η ομάδα έχει πουληθεί!'
                     });
                 }
 
-                await redis.set(KEY, 0);
+                if (hold) {
+                    return res.status(400).json({
+                        error: 'Η ομάδα είναι δεσμευμένη!'
+                    });
+                }
+
                 await redis.set(HOLD_KEY, 1, 'EX', 420);
 
                 return res.status(200).json({
@@ -63,16 +70,15 @@ export default async function handler(req, res) {
             }
 
             if (action === 'remove') {
-                const holdExists = await redis.get(HOLD_KEY);
+                const sold = await redis.get(SOLD_KEY);
 
-                if (holdExists) {
-                    await redis.set(KEY, 1);
+                if (!sold) {
                     await redis.del(HOLD_KEY);
                 }
 
                 return res.status(200).json({
                     success: true,
-                    stock: parseInt(await redis.get(KEY) ?? '0')
+                    stock: sold ? 0 : 1
                 });
             }
 
