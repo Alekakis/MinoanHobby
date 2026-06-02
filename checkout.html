@@ -586,7 +586,7 @@ const totalQty = ducksInCart ? ducksInCart.qty : 1;
                 for (let i = 0; i < (item.qty || 1); i++) {
 
                     await fetch(
-                        '/api/reserve-duck',
+                        '/api/reserve-ducks',
                         {
                             method: 'POST',
                             headers: {
