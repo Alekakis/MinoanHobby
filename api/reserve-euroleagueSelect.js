@@ -16,11 +16,10 @@ export default async function handler(req, res) {
                 const key = `team:stock:${i}`;
                 let stock = await redis.get(key);
                 
-                // Αυτόματη αρχικοποίηση αν το κλειδί δεν υπάρχει
-                if (stock === null) {
-                    await redis.set(key, 1);
-                    stock = 1;
-                }
+              
+               if (stock === null) {
+                stock = 0;
+            }
                 status[i] = parseInt(stock);
             }
             return res.status(200).json({ stocks: status });
