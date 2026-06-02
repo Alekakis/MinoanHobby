@@ -3,9 +3,9 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         try {
             const auth = Buffer.from(
-                `${process.env.db03347e-8d36-4139-83cd-d45449e2d44c}:${process.env.05dreaYv174ROJz6NHvqZ4RtO8SU5P}`
+        'db03347e-8d36-4139-83cd-d45449e2d44c:05dreaYv174ROJz6NHvqZ4RtO8SU5P'
             ).toString('base64');
-
+            
             const vivaRes = await fetch(
                 'https://www.vivapayments.com/api/messages/config/token',
                 {
