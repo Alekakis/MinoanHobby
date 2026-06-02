@@ -74,11 +74,6 @@ export default async function handler(req, res) {
                     'EX',
                     120
                 );
-            
-                await redis.decrby(
-                    'product:stock:euroleague_select',
-                    orderQty
-                );
             }
             else if (lowerTeamId.includes('la liga')) await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 120);
             else await redis.set(`viva:mapping:team:${data.OrderCode}`, teamId, 'EX', 3600);
