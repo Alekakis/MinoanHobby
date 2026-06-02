@@ -56,8 +56,8 @@ export default async function handler(req, res) {
         ].includes(lowerTeamId);
 
         if (!isBoxOrProduct) {
-            const sold = await redis.get(`team:sold:${teamId}`);
-            const hold = await redis.get(`team:hold:${teamId}`);
+            const sold = await redis.get(`SELECT:team:sold:${teamId}`);
+            const hold = await redis.get(`SELECT:team:hold:${teamId}`);
 
             if (sold) {
                 return res.status(400).json({
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            await redis.set(`team:hold:${teamId}`, cartId, 'EX', 420);
+            await redis.set(`SELECT:team:hold:${teamId}`, cartId, 'EX', 420);
         }
 
         const auth = Buffer.from( `${process.env.VIVA_CLIENT_ID || 'db03347e-8d36-4139-83cd-d45449e2d44c'}:${process.env.VIVA_CLIENT_SECRET || '05dreaYv174ROJz6NHvqZ4RtO8SU5P'}` ).toString('base64');
