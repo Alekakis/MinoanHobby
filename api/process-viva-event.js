@@ -94,11 +94,9 @@ export default async function handler(req, res) {
                 teamId &&
                 !isNaN(parseInt(teamId))
             ) {
-                await redis.set(
-                    `team:stock:${teamId}`,
-                    0
-                );
-            }
+                await redis.set(`team:sold:${teamId}`, 1);
+                await redis.del(`team:hold:${teamId}`);
+                    }
 
             await redis.del(
                 `viva:mapping:team:${orderCode}`,
@@ -184,10 +182,8 @@ export default async function handler(req, res) {
                 teamId &&
                 !isNaN(parseInt(teamId))
             ) {
-                await redis.set(
-                    `team:stock:${teamId}`,
-                    1
-                );
+                await redis.del(`team:hold:${teamId}`);
+               
             }
 
             await redis.del(
