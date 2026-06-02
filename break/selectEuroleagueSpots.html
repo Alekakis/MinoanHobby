@@ -231,8 +231,7 @@
 
                     const isReservedOrSold =
                         data.stocks &&
-                        Number(data.stocks[team.id]) === 0 &&
-                        !inCart;
+                        Number(data.stocks[team.id]) === 0;
 
                     return `
                         <div class="shipping-card">
