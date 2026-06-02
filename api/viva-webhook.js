@@ -7,22 +7,22 @@ export default async function handler(req, res) {
     console.log('METHOD:', req.method);
     console.log('QUERY:', req.query);
     console.log('BODY:', req.body);
+
     if (req.method === 'GET') {
-        
-    return res.status(200).json({
-        key: 'ok'
-    });
-}
-    
-    if (req.query && req.query.KeyVerification) {
+        if (req.query && req.query.KeyVerification) {
+            return res.status(200).json({
+                KeyVerification: req.query.KeyVerification
+            });
+        }
+
         return res.status(200).json({
-            KeyVerification: req.query.KeyVerification
+            status: 'webhook-ready'
         });
     }
 
     if (req.method !== 'POST') {
-        return res.status(200).json({
-            status: 'webhook-ready'
+        return res.status(405).json({
+            error: 'Method not allowed'
         });
     }
 
