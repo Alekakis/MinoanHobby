@@ -37,9 +37,10 @@ export default async function handler(req, res) {
                 const holdKey = `${SELECT_PREFIX}:team:hold:${i}`;
 
                 const team = await redis.hgetall(teamKey);
-                const sold = await redis.get(soldKey);
                 const hold = await redis.get(holdKey);
                 const holdTtl = await redis.ttl(holdKey);
+                const stockKey = `${SELECT_PREFIX}:team:stock:${i}`;
+                const stockVal = await redis.get(stockKey);
 
                 teams[i] = {
                     id: Number(team.id),
@@ -47,21 +48,25 @@ export default async function handler(req, res) {
                     maxStock: Number(team.maxStock)
                 };
 
-                if (sold) {
-                    stocks[i] = 'sold';
-                } else if (hold) {
-                    stocks[i] = 'held';
-                } else {
-                    stocks[i] = 'available';
+                // determine state based on numeric stock first
+                let state = 'available';
+                if (stockVal !== null && !isNaN(parseInt(stockVal, 10))) {
+                    const num = parseInt(stockVal, 10);
+                    if (num <= 0) state = 'sold';
                 }
+
+                if (state !== 'sold' && hold) state = 'held';
+
+                stocks[i] = state;
 
                 debug[i] = {
                     teamKey,
                     soldKey,
-                    sold,
                     holdKey,
                     hold,
                     holdTtl,
+                    stockKey,
+                    stockVal,
                     stockReturned: stocks[i]
                 };
             }
