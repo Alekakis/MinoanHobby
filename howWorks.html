@@ -4,134 +4,364 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Πώς Λειτουργεί - MinoanHobby</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* Χρήση των ίδιων styles με την terms.html */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0d1b2a; color: #ffffff; overflow-x: hidden; padding-right: 60px; }
-        
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
-        .main-header nav a { color: #e0e0e0; text-decoration: none; font-weight: 700; font-size: 14px; margin: 0 15px; transition: color 0.3s; }
-        .main-header nav a:hover { color: #ff0000; }
-        
-        .playful-logo { font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
-        .playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
 
-        .right-side-panel { position: fixed; top: 0; right: 0; width: 60px; height: 100vh; background-color: rgba(0, 0, 0, 0.85); border-left: 2px solid #ff0000; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 0; z-index: 100; }
-        .right-side-panel a { color: #e0e0e0; font-size: 18px; text-decoration: none; transition: all 0.3s; }
-        .right-side-panel a:hover { color: #ff0000; }
-        
-        .how-section { padding: 60px 40px; display: flex; justify-content: center; }
-        .how-wrapper { max-width: 900px; width: 100%; background-color: rgba(11, 19, 43, 0.6); border: 1px solid rgba(255, 0, 0, 0.3); border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-        
-        h1 { color: #ff0000; font-size: 30px; margin-bottom: 25px; text-align: center; border-bottom: 2px solid #ff0000; padding-bottom: 15px; }
-        h2 { color: #ff0000; font-size: 18px; margin: 25px 0 15px; display: flex; align-items: center; gap: 10px; }
-        h2::before { content: ''; display: inline-block; width: 8px; height: 8px; background-color: #ff0000; border-radius: 50%; }
-        p { color: #e0e0e0; font-size: 15px; line-height: 1.8; margin-bottom: 15px; }
-        
-        .highlight-box { background: rgba(255, 0, 0, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #ff0000; margin: 20px 0; }
-        .back-home-btn { display: inline-flex; align-items: center; gap: 10px; background-color: #ff0000; color: #ffffff; text-decoration: none; font-weight: 700; padding: 12px 25px; border-radius: 25px; margin-top: 30px; transition: 0.3s; }
-        .back-home-btn:hover { background-color: #ffffff; color: #0d1b2a; }
+        body {
+            background-color: #0d1b2a;
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-right: 60px;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #0b132b;
+            border-bottom: 2px solid #ff0000;
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-header nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .main-header nav a:hover {
+            color: #ff0000;
+        }
+
+        .playful-logo {
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .playful-logo span {
+            color: #ff0000;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-left: 5px;
+        }
+
+        .right-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.85);
+            border-left: 2px solid #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            z-index: 100;
+        }
+
+        .panel-top,
+        .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .right-side-panel a,
+        .right-side-panel .lang-selector {
+            color: #e0e0e0;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .right-side-panel a:hover,
+        .right-side-panel .lang-selector:hover {
+            color: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .cart-container {
+            position: relative;
+        }
+
+        .cart-count {
+            background-color: #ff0000;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -10px;
+        }
+
+        .lang-selector {
+            font-size: 12px !important;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .how-section {
+            padding: 60px 40px;
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(rgba(13,27,42,0.4), #0d1b2a);
+        }
+
+        .how-wrapper {
+            max-width: 900px;
+            width: 100%;
+            background-color: rgba(11,19,43,0.6);
+            border: 1px solid rgba(255,0,0,0.3);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .how-wrapper h1 {
+            color: #ff0000;
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff0000;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        .how-block {
+            margin-bottom: 30px;
+        }
+
+        .how-block h2 {
+            color: #ff0000;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .how-block h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #ff0000;
+            border-radius: 50%;
+        }
+
+        .how-wrapper p {
+            color: #e0e0e0;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .highlight-box {
+            background-color: rgba(255,255,255,0.03);
+            border-left: 4px solid #ff0000;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-box ul {
+            margin-left: 20px;
+            color: #e0e0e0;
+            line-height: 2;
+            font-size: 15px;
+        }
+
+        .action-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #ff0000;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 12px 25px;
+            border-radius: 25px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.2);
+        }
+
+        .back-home-btn:hover {
+            background-color: #ffffff;
+            color: #0d1b2a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.2);
+        }
+
         @media (max-width: 768px) {
-    body {
-        padding-right: 0;
-    }
+            body {
+                padding-right: 0;
+                padding-bottom: 70px;
+            }
 
-    .right-side-panel {
-        position: fixed;
-        bottom: 0;
-        top: auto;
-        right: 0;
-        width: 100%;
-        height: 60px;
-        flex-direction: row;
-        padding: 0 20px;
-        border-left: none;
-        border-top: 2px solid #ff0000;
-    }
+            .right-side-panel {
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                right: 0;
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                padding: 0 20px;
+                border-left: none;
+                border-top: 2px solid #ff0000;
+            }
 
-    .panel-top,
-    .panel-bottom {
-        flex-direction: row;
-        gap: 22px;
-    }
+            .panel-top,
+            .panel-bottom {
+                flex-direction: row;
+                gap: 22px;
+            }
 
-    .main-header {
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px 10px;
-        text-align: center;
-    }
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 10px;
+                text-align: center;
+            }
 
-    .main-header nav {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-    }
+            .main-header nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
 
-    .main-header nav a {
-        margin: 0;
-        font-size: 12px;
-    }
+            .main-header nav a {
+                margin: 0;
+                font-size: 12px;
+            }
 
-    .playful-logo {
-        font-size: 24px;
-        order: -1;
-    }
+            .playful-logo {
+                font-size: 24px;
+                order: -1;
+            }
 
-    .hero-section {
-        min-height: 60vh;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-    }
+            .how-section {
+                padding: 30px 15px 90px;
+            }
 
-    .contact-section {
-        padding: 30px 15px 90px;
-    }
+            .how-wrapper {
+                padding: 25px 18px;
+            }
 
-    .contact-section h2 {
-        font-size: 24px;
-    }
+            .how-wrapper h1 {
+                font-size: 24px;
+            }
 
-    .contact-section p {
-        font-size: 20px;
-        word-break: break-word;
-    }
-}
+            .how-block h2 {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="#"><i class="fas fa-shopping-cart"></i></a>
-            <div style="font-size: 12px; font-weight: bold; text-align: center;">🇬🇷<br>ΕΛ</div>
+            <a href="checkout.html" class="cart-container" title="Καλάθι Αγορών">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="global-cart-count">0</span>
+            </a>
+
+            <div class="lang-selector" title="Αλλαγή Γλώσσας">
+                🇬🇷<br>ΕΛ
+            </div>
         </div>
+
         <div class="panel-bottom">
-            <a href="https://www.instagram.com/minoanhobby/"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.youtube.com/@makisscharlie"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank" title="YouTube">
+                <i class="fab fa-youtube"></i>
+            </a>
         </div>
     </aside>
 
     <header class="main-header">
-        <nav><a href="boxesOrder.html">BOXES</a> <a href="breakOrder.html">BREAKS</a> <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a></nav>
-        <div class="playful-logo">Minoan<span>Hobby</span></div>
-        <nav><a href="howWorks.html" style="color: #ff0000;">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a> <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a> <a href="newUpdates.html">ΜΑΘΕΤΕ ΝΕΑ</a></nav>
+        <nav class="nav-left">
+            <a href="boxesOrder.html">BOXES</a>
+            <a href="breakOrder.html">BREAKS</a>
+            <a href="shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
+        </nav>
+
+        <div class="playful-logo">
+            Minoan<span>Hobby</span>
+        </div>
+
+        <nav class="nav-right">
+            <a href="howWorks.html" style="color: #ff0000;">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+            <a href="terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="newUpdates.html">ΜΑΘΕΤΕ ΝΕΑ</a>
+        </nav>
     </header>
 
     <section class="how-section">
         <div class="how-wrapper">
+
             <h1>Τι είναι το Live Break;</h1>
-            <p>Στο MinoanHobby, το Live Break δεν είναι απλά ένα άνοιγμα πακέτων. Είναι η απόλυτη εμπειρία για κάθε συλλέκτη που θέλει να ζήσει το πάθος της ανακάλυψης σε πραγματικό χρόνο.</p>
-            
-            <h2>Η Διαδικασία</h2>
-            <p>Το Live Break είναι η διαδικασία κατά την οποία ανοίγουμε σφραγισμένα κουτιά (boxes/cases) μπροστά στην κάμερα. Εσείς, επιλέγοντας ένα "spot" (ομάδα, παίκτη ή κατηγορία), κατοχυρώνετε ό,τι κάρτες προκύψουν από το άνοιγμα που αντιστοιχούν στη δική σας επιλογή.</p>
-            
+
+            <p>
+                Στο MinoanHobby, το Live Break δεν είναι απλά ένα άνοιγμα πακέτων.
+                Είναι η απόλυτη εμπειρία για κάθε συλλέκτη που θέλει να ζήσει
+                το πάθος της ανακάλυψης σε πραγματικό χρόνο.
+            </p>
+
+            <div class="how-block">
+                <h2>Η Διαδικασία</h2>
+                <p>
+                    Το Live Break είναι η διαδικασία κατά την οποία ανοίγουμε
+                    σφραγισμένα κουτιά (boxes/cases) μπροστά στην κάμερα.
+                    Εσείς, επιλέγοντας ένα "spot" (ομάδα, παίκτη ή κατηγορία),
+                    κατοχυρώνετε ό,τι κάρτες προκύψουν από το άνοιγμα που
+                    αντιστοιχούν στη δική σας επιλογή.
+                </p>
+            </div>
+
             <div class="highlight-box">
                 <p><strong>Τι κερδίζετε συμμετέχοντας:</strong></p>
-                <ul style="margin-left: 20px; color: #e0e0e0; line-height: 2;">
+                <ul>
                     <li>Πρόσβαση σε σπάνιες κάρτες (Autographs, Memorabilia, Numbered).</li>
                     <li>Την αγωνία και τη χαρά του "hit" την ώρα που ανοίγει το πακέτο.</li>
                     <li>Την εμπειρία της κοινότητάς μας.</li>
@@ -139,19 +369,56 @@
                 </ul>
             </div>
 
-            <h2>Σημαντική Σημείωση</h2>
-            <p>Είναι σημαντικό να κατανοήσετε ότι το Live Break περιέχει το στοιχείο της τύχης. Δεν πρόκειται για επένδυση με εγγυημένο αποτέλεσμα. Υπάρχει η πιθανότητα το spot που επιλέξατε να μην περιλαμβάνει κάρτες στο συγκεκριμένο άνοιγμα, καθώς το περιεχόμενο ορίζεται αποκλειστικά από τον κατασκευαστή.</p>
-
-            <h2>Η Φροντίδα μας</h2>
-            <p>Στο MinoanHobby, η ασφάλεια των καρτών σας είναι προτεραιότητά μας. Κάθε σημαντική κάρτα που "αποκαλύπτεται" στο live, τοποθετείται άμεσα σε προστατευτική θήκη (sleeve/toploader) και, για τις πιο ιδιαίτερες περιπτώσεις, σε magnetic holder. Σας τις στέλνουμε με κάθε δυνατή προσοχή, ώστε να φτάσουν στα χέρια σας όπως ακριβώς βγήκαν από το πακέτο.</p>
-
-            <p style="text-align: center; font-style: italic; margin-top: 30px;">Στο MinoanHobby, δεν βλέπετε απλώς ένα άνοιγμα... Το ζείτε μαζί μας.</p>
-
-            <div style="text-align: center;">
-                <a href="index.html" class="back-home-btn"><i class="fas fa-arrow-left"></i> ΠΙΣΩ ΣΤΗΝ ΑΡΧΙΚΗ</a>
+            <div class="how-block">
+                <h2>Σημαντική Σημείωση</h2>
+                <p>
+                    Είναι σημαντικό να κατανοήσετε ότι το Live Break περιέχει
+                    το στοιχείο της τύχης. Δεν πρόκειται για επένδυση με
+                    εγγυημένο αποτέλεσμα. Υπάρχει η πιθανότητα το spot που
+                    επιλέξατε να μην περιλαμβάνει κάρτες στο συγκεκριμένο άνοιγμα,
+                    καθώς το περιεχόμενο ορίζεται αποκλειστικά από τον κατασκευαστή.
+                </p>
             </div>
+
+            <div class="how-block">
+                <h2>Η Φροντίδα μας</h2>
+                <p>
+                    Στο MinoanHobby, η ασφάλεια των καρτών σας είναι προτεραιότητά μας.
+                    Κάθε σημαντική κάρτα που "αποκαλύπτεται" στο live, τοποθετείται
+                    άμεσα σε προστατευτική θήκη (sleeve/toploader) και, για τις πιο
+                    ιδιαίτερες περιπτώσεις, σε magnetic holder. Σας τις στέλνουμε
+                    με κάθε δυνατή προσοχή, ώστε να φτάσουν στα χέρια σας όπως
+                    ακριβώς βγήκαν από το πακέτο.
+                </p>
+            </div>
+
+            <p style="text-align:center; font-style:italic; margin-top:30px;">
+                Στο MinoanHobby, δεν βλέπετε απλώς ένα άνοιγμα... Το ζείτε μαζί μας.
+            </p>
+
+            <div class="action-container">
+                <a href="index.html" class="back-home-btn">
+                    <i class="fas fa-arrow-left"></i> ΠΙΣΩ ΣΤΗΝ ΑΡΧΙΚΗ
+                </a>
+            </div>
+
         </div>
     </section>
+
+    <script>
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+
+            const badge = document.getElementById('global-cart-count');
+
+            if (badge) {
+                badge.innerText = totalItems;
+            }
+        }
+
+        window.onload = updateCartCount;
+    </script>
 
 </body>
 </html>
