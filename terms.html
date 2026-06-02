@@ -287,9 +287,9 @@
 
     <aside class="right-side-panel">
         <div class="panel-top">
-            <a href="#" class="cart-container" title="Καλάθι Αγορών">
+            <a href="checkout.html" class="cart-container" title="Καλάθι Αγορών">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">0</span>
+                <span class="cart-count" id="global-cart-count">0</span>
             </a>
             <div class="lang-selector" title="Αλλαγή Γλώσσας">
                 🇬🇷<br>ΕΛ
@@ -393,6 +393,19 @@
 
         </div>
     </section>
+    <script>
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+
+        const badge = document.getElementById('global-cart-count');
+        if (badge) {
+            badge.innerText = totalItems;
+        }
+    }
+
+    window.onload = updateCartCount;
+</script>
 
 </body>
 </html>
