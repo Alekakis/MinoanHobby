@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const REDIS_KEY = 'product:stock:ducks'; // Το κλειδί σου στο Redis
+    const REDIS_KEY = 'SELECT:ducks:stock'; // migrate to SELECT namespace
 
     try {
         // --- GET: Επιστροφή στοκ ---
@@ -36,8 +36,8 @@ export default async function handler(req, res) {
                 if (currentStock <= 0) return res.status(400).json({ error: 'Εξαντλήθηκε!' });
                 const newStock = await redis.decr(REDIS_KEY);
                 return res.status(200).json({ success: true, stock: newStock });
-            } 
-            
+            }
+
             if (action === 'remove') {
                 const newStock = await redis.incr(REDIS_KEY);
                 return res.status(200).json({ success: true, stock: newStock });
