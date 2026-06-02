@@ -3,13 +3,10 @@ import Redis from 'ioredis';
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
 export default async function handler(req, res) {
-    // 1. Log ολόκληρο το αντικείμενο του request για να δούμε που κρύβεται το KeyVerification
-    console.log('FULL REQ URL:', req.url);
     console.log('METHOD:', req.method);
     console.log('QUERY:', req.query);
-    console.log('HEADERS:', req.headers);
 
-    // 2. Έλεγχος: Μερικές φορές το KeyVerification έρχεται στο header αντί για το query
+    // 1. Έλεγχος Επαλήθευσης (Verification)
     const keyVerification = req.query.KeyVerification || req.headers['keyverification'];
 
     if (req.method === 'GET' && keyVerification) {
@@ -17,18 +14,20 @@ export default async function handler(req, res) {
             KeyVerification: keyVerification
         });
     }
-        return res.status(200).json({
-            status: 'webhook-ready'
-        });
+
+    // 2. Αν είναι GET αλλά δεν έχει KeyVerification (π.χ. κάποιος μπαίνει στο URL)
+    if (req.method === 'GET') {
+        return res.status(200).json({ status: 'webhook-ready' });
     }
 
+    // 3. Χειρισμός POST (Webhook events)
     if (req.method !== 'POST') {
-        return res.status(405).json({
-            error: 'Method not allowed'
-        });
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Συνέχεια της λογικής σας από εδώ και κάτω...
     let event = req.body;
+    // ...
     if (typeof event === 'string') {
         try { event = JSON.parse(event); } catch(e) {}
     }
