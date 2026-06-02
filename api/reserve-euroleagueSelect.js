@@ -18,12 +18,8 @@ export default async function handler(req, res) {
             for (let i = 1; i <= 23; i++) {
                 const sold = await redis.get(`team:sold:${i}`);
                 const hold = await redis.get(`team:hold:${i}`);
-                const oldStock = await redis.get(`team:stock:${i}`);
 
-                // Migration-safe:
-                // - new system: team:sold / team:hold
-                // - old system: team:stock = 0 means already sold/reserved
-                stocks[i] = sold || hold || oldStock === '0' ? 0 : 1;
+              stocks[i] = sold || hold ? 0 : 1;
             }
 
             return res.status(200).json({ stocks });
@@ -51,9 +47,7 @@ export default async function handler(req, res) {
             if (action === 'add') {
                 const sold = await redis.get(SOLD_KEY);
                 const hold = await redis.get(HOLD_KEY);
-                const oldStock = await redis.get(OLD_STOCK_KEY);
-
-                if (sold || oldStock === '0') {
+             if (sold) {
                     return res.status(400).json({
                         error: 'Η ομάδα έχει πουληθεί!'
                     });
@@ -75,10 +69,9 @@ export default async function handler(req, res) {
 
             if (action === 'remove') {
                 const sold = await redis.get(SOLD_KEY);
-                const oldStock = await redis.get(OLD_STOCK_KEY);
                 const hold = await redis.get(HOLD_KEY);
 
-                if (sold || oldStock === '0') {
+                if (sold) {
                     return res.status(200).json({
                         success: true,
                         released: false,
