@@ -65,9 +65,8 @@ export default async function handler(req, res) {
                   });
                 }
 
-await redis.set(HOLD_KEY, cartId, 'EX', 420);
+                await redis.set(HOLD_KEY, cartId, 'EX', 420);
 
-                await redis.set(HOLD_KEY, 1, 'EX', 420);
 
                 return res.status(200).json({
                     success: true,
