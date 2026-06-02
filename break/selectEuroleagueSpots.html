@@ -227,11 +227,15 @@
                 const sortedTeams = [...euroleagueTeams].sort((a, b) => b.price - a.price);
 
                 grid.innerHTML = sortedTeams.map(team => {
-                    const inCart = cart.find(t => Number(t.teamId) === Number(team.id));
+                const inCart = cart.find(t => Number(t.teamId) === Number(team.id));
 
                     const isReservedOrSold =
                         data.stocks &&
                         Number(data.stocks[team.id]) === 0;
+                    const state = data.stocks ? data.stocks[team.id] : 'available';
+
+                    const isSold = state === 'sold';
+                    const isHeld = state === 'held';
 
                     return `
                         <div class="shipping-card">
@@ -247,11 +251,13 @@
                                 class="add-btn"
                                 id="btn-${team.id}"
                                 ${isReservedOrSold || inCart ? 'disabled' : ''}
+                                ${(isSold || isHeld || inCart) ? 'disabled' : ''}
                                 onclick="addToCart(${team.id})">
                                 ${
                                     isReservedOrSold
                                     ? 'Δεσμευμένο'
                                     : (inCart ? 'Στο καλάθι' : 'Επιλογή')
+                                    isSold ? 'Πωλήθηκε' : (isHeld ? 'Δεσμευμένο' : (inCart ? 'Στο καλάθι' : 'Επιλογή'))
                                 }
                             </button>
 
@@ -282,10 +288,21 @@
                     return;
                 }
 
+                // Try reserve on server
+                try {
+                    await reserveTeam(teamId);
+                } catch (e) {
+                    alert('Η ομάδα δεν είναι διαθέσιμη: ' + (e.message || ''));
+                    await updatePageState();
+                    return;
+                }
+
                 const team = euroleagueTeams.find(t => Number(t.id) === Number(teamId));
 
                 if (!team) {
                     alert('Δεν βρέθηκε η ομάδα.');
+                    // release just in case
+                    try { await releaseTeam(teamId); } catch(e){}
                     await updatePageState();
                     return;
                 }
@@ -317,11 +334,19 @@
             try {
                 let cart = getCart();
 
+                // Optimistically remove locally
                 cart = cart.filter(t => Number(t.teamId) !== Number(teamId));
                 saveCart(cart);
 
                 if (cart.length === 0) {
                     localStorage.removeItem('cartStartTime');
+                }
+
+                // release hold on server
+                try {
+                    await releaseTeam(teamId);
+                } catch (e) {
+                    console.error('failed to release team', teamId, e);
                 }
 
                 await updatePageState();
