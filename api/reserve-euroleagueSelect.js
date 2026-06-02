@@ -12,6 +12,7 @@ async function ensureSelectMapping() {
 
         await redis.hsetnx(key, 'id', String(i));
         await redis.hsetnx(key, 'maxStock', '1');
+        await redis.hsetnx(key, 'stock', '1');
         await redis.hsetnx(key, 'name', `Team ${i}`);
     }
 }
@@ -39,18 +40,22 @@ export default async function handler(req, res) {
                 const team = await redis.hgetall(teamKey);
                 const hold = await redis.get(holdKey);
                 const holdTtl = await redis.ttl(holdKey);
-                const stockKey = `${SELECT_PREFIX}:team:stock:${i}`;
-                const stockVal = await redis.get(stockKey);
+                const sold = await redis.get(soldKey);
+
+                const stockVal = team && (team.stock || team.maxStock);
 
                 teams[i] = {
                     id: Number(team.id),
                     name: team.name,
-                    maxStock: Number(team.maxStock)
+                    maxStock: Number(team.maxStock),
+                    stock: Number(stockVal || 0)
                 };
 
-                // determine state based on numeric stock first
+                // determine state: sold if explicit sold key OR stock <= 0
                 let state = 'available';
-                if (stockVal !== null && !isNaN(parseInt(stockVal, 10))) {
+                if (sold) {
+                    state = 'sold';
+                } else if (stockVal !== undefined && !isNaN(parseInt(stockVal, 10))) {
                     const num = parseInt(stockVal, 10);
                     if (num <= 0) state = 'sold';
                 }
@@ -62,11 +67,11 @@ export default async function handler(req, res) {
                 debug[i] = {
                     teamKey,
                     soldKey,
+                    sold,
                     holdKey,
                     hold,
                     holdTtl,
-                    stockKey,
-                    stockVal,
+                    team,
                     stockReturned: stocks[i]
                 };
             }
