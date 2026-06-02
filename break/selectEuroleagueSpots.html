@@ -263,7 +263,7 @@ async function updatePageState() {
 
                 const inCart =
                     cart.find(
-                        t => t.teamId === team.id
+                        t => Number(t.teamId) === Number(team.id)
                     );
 
                 const isSoldOut =
@@ -320,45 +320,116 @@ async function updatePageState() {
         console.error(e);
     }
 }
-        async function addToCart(teamId) {
+       async function addToCart(teamId) {
+            const btn = document.getElementById(`btn-${teamId}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Γίνεται δέσμευση...';
+            }
+
             try {
+                const cartId = getCartId();
+
                 const res = await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify({teamId,action: 'add',cartId: getCartId()})  
+                    body: JSON.stringify({
+                        teamId: Number(teamId),
+                        action: 'add',
+                        cartId
+                    })  
                 });
+
+                const data = await res.json().catch(() => ({}));
+
                 if (res.ok) {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const team = euroleagueTeams.find(t => t.id === teamId);
-                    cart.push({name: team.name,price: team.price,teamId: teamId,addedAt: Date.now(),cartId: getCartId()});
-                    localStorage.setItem('cart', JSON.stringify(cart)); 
-                    if (
-                        !localStorage.getItem(
-                            'cartStartTime'
-                        )
-                    ) {
-                        localStorage.setItem(
-                            'cartStartTime',
-                            Date.now()
-                        );
+
+                    const alreadyInCart = cart.some(t => Number(t.teamId) === Number(teamId));
+                    if (alreadyInCart) {
+                        await updatePageState();
+                        return;
                     }
+
+                    const team = euroleagueTeams.find(t => Number(t.id) === Number(teamId));
+
+                    if (!team) {
+                        await fetch('/api/reserve-euroleagueSelect', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                teamId: Number(teamId),
+                                action: 'remove',
+                                cartId
+                            })
+                        });
+
+                        alert('Δεν βρέθηκε η ομάδα. Η δέσμευση ακυρώθηκε.');
+                        await updatePageState();
+                        return;
+                    }
+
+                    cart.push({
+                        name: team.name,
+                        price: team.price,
+                        teamId: Number(teamId),
+                        addedAt: Date.now(),
+                        cartId
+                    });
+
+                    localStorage.setItem('cart', JSON.stringify(cart)); 
+
+                    if (!localStorage.getItem('cartStartTime')) {
+                        localStorage.setItem('cartStartTime', Date.now());
+                    }
+
                     await updatePageState();
-                } else { alert("Η ομάδα μόλις δεσμεύτηκε!"); }
-            } catch(e) { console.error(e); }
+
+                } else {
+                    alert(data.error || 'Η ομάδα μόλις δεσμεύτηκε!');
+                    await updatePageState();
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Σφάλμα κατά την προσθήκη στο καλάθι.');
+                await updatePageState();
+            }
         }
 
         async function removeFromCart(teamId) {
             try {
-                await fetch('/api/reserve-euroleagueSelect', {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                const item = cart.find(t => Number(t.teamId) === Number(teamId));
+                const itemCartId = item?.cartId || getCartId();
+
+                const res = await fetch('/api/reserve-euroleagueSelect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({teamId,action: 'remove',cartId: getCartId()})
+                    body: JSON.stringify({
+                        teamId: Number(teamId),
+                        action: 'remove',
+                        cartId: itemCartId
+                    })
                 });
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                cart = cart.filter(t => t.teamId !== teamId);
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || data.success !== true) {
+                    alert(data.error || 'Δεν έγινε σωστά η αποδέσμευση. Δοκίμασε ξανά.');
+                    await updatePageState();
+                    return;
+                }
+
+                cart = cart.filter(t => Number(t.teamId) !== Number(teamId));
                 localStorage.setItem('cart', JSON.stringify(cart));
-                updatePageState();
-            } catch(e) { console.error(e); }
+
+                await updatePageState();
+            } catch(e) {
+                console.error(e);
+                alert('Σφάλμα στην αφαίρεση από το καλάθι.');
+                await updatePageState();
+            }
         }
 
         setInterval(updatePageState, 2000);

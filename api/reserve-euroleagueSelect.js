@@ -41,7 +41,7 @@ export default async function handler(req, res) {
             const { teamId, action, cartId } = body || {};
 
             if (!teamId || !action || !cartId) {
-                 return res.status(400).json({ error: 'Missing data' });
+                return res.status(400).json({ error: 'Missing data' });
             }
 
             const SOLD_KEY = `team:sold:${teamId}`;
@@ -61,12 +61,11 @@ export default async function handler(req, res) {
 
                 if (hold && hold !== cartId) {
                     return res.status(400).json({
-                    error: 'Η ομάδα είναι δεσμευμένη!'
-                  });
+                        error: 'Η ομάδα είναι δεσμευμένη!'
+                    });
                 }
 
                 await redis.set(HOLD_KEY, cartId, 'EX', 420);
-
 
                 return res.status(200).json({
                     success: true,
@@ -77,17 +76,41 @@ export default async function handler(req, res) {
             if (action === 'remove') {
                 const sold = await redis.get(SOLD_KEY);
                 const oldStock = await redis.get(OLD_STOCK_KEY);
-
-                
                 const hold = await redis.get(HOLD_KEY);
 
-            if (!sold && oldStock !== '0' && hold === cartId) {
-              await redis.del(HOLD_KEY);
-            }
+                if (sold || oldStock === '0') {
+                    return res.status(200).json({
+                        success: true,
+                        released: false,
+                        stock: 0,
+                        message: 'Η ομάδα είναι ήδη πουλημένη.'
+                    });
+                }
+
+                if (!hold) {
+                    return res.status(200).json({
+                        success: true,
+                        released: true,
+                        stock: 1,
+                        message: 'Δεν υπήρχε ενεργή δέσμευση.'
+                    });
+                }
+
+                if (hold !== cartId) {
+                    return res.status(409).json({
+                        success: false,
+                        released: false,
+                        stock: 0,
+                        error: 'Η ομάδα είναι δεσμευμένη από άλλο καλάθι.'
+                    });
+                }
+
+                await redis.del(HOLD_KEY);
 
                 return res.status(200).json({
                     success: true,
-                    stock: sold || oldStock === '0' ? 0 : 1
+                    released: true,
+                    stock: 1
                 });
             }
 
