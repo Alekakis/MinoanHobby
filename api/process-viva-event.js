@@ -167,8 +167,9 @@ export default async function handler(req, res) {
                 );
 
             if (ducksQty) {
+                // return ducks stock into SELECT namespace
                 await redis.incrby(
-                    'product:stock:ducks',
+                    'SELECT:ducks:stock',
                     parseInt(ducksQty)
                 );
             }
