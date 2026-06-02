@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         }
 
         // --- 2. VIVA WALLET ---
-        const auth = Buffer.from('db03347e-8d36-4139-83cd-d45449e2d44c:05dreaYv174ROJz6NHvqZ4RtO8JU5P').toString('base64');
+        const auth = Buffer.from('db03347e-8d36-4139-83cd-d45449e2d44c:05dreaYv174ROJz6NHvqZ4RtO8SU5P').toString('base64');
         const vivaResponse = await fetch('https://www.vivapayments.com/api/orders', {
             method: 'POST',
             headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
