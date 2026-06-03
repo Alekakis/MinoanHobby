@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 const redis = new Redis(process.env.REDIS_URL);
 
 const TEAM_COUNT = 23;
-const HOLD_TTL = 7 * 60; // seconds
+const HOLD_TTL = 10 * 60 * 60; // seconds (10 hours)
 const SELECT_PREFIX = 'SELECT';
 
 async function ensureSelectMapping() {
