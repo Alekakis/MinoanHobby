@@ -155,7 +155,7 @@
 			{ id: 23, name: "CSKA Moscow", price: 50.00, logo: "../images/imageCska.png" }
 			];
 
-			const CART_EXPIRE_TIME = 7 * 60 * 1000;
+			const CART_EXPIRE_TIME = 10 * 60 * 60 * 1000; // 10 hours
 			const RESERVE_API = '/api/reserve-euroleagueSelect';
 
 			function getCartId() {
@@ -328,13 +328,6 @@
 			return;
 			}
 
-			try {
-			await reserveTeam(teamId);
-			} catch (e) {
-			alert('Η ομάδα δεν είναι διαθέσιμη: ' + (e.message || ''));
-			await updatePageState();
-			return;
-			}
 
 			const team = euroleagueTeams.find(t => Number(t.id) === Number(teamId));
 
@@ -384,11 +377,7 @@
 			localStorage.removeItem('cartStartTime');
 			}
 
-			try {
-			await releaseTeam(teamId);
-			} catch (e) {
-			console.error('Failed to release team:', teamId, e);
-			}
+			// team reservations in Redis are created at checkout; nothing to release here
 
 			await updatePageState();
 
