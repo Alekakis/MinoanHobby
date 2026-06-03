@@ -1,73 +1,210 @@
-export default async function handler(req, res) { 
-    if (req.method === 'GET') {
-    try { const auth = Buffer.from(
-    'db03347e-8d36-4139-83cd-d45449e2d44c:05dreaYv174ROJz6NHvqZ4RtO8SU5P'
-).toString('base64');
+import Redis from 'ioredis';
 
-const vivaRes = await fetch(
-    'https://www.vivapayments.com/api/messages/config/token',
-    {
-        method: 'GET',
-        headers: {
-            Authorization: `Basic ${auth}`
-        }
-    }
-);
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
-            const data = await vivaRes.json();
-
-            return res.status(200).json({
-                Key: data.Key
-            });
-
-        } catch (error) {
-            return res.status(500).json({
-                error: error.message
-            });
-        }
-    }
-
+export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({
             error: 'Method not allowed'
         });
     }
 
-    try {
-        console.log('VIVA WEBHOOK RECEIVED:', req.body);
-
-        const response = await fetch(
-            `${process.env.SITE_URL}/api/process-viva-event`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-internal-secret': process.env.INTERNAL_API_SECRET
-                },
-                body: JSON.stringify(req.body || {})
-            }
-        );
-
-        const data = await response.json().catch(() => ({}));
-
-        console.log('PROCESS VIVA RESPONSE:', {
-            ok: response.ok,
-            status: response.status,
-            data
+    if (
+        req.headers['x-internal-secret'] !==
+        process.env.INTERNAL_API_SECRET
+    ) {
+        return res.status(401).json({
+            error: 'Unauthorized'
         });
+    }
+
+    let event = req.body;
+
+    if (typeof event === 'string') {
+        try {
+            event = JSON.parse(event);
+        } catch (e) {}
+    }
+
+    try {
+        const eventData = event.EventData || {};
+        const orderCode = eventData.OrderCode;
+        const statusId = eventData.StatusId;
+        const eventTypeId = event.EventTypeId;
+
+        if (!orderCode) {
+            return res.status(200).json({
+                status: 'ignored',
+                message: 'No order code'
+            });
+        }
+
+        if (eventTypeId === 1796 || statusId === 'F') {
+            const orderDetailsRaw =
+                await redis.get(
+                    `viva:order:details:${orderCode}`
+                );
+
+            const details = orderDetailsRaw
+                ? JSON.parse(orderDetailsRaw)
+                : {};
+
+            await fetch(
+                'https://api.web3forms.com/submit',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        access_key: process.env.WEB3FORMS_KEY,
+                        subject:
+                            '💰 Πληρωμένη Παραγγελία: ' +
+                            (details.firstName || ''),
+                        'Order Code': orderCode,
+                        'Ονομα':
+                            (details.firstName || '') +
+                            ' ' +
+                            (details.lastName || ''),
+                        'Email': details.email || '',
+                        'Τηλέφωνο': details.phone || '',
+                        'Διεύθυνση': details.address || '',
+                        'Πόλη': details.city || '',
+                        'ΤΚ': details.zip || '',
+                        'Είδος': details.teamName || 'Άγνωστο',
+                        'Ποσό': (details.price || '0') + ' €'
+                    })
+                }
+            );
+
+            await redis.del(
+                `viva:pending:ducks:${orderCode}`,
+                `viva:pending:megabox:${orderCode}`,
+                `viva:pending:euroleague:${orderCode}`,
+                `viva:pending:select:${orderCode}`,
+                `viva:pending:laliga:${orderCode}`
+            );
+
+            const teamId =
+                await redis.get(
+                    `viva:mapping:team:${orderCode}`
+                );
+
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.set(`SELECT:team:sold:${teamId}`, 1);
+                await redis.del(`SELECT:team:hold:${teamId}`);
+                try { await redis.hdel(`SELECT:team:${teamId}`, 'hold'); } catch (e) {}
+            }
+
+            await redis.del(
+                `viva:mapping:team:${orderCode}`,
+                `viva:order:details:${orderCode}`
+            );
+
+            return res.status(200).json({
+                status: 'success'
+            });
+        }
+
+        if (
+            statusId === 'E' ||
+            statusId === 'X' ||
+            statusId === 'C'
+        ) {
+            const megaboxQty =
+                await redis.get(
+                    `viva:pending:megabox:${orderCode}`
+                );
+
+            if (megaboxQty) {
+                await redis.incrby(
+                    'product:stock:megabox',
+                    parseInt(megaboxQty)
+                );
+            }
+
+            const euroleagueQty =
+                await redis.get(
+                    `viva:pending:euroleague:${orderCode}`
+                );
+
+            if (euroleagueQty) {
+                await redis.incrby(
+                    'product:stock:euroleague',
+                    parseInt(euroleagueQty)
+                );
+            }
+
+            const selectQty =
+                await redis.get(
+                    `viva:pending:select:${orderCode}`
+                );
+
+            if (selectQty) {
+                await redis.incrby(
+                    'product:stock:euroleague_select',
+                    parseInt(selectQty)
+                );
+            }
+
+            const laligaQty =
+                await redis.get(
+                    `viva:pending:laliga:${orderCode}`
+                );
+
+            if (laligaQty) {
+                await redis.incrby(
+                    'product:stock:laliga_select',
+                    parseInt(laligaQty)
+                );
+            }
+
+            const ducksQty =
+                await redis.get(
+                    `viva:pending:ducks:${orderCode}`
+                );
+
+            if (ducksQty) {
+                // return ducks stock into SELECT namespace
+                await redis.incrby(
+                    'SELECT:ducks:stock',
+                    parseInt(ducksQty)
+                );
+            }
+
+            const teamId =
+                await redis.get(
+                    `viva:mapping:team:${orderCode}`
+                );
+
+            if (teamId && !isNaN(parseInt(teamId))) {
+                await redis.del(`SELECT:team:hold:${teamId}`);
+                try { await redis.hdel(`SELECT:team:${teamId}`, 'hold'); } catch (e) {}
+            }
+
+            await redis.del(
+                `viva:pending:ducks:${orderCode}`,
+                `viva:pending:megabox:${orderCode}`,
+                `viva:pending:euroleague:${orderCode}`,
+                `viva:pending:select:${orderCode}`,
+                `viva:pending:laliga:${orderCode}`,
+                `viva:mapping:team:${orderCode}`,
+                `viva:order:details:${orderCode}`
+            );
+
+            return res.status(200).json({
+                status: 'cancelled'
+            });
+        }
 
         return res.status(200).json({
-            received: true,
-            processed: response.ok,
-            result: data
+            status: 'received'
         });
 
     } catch (error) {
-        console.error('Webhook forward error:', error);
+        console.error('Process Viva Event Error:', error);
 
-        return res.status(200).json({
-            received: true,
-            processed: false,
+        return res.status(500).json({
             error: error.message
         });
     }
