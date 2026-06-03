@@ -9,15 +9,23 @@ const HOLD_TTL = 8 * 60 * 60; // 8 hours
 const SELECT_PREFIX = 'SELECT';
 
 async function ensureSelectMapping() {
+    // Run mapping initialization once. Use a marker key to avoid repeating hsetnx on every request.
+    const initKey = `${SELECT_PREFIX}:initialized`;
+    const initialized = await redis.get(initKey);
+    if (initialized) return;
+
+    const p = redis.pipeline();
     for (let i = 1; i <= TEAM_COUNT; i++) {
         const key = `${SELECT_PREFIX}:team:${i}`;
-
-        await redis.hsetnx(key, 'id', String(i));
-        await redis.hsetnx(key, 'maxStock', '1');
-        await redis.hsetnx(key, 'stock', '1');
-        await redis.hsetnx(key, 'name', `Team ${i}`);
-        await redis.hsetnx(key, 'hold', '0');
+        p.hsetnx(key, 'id', String(i));
+        p.hsetnx(key, 'maxStock', '1');
+        p.hsetnx(key, 'stock', '1');
+        p.hsetnx(key, 'name', `Team ${i}`);
+        p.hsetnx(key, 'hold', '0');
     }
+    // set a short-lived initialized key so we can re-run mapping later if needed
+    p.set(initKey, '1', 'EX', 24 * 60 * 60);
+    await p.exec();
 }
 
 export default async function handler(req, res) {
@@ -35,21 +43,36 @@ export default async function handler(req, res) {
             const teams = {};
             const debug = {};
 
+            // Use a pipeline to reduce Redis roundtrips: for each team request hgetall, sold, hold key and ttl
+            const p = redis.pipeline();
             for (let i = 1; i <= TEAM_COUNT; i++) {
                 const teamKey = `${SELECT_PREFIX}:team:${i}`;
                 const soldKey = `${SELECT_PREFIX}:team:sold:${i}`;
                 const holdKey = `${SELECT_PREFIX}:team:hold:${i}`;
 
+                p.hgetall(teamKey);
+                p.get(soldKey);
+                p.get(holdKey);
+                p.ttl(holdKey);
+            }
 
-                const team = await redis.hgetall(teamKey);
-                const sold = await redis.get(soldKey);
+            const results = await p.exec();
+
+            // results contains 4 entries per team in the same order as queued
+            let idx = 0;
+            for (let i = 1; i <= TEAM_COUNT; i++) {
+                const team = (results[idx++] && results[idx - 1][1]) || {};
+                const sold = (results[idx++] && results[idx - 1][1]);
+                const holdKeyVal = (results[idx++] && results[idx - 1][1]);
+                const holdTtl = (results[idx++] && results[idx - 1][1]);
+
+                const teamKey = `${SELECT_PREFIX}:team:${i}`;
+                const soldKey = `${SELECT_PREFIX}:team:sold:${i}`;
+
                 // team.stock can be the string '0' which is falsy; explicitly prefer it when present
                 const stockVal = (team && typeof team.stock !== 'undefined' && team.stock !== null && team.stock !== '') ? team.stock : team.maxStock;
                 // prefer an explicit hold key (with TTL) when present; fallback to hash field for backward compat
-                const holdKeyVal = await redis.get(holdKey);
                 const hold = (holdKeyVal ? '1' : (team && team.hold ? String(team.hold) : '0'));
-                // include TTL for hold key in debug to help troubleshooting
-                const holdTtl = await redis.ttl(holdKey);
 
                 teams[i] = {
                     id: Number(team.id),
@@ -81,7 +104,7 @@ export default async function handler(req, res) {
                     teamKey,
                     soldKey,
                     sold,
-                    holdKey,
+                    holdKey: `${SELECT_PREFIX}:team:hold:${i}`,
                     hold,
                     holdTtl,
                     team,
