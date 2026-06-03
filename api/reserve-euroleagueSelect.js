@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
 const TEAM_COUNT = 23;
 const HOLD_TTL = 10 * 60 * 60; // seconds (10 hours)
