@@ -2,6 +2,7 @@ import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
+
 const TEAM_COUNT = 23;
 const HOLD_TTL = 10 * 60 * 60; // seconds (10 hours)
 const SELECT_PREFIX = 'SELECT';
@@ -38,7 +39,10 @@ export default async function handler(req, res) {
                 const holdKey = `${SELECT_PREFIX}:team:hold:${i}`;
 
                 const team = await redis.hgetall(teamKey);
-                const hold = await redis.get(holdKey);
+                // hold may be stored either as a dedicated key (with TTL) or as a hash field for manual GUI edits
+                const holdFromKey = await redis.get(holdKey);
+                const holdFromHash = team && team.hold;
+                const hold = holdFromHash || holdFromKey;
                 const holdTtl = await redis.ttl(holdKey);
                 const sold = await redis.get(soldKey);
 
@@ -107,6 +111,7 @@ export default async function handler(req, res) {
                 const sold = await redis.get(soldKey);
                 if (sold) return res.status(400).json({ error: 'sold' });
 
+                // Attempt to create hold with TTL key (so it expires). Also set hash field so it shows in GUI.
                 const result = await redis.set(
                     holdKey,
                     String(cartId || 'unknown'),
@@ -116,6 +121,12 @@ export default async function handler(req, res) {
                 );
 
                 if (result === 'OK') {
+                    try {
+                        await redis.hset(teamKey, 'hold', String(cartId || 'unknown'));
+                    } catch (e) {
+                        // ignore hash set errors
+                    }
+
                     return res.status(200).json({
                         success: true,
                         reserved: true,
@@ -125,26 +136,32 @@ export default async function handler(req, res) {
                     });
                 }
 
-                const current = await redis.get(holdKey);
+                // If we couldn't reserve via key, maybe hash hold exists
+                const currentHash = (await redis.hget(teamKey, 'hold')) || null;
+                const currentKey = await redis.get(holdKey);
                 const ttl = await redis.ttl(holdKey);
 
                 return res.status(409).json({
                     error: 'already_reserved',
-                    reservedBy: current,
+                    reservedBy: currentHash || currentKey,
                     ttl
                 });
             }
 
             if (action === 'release') {
-                const current = await redis.get(holdKey);
+                // Support releasing when hold is stored either as key or as hash field
+                const currentKey = await redis.get(holdKey);
+                const currentHash = await redis.hget(teamKey, 'hold');
 
-                if (!current) {
+                if (!currentKey && !currentHash) {
                     return res.status(200).json({
                         success: true,
                         released: false,
                         reason: 'not_found'
                     });
                 }
+
+                const current = currentHash || currentKey;
 
                 if (cartId && current !== String(cartId)) {
                     return res.status(403).json({
@@ -154,11 +171,9 @@ export default async function handler(req, res) {
                 }
 
                 await redis.del(holdKey);
+                try { await redis.hdel(teamKey, 'hold'); } catch (e) {}
 
-                return res.status(200).json({
-                    success: true,
-                    released: true
-                });
+                return res.status(200).json({ success: true, released: true });
             }
 
             return res.status(400).json({ error: 'invalid action' });
