@@ -55,7 +55,7 @@ export default async function handler(req, res) {
             'shipping-only'
         ].includes(lowerTeamId);
 
-        if (!isBoxOrProduct) {
+            if (!isBoxOrProduct) {
             const sold = await redis.get(`SELECT:team:sold:${teamId}`);
             const hold = await redis.get(`SELECT:team:hold:${teamId}`);
 
@@ -65,13 +65,14 @@ export default async function handler(req, res) {
                 });
             }
 
-            if (hold && hold !== cartId) {
+                if (hold && hold !== cartId) {
                 return res.status(400).json({
                     error: 'Το spot είναι δεσμευμένο από άλλον!'
                 });
             }
 
-            await redis.set(`SELECT:team:hold:${teamId}`, cartId, 'EX', 420);
+                // set hold for 10 hours (36000 seconds)
+                await redis.set(`SELECT:team:hold:${teamId}`, cartId, 'EX', 36000);
         }
 
         const auth = Buffer.from( `${process.env.VIVA_CLIENT_ID || 'db03347e-8d36-4139-83cd-d45449e2d44c'}:${process.env.VIVA_CLIENT_SECRET || '05dreaYv174ROJz6NHvqZ4RtO8SU5P'}` ).toString('base64');
