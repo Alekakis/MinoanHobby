@@ -1,6 +1,8 @@
 
 import Redis from 'ioredis';
 
+const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+
 // This endpoint forwards order details to Web3Forms using the server-side key
 export default async function handler(req, res) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
