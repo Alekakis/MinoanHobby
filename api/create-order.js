@@ -56,24 +56,27 @@ export default async function handler(req, res) {
         ].includes(lowerTeamId);
 
             if (!isBoxOrProduct) {
-            const sold = await redis.get(`SELECT:team:sold:${teamId}`);
-            const hold = await redis.get(`SELECT:team:hold:${teamId}`);
+                const sold = await redis.get(`SELECT:team:sold:${teamId}`);
+                const holdKeyVal = await redis.get(`SELECT:team:hold:${teamId}`);
+                const holdHashVal = await redis.hget(`SELECT:team:${teamId}`, 'hold');
+                const hold = holdHashVal || holdKeyVal;
 
-            if (sold) {
-                return res.status(400).json({
-                    error: 'Το spot έχει εξαντληθεί!'
-                });
-            }
+                if (sold) {
+                    return res.status(400).json({
+                        error: 'Το spot έχει εξαντληθεί!'
+                    });
+                }
 
                 if (hold && hold !== cartId) {
-                return res.status(400).json({
-                    error: 'Το spot είναι δεσμευμένο από άλλον!'
-                });
-            }
+                    return res.status(400).json({
+                        error: 'Το spot είναι δεσμευμένο από άλλον!'
+                    });
+                }
 
-                // set hold for 10 hours (36000 seconds)
+                // set hold for 10 hours (36000 seconds) and also set hash field for GUI visibility
                 await redis.set(`SELECT:team:hold:${teamId}`, cartId, 'EX', 36000);
-        }
+                try { await redis.hset(`SELECT:team:${teamId}`, 'hold', cartId); } catch (e) {}
+            }
 
         const auth = Buffer.from( `${process.env.VIVA_CLIENT_ID || 'db03347e-8d36-4139-83cd-d45449e2d44c'}:${process.env.VIVA_CLIENT_SECRET || '05dreaYv174ROJz6NHvqZ4RtO8SU5P'}` ).toString('base64');
 
