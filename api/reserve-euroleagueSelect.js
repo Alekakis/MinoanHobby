@@ -5,7 +5,7 @@ const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admira
 
 const TEAM_COUNT = 23;
 // Hold TTL in seconds (8 hours) - reserved until payment or expiry
-const HOLD_TTL = 10 * 60 * 60; // 8 hours
+const HOLD_TTL = 8 * 60 * 60; // 8 hours
 const SELECT_PREFIX = 'SELECT';
 
 async function ensureSelectMapping() {
@@ -138,6 +138,8 @@ export default async function handler(req, res) {
                 if (cartId) await redis.hset(teamKey, 'holdCart', String(cartId));
                 // also set a dedicated hold key with TTL so it expires automatically
                 await redis.set(holdKey, cartId || '1', 'EX', HOLD_TTL);
+
+                // No notification here: email should be sent from create-order to cover full cart
 
                 return res.status(200).json({ success: true, reserved: true, teamId: tid, maxStock, ttl: HOLD_TTL });
             }
