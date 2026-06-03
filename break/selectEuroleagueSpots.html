@@ -230,15 +230,12 @@
 			const isTeamItem = item.teamId && item.addedAt;
 			const isExpired = isTeamItem && (now - item.addedAt) >= CART_EXPIRE_TIME;
 
-			if (isExpired) {
-			try {
-			await releaseTeam(item.teamId);
-			} catch (e) {
-			console.error('Failed to release expired team:', item.teamId, e);
-			}
-			} else {
-			validItems.push(item);
-			}
+				if (isExpired) {
+					// expired local-only item: no Redis release (reservation happens at checkout)
+					console.info('Expired local team item (no Redis hold):', item.teamId);
+				} else {
+					validItems.push(item);
+				}
 			}
 
 			saveCart(validItems);
