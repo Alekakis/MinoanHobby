@@ -4,7 +4,8 @@ const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admira
 
 
 const TEAM_COUNT = 23;
-const HOLD_TTL = 10 * 60 * 60; // seconds (10 hours)
+// Hold TTL in seconds (8 hours) - reserved until payment or expiry
+const HOLD_TTL = 10 * 60 * 60; // 8 hours
 const SELECT_PREFIX = 'SELECT';
 
 async function ensureSelectMapping() {
@@ -44,7 +45,9 @@ export default async function handler(req, res) {
                 const sold = await redis.get(soldKey);
                 // team.stock can be the string '0' which is falsy; explicitly prefer it when present
                 const stockVal = (team && typeof team.stock !== 'undefined' && team.stock !== null && team.stock !== '') ? team.stock : team.maxStock;
-                const hold = team && team.hold;
+                // prefer an explicit hold key (with TTL) when present; fallback to hash field for backward compat
+                const holdKeyVal = await redis.get(holdKey);
+                const hold = (holdKeyVal ? '1' : (team && team.hold ? String(team.hold) : '0'));
                 // include TTL for hold key in debug to help troubleshooting
                 const holdTtl = await redis.ttl(holdKey);
 
@@ -129,19 +132,29 @@ export default async function handler(req, res) {
                     return res.status(400).json({ error: 'sold' });
                 }
 
+                // set hash flag for compatibility
                 await redis.hset(teamKey, 'hold', '1');
+                // store cartId so we can trace who reserved it
+                if (cartId) await redis.hset(teamKey, 'holdCart', String(cartId));
+                // also set a dedicated hold key with TTL so it expires automatically
+                await redis.set(holdKey, cartId || '1', 'EX', HOLD_TTL);
 
-                return res.status(200).json({ success: true, reserved: true, teamId: tid, maxStock });
+                return res.status(200).json({ success: true, reserved: true, teamId: tid, maxStock, ttl: HOLD_TTL });
             }
 
             if (action === 'release') {
-                // Release by setting hold field to '0'
+                // Release by clearing hold flag and deleting hold key
                 const teamHold = await redis.hget(teamKey, 'hold');
                 if (!teamHold || teamHold === '0') {
+                    // still ensure dedicated hold key removed
+                    await redis.del(holdKey);
+                    await redis.hdel(teamKey, 'holdCart');
                     return res.status(200).json({ success: true, released: false, reason: 'not_found' });
                 }
 
                 await redis.hset(teamKey, 'hold', '0');
+                await redis.hdel(teamKey, 'holdCart');
+                await redis.del(holdKey);
                 return res.status(200).json({ success: true, released: true });
             }
 
