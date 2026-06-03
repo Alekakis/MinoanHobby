@@ -42,8 +42,11 @@ export default async function handler(req, res) {
 
                 const team = await redis.hgetall(teamKey);
                 const sold = await redis.get(soldKey);
-                const stockVal = team && (team.stock || team.maxStock);
+                // team.stock can be the string '0' which is falsy; explicitly prefer it when present
+                const stockVal = (team && typeof team.stock !== 'undefined' && team.stock !== null && team.stock !== '') ? team.stock : team.maxStock;
                 const hold = team && team.hold;
+                // include TTL for hold key in debug to help troubleshooting
+                const holdTtl = await redis.ttl(holdKey);
 
                 teams[i] = {
                     id: Number(team.id),
