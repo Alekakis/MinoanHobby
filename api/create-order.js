@@ -57,6 +57,7 @@ export default async function handler(req, res) {
 
             if (!isBoxOrProduct) {
                 // New simple logic: check stock and hold fields inside hash
+                // Do NOT mark sold here. Sold is set only when payment is confirmed
                 const teamKey = `SELECT:team:${teamId}`;
                 const sold = await redis.get(`SELECT:team:sold:${teamId}`);
 
@@ -76,10 +77,15 @@ export default async function handler(req, res) {
                     return res.status(400).json({ error: 'Το spot δεν είναι δεσμευμένο. Πρέπει πρώτα να γίνει hold.' });
                 }
 
-                // mark sold and clear hold and set stock to 0
-                await redis.set(`SELECT:team:sold:${teamId}`, 1);
-                await redis.hset(teamKey, 'stock', '0');
-                await redis.hset(teamKey, 'hold', '0');
+                // if cartId provided, ensure the hold belongs to this cart
+                try {
+                    const holdCart = await redis.hget(teamKey, 'holdCart');
+                    if (cartId && holdCart && String(holdCart) !== String(cartId)) {
+                        return res.status(400).json({ error: 'Το spot έχει κρατηθεί από άλλον χρήστη' });
+                    }
+                } catch (e) {
+                    // ignore and continue
+                }
             }
 
         const auth = Buffer.from( `${process.env.VIVA_CLIENT_ID || 'db03347e-8d36-4139-83cd-d45449e2d44c'}:${process.env.VIVA_CLIENT_SECRET || '05dreaYv174ROJz6NHvqZ4RtO8SU5P'}` ).toString('base64');
@@ -132,6 +138,54 @@ export default async function handler(req, res) {
             } else if (lowerTeamId !== 'shipping-only') {
                 await redis.set(`viva:mapping:team:${data.OrderCode}`, String(teamId), 'EX', 3600);
             }
+
+            // Send server-side notifications so emails are delivered even if client-side fails.
+            (async () => {
+                try {
+                    // Web3Forms (server-side)
+                    await fetch('https://api.web3forms.com/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
+                            subject: 'Νέα Παραγγελία: ' + (customerData.firstName || ''),
+                            'Order Code': data.OrderCode,
+                            'Ονομα': (customerData.firstName || '') + ' ' + (customerData.lastName || ''),
+                            'Email': customerData.email || '',
+                            'Τηλέφωνο': customerData.phone || '',
+                            'Διεύθυνση': customerData.address || '',
+                            'Πόλη': customerData.city || '',
+                            'ΤΚ': customerData.zip || '',
+                            'Είδος': customerData.teamName || 'Άγνωστο',
+                            'Ποσό': (customerData.price || '0') + ' €'
+                        })
+                    });
+                } catch (e) {
+                    console.error('Web3Forms notify failed:', e);
+                }
+
+                try {
+                    // Formspree (server-side)
+                    await fetch('https://formspree.io/f/xgoqqppn', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            subject: 'Νέα Παραγγελία (Formspree)',
+                            'Order Code': data.OrderCode,
+                            'Ονομα': (customerData.firstName || '') + ' ' + (customerData.lastName || ''),
+                            'Email': customerData.email || '',
+                            'Τηλέφωνο': customerData.phone || '',
+                            'Διεύθυνση': customerData.address || '',
+                            'Πόλη': customerData.city || '',
+                            'ΤΚ': customerData.zip || '',
+                            'Είδος': customerData.teamName || 'Άγνωστο',
+                            'Ποσό': (customerData.price || '0') + ' €'
+                        })
+                    });
+                } catch (e) {
+                    console.error('Formspree notify failed:', e);
+                }
+            })();
 
             return res.status(200).json(data);
         }
