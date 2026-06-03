@@ -15,6 +15,7 @@ async function ensureSelectMapping() {
         await redis.hsetnx(key, 'maxStock', '1');
         await redis.hsetnx(key, 'stock', '1');
         await redis.hsetnx(key, 'name', `Team ${i}`);
+        await redis.hsetnx(key, 'hold', '0');
     }
 }
 
@@ -38,15 +39,11 @@ export default async function handler(req, res) {
                 const soldKey = `${SELECT_PREFIX}:team:sold:${i}`;
                 const holdKey = `${SELECT_PREFIX}:team:hold:${i}`;
 
-                const team = await redis.hgetall(teamKey);
-                // hold may be stored either as a dedicated key (with TTL) or as a hash field for manual GUI edits
-                const holdFromKey = await redis.get(holdKey);
-                const holdFromHash = team && team.hold;
-                const hold = holdFromHash || holdFromKey;
-                const holdTtl = await redis.ttl(holdKey);
-                const sold = await redis.get(soldKey);
 
+                const team = await redis.hgetall(teamKey);
+                const sold = await redis.get(soldKey);
                 const stockVal = team && (team.stock || team.maxStock);
+                const hold = team && team.hold;
 
                 teams[i] = {
                     id: Number(team.id),
@@ -55,16 +52,22 @@ export default async function handler(req, res) {
                     stock: Number(stockVal || 0)
                 };
 
-                // determine state: sold if explicit sold key OR stock <= 0
+                // determine state:
+                // - if explicit sold key -> sold
+                // - else if stock == 1 -> check hold (1 => held, 0 => available)
+                // - else -> sold
                 let state = 'available';
                 if (sold) {
                     state = 'sold';
-                } else if (stockVal !== undefined && !isNaN(parseInt(stockVal, 10))) {
-                    const num = parseInt(stockVal, 10);
-                    if (num <= 0) state = 'sold';
+                } else {
+                    const num = parseInt(stockVal || '0', 10);
+                    if (num === 1) {
+                        if (hold === '1') state = 'held';
+                        else state = 'available';
+                    } else {
+                        state = 'sold';
+                    }
                 }
-
-                if (state !== 'sold' && hold) state = 'held';
 
                 stocks[i] = state;
 
@@ -111,68 +114,31 @@ export default async function handler(req, res) {
                 const sold = await redis.get(soldKey);
                 if (sold) return res.status(400).json({ error: 'sold' });
 
-                // Attempt to create hold with TTL key (so it expires). Also set hash field so it shows in GUI.
-                const result = await redis.set(
-                    holdKey,
-                    String(cartId || 'unknown'),
-                    'EX',
-                    HOLD_TTL,
-                    'NX'
-                );
-
-                if (result === 'OK') {
-                    try {
-                        await redis.hset(teamKey, 'hold', String(cartId || 'unknown'));
-                    } catch (e) {
-                        // ignore hash set errors
-                    }
-
-                    return res.status(200).json({
-                        success: true,
-                        reserved: true,
-                        teamId: tid,
-                        maxStock,
-                        ttl: HOLD_TTL
-                    });
+                // Simple behavior: use hash 'hold' field = '1'|'0'
+                const teamHold = await redis.hget(teamKey, 'hold');
+                if (teamHold === '1') {
+                    return res.status(409).json({ error: 'already_reserved' });
                 }
 
-                // If we couldn't reserve via key, maybe hash hold exists
-                const currentHash = (await redis.hget(teamKey, 'hold')) || null;
-                const currentKey = await redis.get(holdKey);
-                const ttl = await redis.ttl(holdKey);
+                // ensure stock is available
+                const stockNum = Number(await redis.hget(teamKey, 'stock') || await redis.hget(teamKey, 'maxStock') || 0);
+                if (stockNum !== 1) {
+                    return res.status(400).json({ error: 'sold' });
+                }
 
-                return res.status(409).json({
-                    error: 'already_reserved',
-                    reservedBy: currentHash || currentKey,
-                    ttl
-                });
+                await redis.hset(teamKey, 'hold', '1');
+
+                return res.status(200).json({ success: true, reserved: true, teamId: tid, maxStock });
             }
 
             if (action === 'release') {
-                // Support releasing when hold is stored either as key or as hash field
-                const currentKey = await redis.get(holdKey);
-                const currentHash = await redis.hget(teamKey, 'hold');
-
-                if (!currentKey && !currentHash) {
-                    return res.status(200).json({
-                        success: true,
-                        released: false,
-                        reason: 'not_found'
-                    });
+                // Release by setting hold field to '0'
+                const teamHold = await redis.hget(teamKey, 'hold');
+                if (!teamHold || teamHold === '0') {
+                    return res.status(200).json({ success: true, released: false, reason: 'not_found' });
                 }
 
-                const current = currentHash || currentKey;
-
-                if (cartId && current !== String(cartId)) {
-                    return res.status(403).json({
-                        error: 'forbidden',
-                        ownedBy: current
-                    });
-                }
-
-                await redis.del(holdKey);
-                try { await redis.hdel(teamKey, 'hold'); } catch (e) {}
-
+                await redis.hset(teamKey, 'hold', '0');
                 return res.status(200).json({ success: true, released: true });
             }
 

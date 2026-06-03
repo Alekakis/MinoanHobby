@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				access_key: process.env.WEB3FORMS_KEY,
+				access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
 				subject: '📝 Νέα Παραγγελία (Checkout)',
 				'Ονομα': (details.firstName || '') + ' ' + (details.lastName || ''),
 				'Email': details.email || '',

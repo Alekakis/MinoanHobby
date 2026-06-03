@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 
-const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
+const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        access_key: process.env.WEB3FORMS_KEY,
+                        access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
                         subject:
                             '💰 Πληρωμένη Παραγγελία: ' +
                             (details.firstName || ''),
@@ -90,13 +90,11 @@ export default async function handler(req, res) {
                     `viva:mapping:team:${orderCode}`
                 );
 
-            if (
-                teamId &&
-                !isNaN(parseInt(teamId))
-            ) {
+            if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.set(`SELECT:team:sold:${teamId}`, 1);
-                await redis.del(`SELECT:team:hold:${teamId}`);
-                    }
+                try { await redis.hset(`SELECT:team:${teamId}`, 'stock', '0'); } catch (e) {}
+                try { await redis.hset(`SELECT:team:${teamId}`, 'hold', '0'); } catch (e) {}
+            }
 
             await redis.del(
                 `viva:mapping:team:${orderCode}`,
@@ -179,12 +177,8 @@ export default async function handler(req, res) {
                     `viva:mapping:team:${orderCode}`
                 );
 
-            if (
-                teamId &&
-                !isNaN(parseInt(teamId))
-            ) {
-                await redis.del(`SELECT:team:hold:${teamId}`);
-
+            if (teamId && !isNaN(parseInt(teamId))) {
+                try { await redis.hset(`SELECT:team:${teamId}`, 'hold', '0'); } catch (e) {}
             }
 
             await redis.del(
