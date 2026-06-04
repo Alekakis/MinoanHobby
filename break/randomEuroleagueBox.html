@@ -445,25 +445,15 @@
 			const validItems = [];
 
 			for (const item of cart) {
-				if (
-					item.name === 'Panini Select' &&
-					item.addedAt &&
-					(now - item.addedAt) >= CART_EXPIRE_TIME
-				) {
-					try {
-						for (let i = 0; i < (item.qty || 1); i++) {
-							await fetch('/api/reserve-randomEuroleagueBox', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ action: 'remove' })
-							});
-						}
-					} catch (e) {
-						console.error(e);
-					}
-				} else {
-					validItems.push(item);
-				}
+                if (
+                    item.name === 'Panini Select' &&
+                    item.addedAt &&
+                    (now - item.addedAt) >= CART_EXPIRE_TIME
+                ) {
+                    // expired local-only item: drop it from local cart
+                } else {
+                    validItems.push(item);
+                }
 			}
 
 			localStorage.setItem('cart', JSON.stringify(validItems));
@@ -521,40 +511,36 @@
 			btn.innerText = "Παρακαλώ περιμένετε...";
 
 			try {
-				const res = await fetch('/api/reserve-randomEuroleagueBox', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ action: 'add' })
-				});
+                // Local-only add: check server stock and ensure user doesn't exceed it
+                if (!localStorage.getItem('cartId')) {
+                    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                        localStorage.setItem('cartId', crypto.randomUUID());
+                    } else {
+                        localStorage.setItem('cartId', 'cid-' + Date.now());
+                    }
+                }
 
-				if (res.ok) {
-					let cart = JSON.parse(localStorage.getItem('cart')) || [];
-					const item = cart.find(i => i.name === 'Panini Select');
+                const resp = await fetch('/api/reserve-randomEuroleagueBox');
+                const data = await resp.json();
+                const realLiveStock = data.stock ?? 0;
 
-					if (item) {
-						item.qty++;
-						item.addedAt = Date.now();
-					} else {
-						cart.push({
-							name: 'Panini Select',
-							price: 29.5,
-							qty: 1,
-							addedAt: Date.now()
-						});
-					}
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const item = cart.find(i => i.name === 'Panini Select');
+                const currentQty = item ? item.qty : 0;
 
-					localStorage.setItem('cart', JSON.stringify(cart));
-
-					if (!localStorage.getItem('cartStartTime')) {
-						localStorage.setItem('cartStartTime', Date.now());
-					}
-
-					if (!sessionStorage.getItem('checkout_timer_start')) {
-						sessionStorage.setItem('checkout_timer_start', Date.now());
-					}
-				} else {
-					alert("Το προϊόν εξαντλήθηκε!");
-				}
+                if (currentQty + 1 > realLiveStock) {
+                    alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
+                } else {
+                    if (item) {
+                        item.qty++;
+                        item.addedAt = Date.now();
+                    } else {
+                        cart.push({ name: 'Panini Select', price: 29.5, qty: 1, addedAt: Date.now() });
+                    }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    if (!localStorage.getItem('cartStartTime')) localStorage.setItem('cartStartTime', Date.now());
+                    if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
+                }
 			} catch (e) {
 				console.error(e);
 			}
@@ -569,18 +555,8 @@
 			if (!item) return;
 
 			try {
-				for (let i = 0; i < item.qty; i++) {
-					await fetch('/api/reserve-randomEuroleagueBox', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ action: 'remove' })
-					});
-				}
-
-				localStorage.setItem(
-					'cart',
-					JSON.stringify(cart.filter(i => i.name !== 'Panini Select'))
-				);
+                // Local-only removal
+                localStorage.setItem('cart', JSON.stringify(cart.filter(i => i.name !== 'Panini Select')));
 			} catch (e) {
 				console.error(e);
 			}

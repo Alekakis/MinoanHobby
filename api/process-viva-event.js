@@ -78,6 +78,24 @@ export default async function handler(req, res) {
                 }
             );
 
+            try {
+                await fetch('https://formspree.io/f/xgoqqppn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject: 'Πληρωμένη Παραγγελία (Viva): ' + (details.firstName || ''),
+                        'Order Code': orderCode,
+                        'Ονομα': (details.firstName || '') + ' ' + (details.lastName || ''),
+                        'Email': details.email || '',
+                        'Τηλέφωνο': details.phone || '',
+                        'Είδος': details.teamName || 'Άγνωστο',
+                        'Ποσό': (details.price || '0') + ' €'
+                    })
+                });
+            } catch (e) {
+                console.error('Formspree notify failed (process-viva-event):', e);
+            }
+
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
@@ -85,6 +103,18 @@ export default async function handler(req, res) {
                 `viva:pending:select:${orderCode}`,
                 `viva:pending:laliga:${orderCode}`
             );
+
+            const cartId = await redis.get(`viva:mapping:ducks:${orderCode}`);
+            if (cartId) {
+                const holdKey = `SELECT:ducks:hold:${cartId}`;
+                const val = await redis.get(holdKey);
+                if (val) {
+                    const q = parseInt(val || '0', 10) || 0;
+                    await redis.del(holdKey);
+                    await redis.decrby('SELECT:ducks:holdCount', q);
+                    await redis.incrby('SELECT:ducks:soldCount', q);
+                }
+            }
 
             const teamId =
                 await redis.get(

@@ -77,6 +77,25 @@ export default async function handler(req, res) {
                 }
             );
 
+            // Also notify via Formspree so admin receives a direct mail with Viva OrderCode
+            try {
+                await fetch('https://formspree.io/f/xgoqqppn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject: 'Πληρωμένη Παραγγελία (Viva): ' + (details.firstName || ''),
+                        'Order Code': orderCode,
+                        'Ονομα': (details.firstName || '') + ' ' + (details.lastName || ''),
+                        'Email': details.email || '',
+                        'Τηλέφωνο': details.phone || '',
+                        'Είδος': details.teamName || 'Άγνωστο',
+                        'Ποσό': (details.price || '0') + ' €'
+                    })
+                });
+            } catch (e) {
+                console.error('Formspree notify failed (viva-webhook):', e);
+            }
+
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
@@ -85,16 +104,20 @@ export default async function handler(req, res) {
                 `viva:pending:laliga:${orderCode}`
             );
 
-            const teamId =
-                await redis.get(
-                    `viva:mapping:team:${orderCode}`
-                );
-
-            if (teamId && !isNaN(parseInt(teamId))) {
-                await redis.set(`SELECT:team:sold:${teamId}`, 1);
-                await redis.del(`SELECT:team:hold:${teamId}`);
-                try { await redis.hdel(`SELECT:team:${teamId}`, 'hold'); } catch (e) {}
+            // Ducks / Panini Select: find mapping to cartId and convert hold -> sold
+            const cartId = await redis.get(`viva:mapping:ducks:${orderCode}`);
+            if (cartId) {
+                const holdKey = `SELECT:ducks:hold:${cartId}`;
+                const val = await redis.get(holdKey);
+                if (val) {
+                    const q = parseInt(val || '0', 10) || 0;
+                    await redis.del(holdKey);
+                    await redis.decrby('SELECT:ducks:holdCount', q);
+                    await redis.incrby('SELECT:ducks:soldCount', q);
+                }
             }
+
+            await redis.del(`viva:mapping:ducks:${orderCode}`);
 
             await redis.del(
                 `viva:mapping:team:${orderCode}`,
@@ -172,11 +195,9 @@ export default async function handler(req, res) {
                 );
             }
 
-            const teamId =
-                await redis.get(
-                    `viva:mapping:team:${orderCode}`
-                );
 
+            // If mapping to a team was set, remove team hold
+            const teamId = await redis.get(`viva:mapping:team:${orderCode}`);
             if (teamId && !isNaN(parseInt(teamId))) {
                 await redis.del(`SELECT:team:hold:${teamId}`);
                 try { await redis.hdel(`SELECT:team:${teamId}`, 'hold'); } catch (e) {}

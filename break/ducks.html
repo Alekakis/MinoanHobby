@@ -474,17 +474,7 @@
                     item.addedAt &&
                     (now - item.addedAt) >= CART_EXPIRE_TIME
                 ) {
-                    try {
-                        for (let i = 0; i < (item.qty || 1); i++) {
-                            await fetch('/api/reserve-ducks', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'remove' })
-                            });
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    // expired local-only item: just drop it from local cart
                 } else {
                     validItems.push(item);
                 }
@@ -511,6 +501,7 @@
                 const response = await fetch('/api/reserve-ducks');
                 const data = await response.json();
                 const realLiveStock = data.stock ?? 0;
+                const available = realLiveStock - userQty;
 
                 if (realLiveStock <= 0) {
                     btnDucks.disabled = true;
@@ -521,13 +512,13 @@
                         ? `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>`
                         : "";
                 } else if (userQty > 0) {
-                    btnDucks.disabled = false;
+                    btnDucks.disabled = (available <= 0);
                     btnDucks.innerText = `Προσθήκη (+1) | Έχετε: ${userQty}`;
                     stockText.className = "stock-indicator";
                     stockText.innerText = `✔️ Διαθέσιμα: ${realLiveStock}`;
                     removeBox.innerHTML = `<span class="remove-link" onclick="removeDucksFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                 } else {
-                    btnDucks.disabled = false;
+                    btnDucks.disabled = (available <= 0);
                     btnDucks.innerText = "Προσθηκη στο καλαθι";
                     stockText.className = "stock-indicator";
                     stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
@@ -545,40 +536,35 @@
             btn.innerText = "Παρακαλώ περιμένετε...";
 
             try {
-                const res = await fetch('/api/reserve-ducks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
+                // Local-only add: check server stock and ensure user doesn't exceed it
+                if (!localStorage.getItem('cartId')) {
+                    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                        localStorage.setItem('cartId', crypto.randomUUID());
+                    } else {
+                        localStorage.setItem('cartId', 'cid-' + Date.now());
+                    }
+                }
 
-                if (res.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const item = cart.find(i => i.name === 'Ducks');
+                const resp = await fetch('/api/reserve-ducks');
+                const data = await resp.json();
+                const realLiveStock = data.stock ?? 0;
 
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const item = cart.find(i => i.name === 'Ducks');
+                const currentQty = item ? item.qty : 0;
+
+                if (currentQty + 1 > realLiveStock) {
+                    alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
+                } else {
                     if (item) {
                         item.qty++;
                         item.addedAt = Date.now();
-                    
                     } else {
-                        cart.push({
-                            name: 'Ducks',
-                            price: 9.99,
-                            qty: 1,
-                            addedAt: Date.now()
-                        });
+                        cart.push({ name: 'Ducks', price: 9.99, qty: 1, addedAt: Date.now() });
                     }
-
                     localStorage.setItem('cart', JSON.stringify(cart));
-
-                    if (!localStorage.getItem('cartStartTime')) {
-                        localStorage.setItem('cartStartTime', Date.now());
-                    }
-
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
-                } else {
-                    alert("Το προϊόν εξαντλήθηκε!");
+                    if (!localStorage.getItem('cartStartTime')) localStorage.setItem('cartStartTime', Date.now());
+                    if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
                 }
             } catch (e) {
                 console.error(e);
@@ -594,18 +580,8 @@
             if (!item) return;
 
             try {
-                for (let i = 0; i < item.qty; i++) {
-                    await fetch('/api/reserve-ducks', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-
-                localStorage.setItem(
-                    'cart',
-                    JSON.stringify(cart.filter(i => i.name !== 'Ducks'))
-                );
+                // Local-only removal: just remove from local cart
+                localStorage.setItem('cart', JSON.stringify(cart.filter(i => i.name !== 'Ducks')));
             } catch (e) {
                 console.error(e);
             }

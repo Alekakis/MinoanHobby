@@ -56,6 +56,8 @@ export default async function handler(req, res) {
             'shipping-only'
         ].includes(lowerTeamId);
 
+            // For select teams we expect a prior hold. For pooled products (ducks / panini select)
+            // we will perform the server-side reservation (hold) here at checkout.
             if (!isBoxOrProduct) {
                 // New simple logic: check stock and hold fields inside hash
                 // Do NOT mark sold here. Sold is set only when payment is confirmed
@@ -65,6 +67,37 @@ export default async function handler(req, res) {
                 if (sold) {
                     return res.status(400).json({ error: 'Το spot έχει εξαντληθεί!' });
                 }
+
+            // Handle pooled products (ducks / panini select) by reserving at checkout
+            let reservedDucks = false;
+            let duckReservation = {
+                STOCK_KEY: 'SELECT:ducks:stock',
+                HOLD_KEY: `SELECT:ducks:hold:${cartId}`,
+                HOLD_COUNT_KEY: 'SELECT:ducks:holdCount',
+                HOLD_TTL: 8 * 60 * 60
+            };
+
+            if (lowerTeamId === 'ducks' || lowerTeamId === 'panini select') {
+                const { STOCK_KEY, HOLD_KEY, HOLD_COUNT_KEY, HOLD_TTL } = duckReservation;
+                const currentStock = parseInt(await redis.get(STOCK_KEY) || '0', 10);
+                if (currentStock < orderQty) {
+                    return res.status(400).json({ error: 'Το προϊόν δεν έχει αρκετό απόθεμα' });
+                }
+
+                // attempt to reserve
+                const newStock = await redis.decrby(STOCK_KEY, orderQty);
+                if (newStock < 0) {
+                    // rollback
+                    await redis.incrby(STOCK_KEY, orderQty);
+                    return res.status(400).json({ error: 'Το προϊόν δεν έχει αρκετό απόθεμα' });
+                }
+
+                // set hold key for this cart
+                await redis.set(HOLD_KEY, String(orderQty), 'EX', HOLD_TTL);
+                await redis.incrby(HOLD_COUNT_KEY, orderQty);
+                reservedDucks = true;
+                // store mapping so webhook can finalize later (after viva OrderCode is created)
+            }
 
                 const stock = await redis.hget(teamKey, 'stock');
                 const hold = await redis.hget(teamKey, 'hold');
@@ -91,20 +124,47 @@ export default async function handler(req, res) {
 
         const auth = Buffer.from( `${process.env.VIVA_CLIENT_ID || 'db03347e-8d36-4139-83cd-d45449e2d44c'}:${process.env.VIVA_CLIENT_SECRET || '05dreaYv174ROJz6NHvqZ4RtO8SU5P'}` ).toString('base64');
 
-        const vivaResponse = await fetch('https://www.vivapayments.com/api/orders', {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${auth}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                Amount: Math.round(parseFloat(amount) * 100).toString(),
-                CustomerTrns: 'Minoan Hobby Order',
-                SourceCode: '4936'
-            })
-        });
+        let data;
+        try {
+            const vivaResponse = await fetch('https://www.vivapayments.com/api/orders', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Basic ${auth}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    Amount: Math.round(parseFloat(amount) * 100).toString(),
+                    CustomerTrns: 'Minoan Hobby Order',
+                    SourceCode: '4936'
+                })
+            });
 
-        const data = await vivaResponse.json();
+            data = await vivaResponse.json();
+        } catch (e) {
+            // rollback duck reservation if created
+            if (reservedDucks) {
+                try {
+                    await redis.del(duckReservation.HOLD_KEY);
+                    await redis.incrby(duckReservation.STOCK_KEY, orderQty);
+                    await redis.decrby(duckReservation.HOLD_COUNT_KEY, orderQty);
+                } catch (re) {}
+            }
+
+            throw e;
+        }
+
+        if (!data || !data.OrderCode) {
+            // rollback duck reservation if created
+            if (reservedDucks) {
+                try {
+                    await redis.del(duckReservation.HOLD_KEY);
+                    await redis.incrby(duckReservation.STOCK_KEY, orderQty);
+                    await redis.decrby(duckReservation.HOLD_COUNT_KEY, orderQty);
+                } catch (re) {}
+            }
+
+            return res.status(500).json({ error: 'Παρουσιάστηκε σφάλμα στη σύνδεση με την Viva. Παρακαλώ δοκιμάστε ξανά.' });
+        }
 
         if (data.OrderCode) {
             const customerData = {
@@ -128,6 +188,7 @@ export default async function handler(req, res) {
 
             if (lowerTeamId === 'ducks') {
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 3600);
+                if (cartId) await redis.set(`viva:mapping:ducks:${data.OrderCode}`, String(cartId), 'EX', 3600);
             } else if (lowerTeamId === 'megabox half case') {
                 await redis.set(`viva:pending:megabox:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId.includes('euroleague contenders')) {
@@ -137,6 +198,7 @@ export default async function handler(req, res) {
             } else if (lowerTeamId === 'panini select') {
                 // Treat Panini Select like Ducks for payment flow
                 await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 3600);
+                if (cartId) await redis.set(`viva:mapping:ducks:${data.OrderCode}`, String(cartId), 'EX', 3600);
             } else if (lowerTeamId.includes('la liga')) {
                 await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId !== 'shipping-only') {
