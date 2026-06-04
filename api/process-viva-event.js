@@ -2,6 +2,7 @@ import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({
@@ -82,7 +83,6 @@ export default async function handler(req, res) {
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
                 `viva:pending:select:${orderCode}`,
-                `viva:pending:randomselect:${orderCode}`,
                 `viva:pending:laliga:${orderCode}`
             );
 
@@ -148,11 +148,7 @@ export default async function handler(req, res) {
                 );
             }
 
-            const randomSelectQty = await redis.get(`viva:pending:randomselect:${orderCode}`);
-            if (randomSelectQty) {
-                // return stock into SELECT namespace for the random hobby box
-                await redis.incrby('SELECT:random-euroleague-box:stock', parseInt(randomSelectQty));
-            }
+            // randomselect removed; Panini Select uses ducks pending key now
 
             const laligaQty =
                 await redis.get(
