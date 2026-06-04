@@ -536,7 +536,7 @@
             btn.innerText = "Παρακαλώ περιμένετε...";
 
             try {
-                // Local-only add: check server stock and ensure user doesn't exceed it
+                // Ensure cartId exists
                 if (!localStorage.getItem('cartId')) {
                     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
                         localStorage.setItem('cartId', crypto.randomUUID());
@@ -545,26 +545,44 @@
                     }
                 }
 
-                const resp = await fetch('/api/reserve-ducks');
-                const data = await resp.json();
-                const realLiveStock = data.stock ?? 0;
-
+                // Optimistic local add so UI/navigation shows item immediately
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const item = cart.find(i => i.name === 'Ducks');
-                const currentQty = item ? item.qty : 0;
+                let item = cart.find(i => i.name === 'Ducks');
+                const previousQty = item ? item.qty : 0;
 
-                if (currentQty + 1 > realLiveStock) {
-                    alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
+                if (item) {
+                    item.qty++;
+                    item.addedAt = Date.now();
                 } else {
-                    if (item) {
-                        item.qty++;
-                        item.addedAt = Date.now();
-                    } else {
-                        cart.push({ name: 'Ducks', price: 9.99, qty: 1, addedAt: Date.now() });
+                    item = { name: 'Ducks', price: 9.99, qty: 1, addedAt: Date.now() };
+                    cart.push(item);
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+                if (!localStorage.getItem('cartStartTime')) localStorage.setItem('cartStartTime', Date.now());
+                if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
+
+                // Validate against server stock; if exceeded, revert and inform user
+                try {
+                    const resp = await fetch('/api/reserve-ducks');
+                    const data = await resp.json();
+                    const realLiveStock = data.stock ?? 0;
+                    if ((previousQty + 1) > realLiveStock) {
+                        // revert
+                        let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
+                        cartNow = cartNow.map(i => i.name === 'Ducks' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
+                        localStorage.setItem('cart', JSON.stringify(cartNow));
+                        updatePageState();
+                        alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
                     }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    if (!localStorage.getItem('cartStartTime')) localStorage.setItem('cartStartTime', Date.now());
-                    if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
+                } catch (e) {
+                    // validation failed (network or server error) -> revert optimistic add
+                    console.error('Stock validation failed:', e);
+                    let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
+                    cartNow = cartNow.map(i => i.name === 'Ducks' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
+                    localStorage.setItem('cart', JSON.stringify(cartNow));
+                    updatePageState();
+                    alert('Σφάλμα επικοινωνίας με τον server. Η προσθήκη στο καλάθι ακυρώθηκε.');
                 }
             } catch (e) {
                 console.error(e);
