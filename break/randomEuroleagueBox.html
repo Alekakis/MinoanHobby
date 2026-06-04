@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Panini Select EuroLeague 2025/26 - Hobby Box</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+		body { background-color: #0d1b2a; color: #ffffff; padding-right: 60px; overflow-x: hidden; }
+		.main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background-color: #0b132b; border-bottom: 2px solid #ff0000; position: relative; z-index: 10; }
+		.team-box-product { background-color: #0b132b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px; width: 100%; max-width: 640px; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); margin: 50px auto; }
+		.card-image-container { width: 100%; height: 260px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 8px; }
+		.card-image-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+		.card-title { font-size: 24px; color: #ffffff; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
+		.card-price { font-size: 28px; color: #ff0000; font-weight: bold; margin-bottom: 5px; }
+		.stock-indicator { font-size: 15px; color: #22c55e; font-weight: 600; margin-bottom: 15px; }
+		.card-desc { color: #cbd5e1; font-size: 15px; line-height: 1.5; margin-bottom: 25px; }
+		.add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; text-transform: uppercase; transition: 0.3s; }
+		.add-btn:hover { background-color: #ff0000; }
+		.remove-link { display: inline-block; margin-top: 10px; color: #ef4444; font-size: 13px; text-decoration: none; font-weight: 600; cursor: pointer; }
+	</style>
+</head>
+<body>
+	<aside class="right-side-panel">
+		<div class="panel-top">
+			<a href="../checkout.html" class="cart-container">
+				<i class="fas fa-shopping-cart"></i>
+				<span class="cart-count" id="global-cart-count">0</span>
+			</a>
+			<div class="lang-selector">🇬🇷<br>ΕΛ</div>
+		</div>
+		<div class="panel-bottom">
+			<a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
+			<a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+		</div>
+	</aside>
+
+	<header class="main-header">
+		<nav>
+			<a href="../boxesOrder.html">BOXES</a>
+			<a href="../breakOrder.html">BREAKS</a>
+			<a href="../shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
+		</nav>
+		<div class="playful-logo">Minoan<span>Hobby</span></div>
+		<nav>
+			<a href="../howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+			<a href="../terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+			<a href="../newUpdates.html">ΜΑΘΕΤΕ ΝΕΑ</a>
+		</nav>
+	</header>
+
+	<main>
+		<div class="team-box-product">
+			<div>
+				<div class="card-image-container"><img src="../images/megabox-photo.png" alt="Panini Select"></div>
+				<h2 class="card-title">Panini Select EuroLeague 2025/26 - Hobby Box</h2>
+				<div class="card-price">29.50 €</div>
+				<div id="select-stock" class="stock-indicator">Φόρτωση αποθέματος...</div>
+				<p class="card-desc">Random spot σε μια ομάδα. Το reveal θα γίνει ζωντανά στο YouTube.</p>
+			</div>
+
+			<div>
+				<button class="add-btn" id="btn-select">Προσθήκη στο καλάθι</button>
+				<div id="remove-select-box"></div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		const CART_EXPIRE_TIME = 7 * 60 * 1000;
+
+		async function cleanExpiredSelectItems() {
+			const now = Date.now();
+			let cart = JSON.parse(localStorage.getItem('cart')) || [];
+			const validItems = [];
+
+			for (const item of cart) {
+				if (
+					item.name === 'Panini Select' &&
+					item.addedAt &&
+					(now - item.addedAt) >= CART_EXPIRE_TIME
+				) {
+					try {
+						for (let i = 0; i < (item.qty || 1); i++) {
+							await fetch('/api/reserve-randomEuroleagueBox', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ action: 'remove' })
+							});
+						}
+					} catch (e) {
+						console.error(e);
+					}
+				} else {
+					validItems.push(item);
+				}
+			}
+
+			localStorage.setItem('cart', JSON.stringify(validItems));
+		}
+
+		async function updatePageState() {
+			await cleanExpiredSelectItems();
+
+			const cart = JSON.parse(localStorage.getItem('cart')) || [];
+			const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+
+			document.getElementById('global-cart-count')?.innerText = totalItems;
+
+			const selectInCart = cart.find(item => item.name === 'Panini Select');
+			const userQty = selectInCart ? selectInCart.qty : 0;
+			const btn = document.getElementById('btn-select');
+			const stockText = document.getElementById('select-stock');
+			const removeBox = document.getElementById('remove-select-box');
+
+			try {
+				const response = await fetch('/api/reserve-randomEuroleagueBox');
+				const data = await response.json();
+				const realLiveStock = data.stock ?? 0;
+
+				if (realLiveStock <= 0) {
+					btn.disabled = true;
+					btn.innerText = "Εξαντλήθηκε";
+					stockText.className = "stock-indicator out";
+					stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
+					removeBox.innerHTML = userQty > 0
+						? `<span class="remove-link" onclick="removeSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση</span>`
+						: "";
+				} else if (userQty > 0) {
+					btn.disabled = false;
+					btn.innerText = `Προσθήκη (+1) | Έχετε: ${userQty}`;
+					stockText.className = "stock-indicator";
+					stockText.innerText = `✔️ Διαθέσιμα: ${realLiveStock}`;
+					removeBox.innerHTML = `<span class="remove-link" onclick="removeSelectFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
+				} else {
+					btn.disabled = false;
+					btn.innerText = "Προσθήκη στο καλάθι";
+					stockText.className = "stock-indicator";
+					stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
+					removeBox.innerHTML = "";
+				}
+			} catch (e) {
+				stockText.innerText = "Σφάλμα φόρτωσης στοκ";
+			}
+		}
+
+		async function addSelectToCart() {
+			const btn = document.getElementById('btn-select');
+
+			btn.disabled = true;
+			btn.innerText = "Παρακαλώ περιμένετε...";
+
+			try {
+				const res = await fetch('/api/reserve-randomEuroleagueBox', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'add' })
+				});
+
+				if (res.ok) {
+					let cart = JSON.parse(localStorage.getItem('cart')) || [];
+					const item = cart.find(i => i.name === 'Panini Select');
+
+					if (item) {
+						item.qty++;
+						item.addedAt = Date.now();
+					} else {
+						cart.push({
+							name: 'Panini Select',
+							price: 29.5,
+							qty: 1,
+							addedAt: Date.now()
+						});
+					}
+
+					localStorage.setItem('cart', JSON.stringify(cart));
+
+					if (!localStorage.getItem('cartStartTime')) {
+						localStorage.setItem('cartStartTime', Date.now());
+					}
+
+					if (!sessionStorage.getItem('checkout_timer_start')) {
+						sessionStorage.setItem('checkout_timer_start', Date.now());
+					}
+				} else {
+					alert("Το προϊόν εξαντλήθηκε!");
+				}
+			} catch (e) {
+				console.error(e);
+			}
+
+			await updatePageState();
+		}
+
+		async function removeSelectFromCart() {
+			let cart = JSON.parse(localStorage.getItem('cart')) || [];
+			const item = cart.find(i => i.name === 'Panini Select');
+
+			if (!item) return;
+
+			try {
+				for (let i = 0; i < item.qty; i++) {
+					await fetch('/api/reserve-randomEuroleagueBox', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'remove' })
+					});
+				}
+
+				localStorage.setItem(
+					'cart',
+					JSON.stringify(cart.filter(i => i.name !== 'Panini Select'))
+				);
+			} catch (e) {
+				console.error(e);
+			}
+
+			updatePageState();
+		}
+
+		document.getElementById('btn-select').addEventListener('click', addSelectToCart);
+		window.onload = updatePageState;
+	</script>
+</body>
+</html>
