@@ -1,114 +1,393 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Panini Select - MinoanHobby</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ducks Break - MinoanHobby</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-	<style>
-		* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-		body {
-			background-color: #0d1b2a;
-			color: #ffffff;
-			padding-right: 60px;
-			overflow-x: hidden;
-		}
+        body {
+            background-color: #0d1b2a;
+            color: #ffffff;
+            padding-right: 60px;
+            overflow-x: hidden;
+        }
 
-		.main-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 15px 40px;
-			background-color: #0b132b;
-			border-bottom: 2px solid #ff0000;
-			position: relative;
-			z-index: 10;
-		}
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #0b132b;
+            border-bottom: 2px solid #ff0000;
+            position: relative;
+            z-index: 10;
+        }
 
-		.main-header nav a {
-			color: #e0e0e0;
-			text-decoration: none;
-			font-weight: 700;
-			font-size: 14px;
-			margin: 0 15px;
-			letter-spacing: 1px;
-			transition: color 0.3s;
-		}
+        .main-header nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
 
-		.main-header nav a:hover { color: #ff0000; }
+        .main-header nav a:hover { color: #ff0000; }
 
-		.playful-logo {
-			font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
-			font-size: 28px;
-			font-weight: bold;
-			color: #ffffff;
-			letter-spacing: 1px;
-			text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-		}
+        .playful-logo {
+            font-family: 'Comic Sans MS', 'Arial Round MT Bold', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-		.playful-logo span { color: #ff0000; font-style: italic; display: inline-block; transform: rotate(-3deg); margin-left: 5px; }
+        .playful-logo span {
+            color: #ff0000;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-left: 5px;
+        }
 
-		.right-side-panel {
-			position: fixed;
-			top: 0;
-			right: 0;
-			width: 60px;
-			height: 100vh;
-			background-color: rgba(0,0,0,0.85);
-			border-left: 2px solid #ff0000;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			align-items: center;
-			padding: 25px 0;
-			z-index: 100;
-		}
+        .right-side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.85);
+            border-left: 2px solid #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            z-index: 100;
+        }
 
-		.panel-top, .panel-bottom { display:flex; flex-direction:column; align-items:center; gap:25px; }
+        .panel-top,
+        .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
 
-		.cart-container { position: relative; }
+        .right-side-panel a {
+            color: #e0e0e0;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
 
-		.cart-count { background-color: #ff0000; color: white; padding: 2px 5px; border-radius: 50%; font-size: 10px; font-weight: bold; position: absolute; top: -8px; right: -10px; }
+        .right-side-panel a:hover {
+            color: #ff0000;
+            transform: scale(1.1);
+        }
 
-		.product-wrapper { max-width: 900px; margin: 50px auto; padding: 0 20px; }
+        .cart-container { position: relative; }
 
-		.shipping-grid { display:flex; gap:30px; justify-content:center; flex-wrap:wrap; }
+        .cart-count {
+            background-color: #ff0000;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -10px;
+        }
 
-		.shipping-card { background-color: #0b132b; border: 1px solid rgba(255,255,255,0.1); border-radius:12px; padding:30px; width:100%; max-width:400px; text-align:center; box-shadow: 0 8px 20px rgba(0,0,0,0.4); display:flex; flex-direction:column; justify-content:space-between; }
+        .product-wrapper {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
 
-		.card-image-container { width:100%; height:160px; margin-bottom:15px; display:flex; justify-content:center; align-items:center; overflow:hidden; border-radius:8px; }
-		.card-image-container img { max-width:100%; max-height:100%; object-fit:contain; }
+        .shipping-grid {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-		.card-title { font-size:20px; color:#ffffff; margin-bottom:10px; text-transform:uppercase; }
-		.card-price { font-size:32px; color:#ff0000; font-weight:bold; margin-bottom:5px; }
-		.stock-indicator { font-size:13px; color:#22c55e; font-weight:600; margin-bottom:15px; }
-		.stock-indicator.out { color:#ef4444; }
-		.card-desc { color:#cbd5e1; font-size:14px; line-height:1.5; margin-bottom:25px; }
+        .shipping-card {
+            background-color: #0b132b;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-		.add-btn { width:100%; background-color:transparent; border:2px solid #ff0000; color:#ffffff; padding:12px; font-weight:bold; cursor:pointer; border-radius:8px; font-size:15px; text-transform:uppercase; }
-		.add-btn:hover:not(:disabled) { background-color:#ff0000; }
-		.add-btn:disabled { border-color:#475569; color:#64748b; cursor:not-allowed; background-color:rgba(71,85,105,0.1); }
+        .card-image-container {
+            width: 100%;
+            height: 160px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 8px;
+        }
 
-		.raffle-box { max-width:650px; margin:30px auto 0; padding:25px; border-radius:18px; background: linear-gradient(135deg, #111111, #1f1f1f); color:#ffffff; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.35); border:1px solid rgba(255,204,0,0.35); }
-		.raffle-box h2 { margin-bottom:15px; color:#ffcc00; font-size:26px; }
-		.raffle-box p { font-size:16px; line-height:1.5; color:#e5e7eb; }
+        .card-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
 
-		@media (max-width:768px) {
-			body { padding-right:0; padding-bottom:70px; }
-			.right-side-panel { position:fixed; bottom:0; top:auto; right:0; width:100%; height:60px; flex-direction:row; padding:0 20px; border-left:none; border-top:2px solid #ff0000; }
-			.panel-top, .panel-bottom { flex-direction:row; gap:22px; }
-			.main-header { flex-direction:column; gap:15px; padding:15px 10px; text-align:center; }
-			.product-wrapper { margin:30px auto; padding:0 14px; }
-			.shipping-card { padding:22px; }
-			.raffle-box { padding:20px 15px; }
-			.raffle-box h2 { font-size:22px; }
-		}
-	</style>
+        .card-title {
+            font-size: 20px;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .card-price {
+            font-size: 32px;
+            color: #ff0000;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stock-indicator {
+            font-size: 13px;
+            color: #22c55e;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .stock-indicator.out { color: #ef4444; }
+
+        .card-desc {
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .add-btn {
+            width: 100%;
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 15px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .add-btn:hover:not(:disabled) {
+            background-color: #ff0000;
+            box-shadow: 0 5px 15px rgba(255,0,0,0.4);
+        }
+
+        .add-btn:disabled {
+            border-color: #475569;
+            color: #64748b;
+            cursor: not-allowed;
+            background-color: rgba(71,85,105,0.1);
+        }
+
+        .remove-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #ef4444;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .remove-link:hover { text-decoration: underline; }
+
+        .raffle-box {
+            max-width: 650px;
+            margin: 30px auto 0;
+            padding: 25px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #111111, #1f1f1f);
+            color: #ffffff;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,204,0,0.35);
+        }
+
+        .raffle-box h2 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+            font-size: 26px;
+        }
+
+        .raffle-box p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #e5e7eb;
+        }
+
+        .teams {
+            margin: 20px 0;
+            display: grid;
+            gap: 12px;
+        }
+
+        .teams div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2b2b2b;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .teams span {
+            background: #ffcc00;
+            color: #111;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .note {
+            background: rgba(255,204,0,0.12);
+            border: 1px solid #ffcc00;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-top: 15px;
+        }
+
+        .live {
+            margin-top: 15px;
+            color: #ffcc00 !important;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-right: 0;
+                padding-bottom: 70px;
+            }
+
+            .right-side-panel {
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                right: 0;
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                padding: 0 20px;
+                border-left: none;
+                border-top: 2px solid #ff0000;
+            }
+
+            .panel-top,
+            .panel-bottom {
+                flex-direction: row;
+                gap: 22px;
+            }
+
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 10px;
+                text-align: center;
+            }
+
+            .main-header nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .main-header nav a {
+                margin: 0;
+                font-size: 12px;
+            }
+
+            .playful-logo {
+                font-size: 24px;
+                order: -1;
+            }
+
+            .product-wrapper {
+                margin: 30px auto;
+                padding: 0 14px;
+            }
+
+            .shipping-card {
+                padding: 22px;
+            }
+
+            .raffle-box {
+                padding: 20px 15px;
+            }
+
+            .raffle-box h2 {
+                font-size: 22px;
+            }
+
+            .teams div {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+
+    <aside class="right-side-panel">
+        <div class="panel-top">
+            <a href="../checkout.html" title="Καλάθι Αγορών" class="cart-container">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="global-cart-count">0</span>
+            </a>
+        </div>
+
+        <div class="panel-bottom">
+            <a href="https://www.instagram.com/minoanhobby/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@makisscharlie" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </aside>
+
+    <header class="main-header">
+        <nav>
+            <a href="../boxesOrder.html">BOXES</a>
+            <a href="../breakOrder.html">BREAKS</a>
+            <a href="../shipOrder.html">ΑΠΟΣΤΟΛΕΣ</a>
+        </nav>
+
+        <div class="playful-logo">Minoan<span>Hobby</span></div>
+
+        <nav>
+            <a href="../howWorks.html">ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ</a>
+            <a href="../terms.html">ΟΡΟΙ & ΠΡΟΫΠΟΘΕΣΕΙΣ</a>
+            <a href="../newUpdates.html">ΜΑΘΕΤΕ ΝΕΑ</a>
+        </nav>
+    </header>
 
     <main class="product-wrapper">
 
