@@ -135,8 +135,8 @@ export default async function handler(req, res) {
             } else if (lowerTeamId.includes('euroleague select')) {
                 await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId === 'panini select') {
-                // random hobby box reserve key
-                await redis.set(`viva:pending:randomselect:${data.OrderCode}`, orderQty, 'EX', 3600);
+                // Treat Panini Select like Ducks for payment flow
+                await redis.set(`viva:pending:ducks:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId.includes('la liga')) {
                 await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId !== 'shipping-only') {
