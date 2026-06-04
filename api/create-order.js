@@ -52,6 +52,7 @@ export default async function handler(req, res) {
             '2025-26 panini euroleague contenders basketball mega box',
             'panini euroleague select box',
             'panini la liga select box',
+            'panini select',
             'shipping-only'
         ].includes(lowerTeamId);
 
@@ -133,6 +134,9 @@ export default async function handler(req, res) {
                 await redis.set(`viva:pending:euroleague:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId.includes('euroleague select')) {
                 await redis.set(`viva:pending:select:${data.OrderCode}`, orderQty, 'EX', 3600);
+            } else if (lowerTeamId === 'panini select') {
+                // random hobby box reserve key
+                await redis.set(`viva:pending:randomselect:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId.includes('la liga')) {
                 await redis.set(`viva:pending:laliga:${data.OrderCode}`, orderQty, 'EX', 3600);
             } else if (lowerTeamId !== 'shipping-only') {
