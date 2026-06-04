@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 	if (req.method === 'OPTIONS') return res.status(200).end();
 
 	const REDIS_KEY = 'SELECT:random-euroleague-box:stock';
-	const MAX_STOCK = 23;
+	const MAX_STOCK = 21;
 
 	try {
 		// GET: return stock
