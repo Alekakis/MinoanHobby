@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Αποτυχία Πληρωμής - MinoanHobby</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+	* { box-sizing: border-box; margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+	body { background:#0d1b2a; color:#e6eef8; min-height:100vh; }
+	.container { max-width:900px; margin:60px auto; padding:24px; }
+	.panel { background:#0b132b; border:1px solid rgba(255,255,255,0.06); padding:32px; border-radius:12px; text-align:center; }
+	.title { color:#ff0000; font-weight:900; font-size:28px; letter-spacing:1px; margin-bottom:18px; }
+	.icon { font-size:72px; color:#ff6b6b; margin-bottom:18px; }
+	.message { font-size:18px; color:#e0e7ff; margin-bottom:22px; }
+	.sub { color:#a8b3c7; margin-bottom:24px; }
+	.actions { display:flex; gap:12px; justify-content:center; }
+	.btn { background:transparent; border:2px solid #ff0000; color:#fff; padding:12px 20px; border-radius:8px; font-weight:700; text-decoration:none; }
+	.btn.primary { background:#ff0000; box-shadow:0 8px 24px rgba(255,0,0,0.12); }
+	.muted { color:#7f8a9a; font-size:13px; margin-top:14px; }
+	@media (max-width:600px){ .container{ margin:24px 12px; } .title{ font-size:22px } }
+  </style>
+</head>
+<body>
+  <main class="container">
+	<section class="panel">
+	  <div class="icon"><i class="fas fa-times-circle"></i></div>
+	  <h1 class="title">Κάτι πήγε στραβά</h1>
+	  <p class="message">Η πληρωμή δεν ολοκληρώθηκε. Παρακαλώ δοκιμάστε ξανά ή επικοινωνήστε με την υποστήριξη.</p>
+	  <p class="sub">Μπορείτε να επιστρέψετε στο καλάθι και να δοκιμάσετε άλλη μέθοδο πληρωμής.</p>
+
+	  <div class="actions">
+		<a href="/checkout.html" class="btn primary" id="back-checkout">Επιστροφή στο καλάθι</a>
+		<a href="/" class="btn" id="go-home">Συνέχεια στο site</a>
+	  </div>
+
+	  <p class="muted">Αν συνεχίσει να παρουσιάζεται πρόβλημα, επικοινωνήστε μαζί μας.</p>
+	</section>
+  </main>
+
+  <script>
+	// Optionally leave cart intact so user can retry. Still record timestamp of failure.
+	try {
+	  localStorage.setItem('lastPaymentFailedAt', new Date().toISOString());
+	  // Optionally you can ping backend to log the failure
+	  // fetch('/api/payment-failed-ping', { method: 'POST' });
+	} catch (e) { }
+  </script>
+</body>
+</html>
