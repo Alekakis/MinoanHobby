@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Επιτυχής Πληρωμή - MinoanHobby</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+	* { box-sizing: border-box; margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+	body { background:#0d1b2a; color:#e6eef8; min-height:100vh; }
+	.container { max-width:900px; margin:60px auto; padding:24px; }
+	.panel { background:#0b132b; border:1px solid rgba(255,255,255,0.06); padding:32px; border-radius:12px; text-align:center; }
+	.title { color:#ff0000; font-weight:900; font-size:28px; letter-spacing:1px; margin-bottom:18px; }
+	.icon { font-size:72px; color:#2ad05a; margin-bottom:18px; }
+	.message { font-size:18px; color:#e0e7ff; margin-bottom:22px; }
+	.sub { color:#a8b3c7; margin-bottom:24px; }
+	.actions { display:flex; gap:12px; justify-content:center; }
+	.btn { background:transparent; border:2px solid #ff0000; color:#fff; padding:12px 20px; border-radius:8px; font-weight:700; text-decoration:none; }
+	.btn.primary { background:#ff0000; box-shadow:0 8px 24px rgba(255,0,0,0.12); }
+	.muted { color:#7f8a9a; font-size:13px; margin-top:14px; }
+	@media (max-width:600px){ .container{ margin:24px 12px; } .title{ font-size:22px } }
+  </style>
+</head>
+<body>
+  <main class="container">
+	<section class="panel">
+	  <div class="icon"><i class="fas fa-check-circle"></i></div>
+	  <h1 class="title">Επιτυχής Πληρωμή</h1>
+	  <p class="message">Η πληρωμή ολοκληρώθηκε επιτυχώς. Σας ευχαριστούμε για την αγορά!</p>
+	  <p class="sub">Μπορείτε να συνεχίσετε την περιήγηση στο site ή να δείτε την κατάσταση της παραγγελίας σας.</p>
+
+	  <div class="actions">
+		<a href="/" class="btn primary" id="go-home">Συνέχεια στο site</a>
+		<a href="/checkout.html" class="btn" id="view-order">Προβολή Παραγγελίας</a>
+	  </div>
+
+	  <p class="muted">Αν χρειάζεστε βοήθεια, επικοινωνήστε μαζί μας.</p>
+	</section>
+  </main>
+
+  <script>
+	// Clear the client cart after a successful payment so pages that rely on localStorage reflect the change.
+	try {
+	  localStorage.removeItem('cart');
+	  localStorage.removeItem('cartId');
+	  // Optional: send a small ping to backend to confirm success (uncomment and adjust if you have an endpoint)
+	  // fetch('/api/payment-success-ping', { method: 'POST' });
+	} catch (e) {
+	  // ignore
+	}
+  </script>
+</body>
+</html>
