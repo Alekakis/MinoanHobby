@@ -2,6 +2,96 @@ import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
 
+const HOLD_TTL = 10 * 60;
+
+const POOLED_PRODUCTS = {
+    ducks: {
+        holdPrefix: 'SELECT:ducks:hold',
+        holdIndexKey: 'SELECT:ducks:holdIndex',
+        holdCountKey: 'SELECT:ducks:holdCount',
+        soldCountKey: 'SELECT:ducks:soldCount',
+        stockKey: 'SELECT:ducks:stock',
+        pendingKey: 'viva:pending:ducks',
+        mappingKey: 'viva:mapping:ducks'
+    },
+    randomEuroleagueBox: {
+        holdPrefix: 'SELECT:random-euroleague-box:hold',
+        holdIndexKey: 'SELECT:random-euroleague-box:holdIndex',
+        holdCountKey: 'SELECT:random-euroleague-box:holdCount',
+        soldCountKey: 'SELECT:random-euroleague-box:soldCount',
+        stockKey: 'SELECT:random-euroleague-box:stock',
+        pendingKey: 'viva:pending:randomEuroleagueBox',
+        mappingKey: 'viva:mapping:randomEuroleagueBox'
+    }
+};
+
+function holdKey(config, cartId) {
+    return `${config.holdPrefix}:${cartId}`;
+}
+
+async function confirmPooledProduct(orderCode, config) {
+    const cartId = await redis.get(`${config.mappingKey}:${orderCode}`);
+    if (!cartId) return;
+
+    const key = holdKey(config, cartId);
+    const val = await redis.get(key);
+    if (!val) return;
+
+    const heldQty = parseInt(val || '0', 10) || 0;
+    const pendingQty = parseInt(await redis.get(`${config.pendingKey}:${orderCode}`) || '0', 10);
+    const qty = pendingQty > 0 ? Math.min(heldQty, pendingQty) : heldQty;
+
+    if (qty <= 0) return;
+
+    if (heldQty > qty) {
+        const remaining = heldQty - qty;
+        await redis.set(key, String(remaining), 'EX', HOLD_TTL);
+        await redis.hset(config.holdIndexKey, cartId, JSON.stringify({
+            qty: remaining,
+            expiresAt: Date.now() + (HOLD_TTL * 1000)
+        }));
+    } else {
+        await redis.del(key);
+        await redis.hdel(config.holdIndexKey, cartId);
+    }
+
+    await redis.decrby(config.holdCountKey, qty);
+    await redis.incrby(config.soldCountKey, qty);
+}
+
+async function releasePooledProduct(orderCode, config) {
+    const cartId = await redis.get(`${config.mappingKey}:${orderCode}`);
+    const pendingQty = parseInt(await redis.get(`${config.pendingKey}:${orderCode}`) || '0', 10);
+    if (!cartId && pendingQty <= 0) return;
+
+    if (cartId) {
+        const key = holdKey(config, cartId);
+        const heldQty = parseInt(await redis.get(key) || '0', 10);
+        const qty = pendingQty > 0 ? Math.min(heldQty || pendingQty, pendingQty) : heldQty;
+
+        if (qty > 0) {
+            if (heldQty > qty) {
+                const remaining = heldQty - qty;
+                await redis.set(key, String(remaining), 'EX', HOLD_TTL);
+                await redis.hset(config.holdIndexKey, cartId, JSON.stringify({
+                    qty: remaining,
+                    expiresAt: Date.now() + (HOLD_TTL * 1000)
+                }));
+            } else {
+                await redis.del(key);
+                await redis.hdel(config.holdIndexKey, cartId);
+            }
+
+            await redis.decrby(config.holdCountKey, qty);
+            await redis.incrby(config.stockKey, qty);
+        }
+
+        return;
+    }
+
+    await redis.incrby(config.stockKey, pendingQty);
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({
@@ -96,30 +186,18 @@ export default async function handler(req, res) {
                 console.error('Formspree notify failed (viva-webhook):', e);
             }
 
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.ducks);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
+
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
+                `viva:pending:randomEuroleagueBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
                 `viva:pending:select:${orderCode}`,
-                `viva:pending:laliga:${orderCode}`
-            );
-
-            // Ducks / Panini Select: find mapping to cartId and convert hold -> sold
-            const cartId = await redis.get(`viva:mapping:ducks:${orderCode}`);
-            if (cartId) {
-                const holdKey = `SELECT:ducks:hold:${cartId}`;
-                const val = await redis.get(holdKey);
-                if (val) {
-                    const q = parseInt(val || '0', 10) || 0;
-                    await redis.del(holdKey);
-                    await redis.decrby('SELECT:ducks:holdCount', q);
-                    await redis.incrby('SELECT:ducks:soldCount', q);
-                }
-            }
-
-            await redis.del(`viva:mapping:ducks:${orderCode}`);
-
-            await redis.del(
+                `viva:pending:laliga:${orderCode}`,
+                `viva:mapping:ducks:${orderCode}`,
+                `viva:mapping:randomEuroleagueBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
                 `viva:order:details:${orderCode}`
             );
@@ -182,18 +260,8 @@ export default async function handler(req, res) {
                 );
             }
 
-            const ducksQty =
-                await redis.get(
-                    `viva:pending:ducks:${orderCode}`
-                );
-
-            if (ducksQty) {
-                // return ducks stock into SELECT namespace
-                await redis.incrby(
-                    'SELECT:ducks:stock',
-                    parseInt(ducksQty)
-                );
-            }
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.ducks);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
 
 
             // If mapping to a team was set, remove team hold
@@ -205,10 +273,13 @@ export default async function handler(req, res) {
 
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
+                `viva:pending:randomEuroleagueBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
                 `viva:pending:select:${orderCode}`,
                 `viva:pending:laliga:${orderCode}`,
+                `viva:mapping:ducks:${orderCode}`,
+                `viva:mapping:randomEuroleagueBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
                 `viva:order:details:${orderCode}`
             );

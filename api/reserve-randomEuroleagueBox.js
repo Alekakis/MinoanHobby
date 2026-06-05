@@ -4,13 +4,65 @@ const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admira
 
 const STOCK_KEY = 'SELECT:random-euroleague-box:stock';
 const HOLD_PREFIX = 'SELECT:random-euroleague-box:hold';
+const HOLD_INDEX_KEY = 'SELECT:random-euroleague-box:holdIndex';
 const HOLD_COUNT_KEY = 'SELECT:random-euroleague-box:holdCount';
 const SOLD_COUNT_KEY = 'SELECT:random-euroleague-box:soldCount';
 const MAX_STOCK = 21;
-const HOLD_TTL = 8 * 60 * 60; // 8 hours
+const HOLD_TTL = 10 * 60; // 10 minutes
 
 function makeHoldKey(cartId) {
 	return `${HOLD_PREFIX}:${cartId}`;
+}
+
+async function cleanupExpiredHolds() {
+	const now = Date.now();
+	const index = await redis.hgetall(HOLD_INDEX_KEY);
+	const expired = [];
+	const activeKeys = await redis.keys(`${HOLD_PREFIX}:*`);
+
+	for (const key of activeKeys) {
+		const cartId = key.replace(`${HOLD_PREFIX}:`, '');
+		if (index[cartId]) continue;
+
+		const [qty, ttl] = await Promise.all([redis.get(key), redis.ttl(key)]);
+		const parsedQty = Number(qty || 0);
+		if (parsedQty <= 0) continue;
+
+		const expiresAt = ttl > 0
+			? now + (ttl * 1000)
+			: now + (HOLD_TTL * 1000);
+
+		index[cartId] = JSON.stringify({ qty: parsedQty, expiresAt });
+		await redis.hset(HOLD_INDEX_KEY, cartId, index[cartId]);
+		if (ttl < 0) await redis.expire(key, HOLD_TTL);
+	}
+
+	for (const [cartId, raw] of Object.entries(index || {})) {
+		let hold;
+		try {
+			hold = JSON.parse(raw);
+		} catch (e) {
+			expired.push({ cartId, qty: 0 });
+			continue;
+		}
+
+		if (Number(hold.expiresAt || 0) <= now) {
+			expired.push({ cartId, qty: Number(hold.qty || 0) });
+		}
+	}
+
+	if (expired.length === 0) return;
+
+	const p = redis.pipeline();
+	for (const item of expired) {
+		p.del(makeHoldKey(item.cartId));
+		p.hdel(HOLD_INDEX_KEY, item.cartId);
+		if (item.qty > 0) {
+			p.decrby(HOLD_COUNT_KEY, item.qty);
+			p.incrby(STOCK_KEY, item.qty);
+		}
+	}
+	await p.exec();
 }
 
 export default async function handler(req, res) {
@@ -23,6 +75,7 @@ export default async function handler(req, res) {
 	try {
 		const exists = await redis.exists(STOCK_KEY);
 		if (!exists) await redis.set(STOCK_KEY, MAX_STOCK);
+		await cleanupExpiredHolds();
 
 		if (req.method === 'GET') {
 			const [stock, holdCount, soldCount] = await redis.mget(STOCK_KEY, HOLD_COUNT_KEY, SOLD_COUNT_KEY);
@@ -71,8 +124,16 @@ export default async function handler(req, res) {
 				if (existing) {
 					const newQty = parseInt(existing || '0', 10) + requested;
 					await redis.set(holdKey, String(newQty), 'EX', HOLD_TTL);
+					await redis.hset(HOLD_INDEX_KEY, id, JSON.stringify({
+						qty: newQty,
+						expiresAt: Date.now() + (HOLD_TTL * 1000)
+					}));
 				} else {
 					await redis.set(holdKey, String(requested), 'EX', HOLD_TTL);
+					await redis.hset(HOLD_INDEX_KEY, id, JSON.stringify({
+						qty: requested,
+						expiresAt: Date.now() + (HOLD_TTL * 1000)
+					}));
 				}
 
 				await redis.incrby(HOLD_COUNT_KEY, requested);
@@ -87,6 +148,7 @@ export default async function handler(req, res) {
 					if (!val) return res.status(200).json({ success: true, released: false, reason: 'not_found' });
 					const q = parseInt(val || '0', 10) || 0;
 					await redis.del(holdKey);
+					await redis.hdel(HOLD_INDEX_KEY, cartId);
 					await redis.decrby(HOLD_COUNT_KEY, q);
 					await redis.incrby(STOCK_KEY, q);
 					return res.status(200).json({ success: true, released: true, qty: q });
@@ -108,6 +170,7 @@ export default async function handler(req, res) {
 					if (!val) return res.status(200).json({ success: true, confirmed: false, reason: 'not_found' });
 					const q = parseInt(val || '0', 10) || 0;
 					await redis.del(holdKey);
+					await redis.hdel(HOLD_INDEX_KEY, cartId);
 					await redis.decrby(HOLD_COUNT_KEY, q);
 					await redis.incrby(SOLD_COUNT_KEY, q);
 					return res.status(200).json({ success: true, confirmed: true, qty: q });

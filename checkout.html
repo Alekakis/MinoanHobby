@@ -352,13 +352,11 @@
 
 			if (!item.teamId) {
 			if (item.name === 'Ducks') {
-			for (let i = 0; i < (item.qty || 1); i++) {
-							await fetch('/api/reserve-ducks', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ action: 'remove' })
-							});
-						}
+						await fetch('/api/reserve-ducks', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});
 					} else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') {
 						for (let i = 0; i < (item.qty || 1); i++) {
 							await fetch('/api/reserve-euroleague', {
@@ -376,13 +374,11 @@
 							});
 						}
 					} else if (item.name === 'Panini Select') {
-						for (let i = 0; i < (item.qty || 1); i++) {
-							await fetch('/api/reserve-randomEuroleagueBox', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ action: 'remove' })
-							});
-						}
+						await fetch('/api/reserve-randomEuroleagueBox', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});
 					} else if (item.name === 'Panini La Liga Select Box') {
 						for (let i = 0; i < (item.qty || 1); i++) {
 							await fetch('/api/reserve-laliga', {
@@ -444,19 +440,23 @@
 
             const realProducts = cart.filter(item => !isShippingItem(item));
 
-            const ducksInCart = realProducts.find(item => item.name === 'Ducks');
-
-            const targetTeamId = ducksInCart
-                ? 'ducks'
+            const targetTeamId = realProducts.length > 1
+                ? 'mixed-cart'
                 : (realProducts[0] ? (realProducts[0].teamId || realProducts[0].name) : 'shipping-only');
 
-            const totalQty = ducksInCart ? ducksInCart.qty : 1;
+            const totalQty = realProducts[0] ? (realProducts[0].qty || 1) : 1;
 
             const orderPayload = {
                 amount: totalAmount.toFixed(2),
                 teamId: targetTeamId,
                 qty: totalQty,
                 cartId: getCartId(),
+                items: cart.map(item => ({
+                    name: item.name,
+                    teamId: item.teamId || item.name,
+                    qty: item.qty || 1,
+                    price: item.price || 0
+                })),
                 firstName: document.getElementById('firstname').value,
                 lastName: document.getElementById('lastname').value,
                 email: document.getElementById('email').value,
@@ -569,7 +569,7 @@
                     /*
                         ΝΕΑ ΛΟΓΙΚΗ ΓΙΑ TEAM BREAKS:
                         Αν item.teamId υπάρχει, δεν κάνουμε release εδώ.
-                        Αν έχει γίνει Redis hold από checkout, λήγει αυτόματα σε 7 λεπτά.
+                        Αν έχει γίνει Redis hold από checkout, λήγει αυτόματα σε 10 λεπτά.
                     */
 
                     if (item.teamId) {
@@ -593,13 +593,11 @@
                             });
                         }
 					} else if (item.name === 'Panini Select') {
-						for (let i = 0; i < (item.qty || 1); i++) {
-							await fetch('/api/reserve-randomEuroleagueBox', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ action: 'remove' })
-							});
-						}
+						await fetch('/api/reserve-randomEuroleagueBox', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});
                     } else if (item.name === 'Panini La Liga Select Box') {
                         for (let i = 0; i < (item.qty || 1); i++) {
                             await fetch('/api/reserve-laliga', {
@@ -617,13 +615,11 @@
                             });
                         }
                     } else if (item.name === 'Ducks') {
-                        for (let i = 0; i < (item.qty || 1); i++) {
-                            await fetch('/api/reserve-ducks', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'remove' })
-                            });
-                        }
+                        await fetch('/api/reserve-ducks', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', cartId: getCartId() })
+                        });
                     }
                 } catch (e) {
                     console.error('Failed to release item:', item, e);
@@ -645,9 +641,9 @@
             }
 
             const diff = now - parseInt(startTime);
-            const sevenMinutes = 7 * 60 * 1000;
+            const cartHoldTime = 10 * 60 * 1000;
 
-            if (diff >= sevenMinutes) {
+            if (diff >= cartHoldTime) {
                 await releaseExpiredCart();
             }
         }
