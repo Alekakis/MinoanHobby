@@ -358,13 +358,11 @@
 							body: JSON.stringify({ action: 'release', cartId: getCartId() })
 						});
 					} else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') {
-						for (let i = 0; i < (item.qty || 1); i++) {
-							await fetch('/api/reserve-euroleague', {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ action: 'remove' })
-							});
-						}
+						await fetch('/api/reserve-euroleague', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});
 					} else if (item.name === 'Panini EuroLeague Select Box') {
 						for (let i = 0; i < (item.qty || 1); i++) {
 							await fetch('/api/reserve-BoxEuroleague', {
@@ -585,13 +583,11 @@
                             });
                         }
 					} else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') {
-                        for (let i = 0; i < (item.qty || 1); i++) {
-                            await fetch('/api/reserve-euroleague', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'remove' })
-                            });
-                        }
+                        await fetch('/api/reserve-euroleague', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', cartId: getCartId() })
+                        });
 					} else if (item.name === 'Panini Select') {
 						await fetch('/api/reserve-randomEuroleagueBox', {
 							method: 'POST',
