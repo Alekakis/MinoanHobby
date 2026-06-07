@@ -22,6 +22,15 @@ const POOLED_PRODUCTS = {
         stockKey: 'SELECT:random-euroleague-box:stock',
         pendingKey: 'viva:pending:randomEuroleagueBox',
         mappingKey: 'viva:mapping:randomEuroleagueBox'
+    },
+    euroleagueMegaBox: {
+        holdPrefix: 'SELECT:euroleague-mega-box:hold',
+        holdIndexKey: 'SELECT:euroleague-mega-box:holdIndex',
+        holdCountKey: 'SELECT:euroleague-mega-box:holdCount',
+        soldCountKey: 'SELECT:euroleague-mega-box:soldCount',
+        stockKey: 'product:stock:euroleague',
+        pendingKey: 'viva:pending:euroleagueMegaBox',
+        mappingKey: 'viva:mapping:euroleagueMegaBox'
     }
 };
 
@@ -187,6 +196,7 @@ export default async function handler(req, res) {
 
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.ducks);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
 
             const teamId =
                 await redis.get(
@@ -202,12 +212,14 @@ export default async function handler(req, res) {
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:randomEuroleagueBox:${orderCode}`,
+                `viva:pending:euroleagueMegaBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
                 `viva:pending:select:${orderCode}`,
                 `viva:pending:laliga:${orderCode}`,
                 `viva:mapping:ducks:${orderCode}`,
                 `viva:mapping:randomEuroleagueBox:${orderCode}`,
+                `viva:mapping:euroleagueMegaBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
                 `viva:order:details:${orderCode}`
             );
@@ -272,6 +284,7 @@ export default async function handler(req, res) {
 
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.ducks);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
 
             const teamId =
                 await redis.get(
@@ -285,12 +298,14 @@ export default async function handler(req, res) {
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:randomEuroleagueBox:${orderCode}`,
+                `viva:pending:euroleagueMegaBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
                 `viva:pending:select:${orderCode}`,
                 `viva:pending:laliga:${orderCode}`,
                 `viva:mapping:ducks:${orderCode}`,
                 `viva:mapping:randomEuroleagueBox:${orderCode}`,
+                `viva:mapping:euroleagueMegaBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
                 `viva:order:details:${orderCode}`
             );
