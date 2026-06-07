@@ -172,71 +172,83 @@
     </main>
 
     <script>
-        const CART_EXPIRE_TIME = 7 * 60 * 1000;
+        const CART_EXPIRE_TIME = 10 * 60 * 1000;
+        const PRODUCT_NAME = '2025-26 Panini EuroLeague Contenders Basketball Mega Box';
+        const PRODUCT_PRICE = 54.90;
+        const RESERVE_API = '/api/reserve-euroleague';
+
+        function getCartId() {
+            let cartId = localStorage.getItem('cartId');
+
+            if (!cartId) {
+                if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                    cartId = crypto.randomUUID();
+                } else {
+                    cartId = 'cid-' + Date.now();
+                }
+
+                localStorage.setItem('cartId', cartId);
+            }
+
+            return cartId;
+        }
 
         async function cleanExpiredEuroleagueItems() {
             const now = Date.now();
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const validItems = [];
-        
+
             for (const item of cart) {
                 if (
-                    item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box' &&
+                    item.name === PRODUCT_NAME &&
                     item.addedAt &&
                     (now - item.addedAt) >= CART_EXPIRE_TIME
                 ) {
-                    try {
-                        for (let i = 0; i < (item.qty || 1); i++) {
-                            await fetch('/api/reserve-euroleague', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'remove' })
-                            });
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    // Same behavior as Ducks: before checkout this is local-only, so just drop it.
                 } else {
                     validItems.push(item);
                 }
             }
-        
+
             localStorage.setItem('cart', JSON.stringify(validItems));
         }
+
         async function updatePageState() {
             await cleanExpiredEuroleagueItems();
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
             const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
             const badge = document.getElementById('global-cart-count');
             if (badge) badge.innerText = totalItems;
 
-            const euroleagueInCart = cart.find(item => item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box');
+            const euroleagueInCart = cart.find(item => item.name === PRODUCT_NAME);
             const userQty = euroleagueInCart ? euroleagueInCart.qty : 0;
-
             const btnEuroleague = document.getElementById('btn-euroleague');
             const stockText = document.getElementById('euroleague-stock-text');
             const removeBox = document.getElementById('remove-euroleague-box');
 
             try {
-                const response = await fetch('/api/reserve-euroleague'); 
+                const response = await fetch(RESERVE_API);
                 const data = await response.json();
-                const realLiveStock = data.stock !== undefined ? data.stock : 10;
+                const realLiveStock = data.stock ?? 0;
+                const available = realLiveStock - userQty;
 
                 if (realLiveStock <= 0) {
                     btnEuroleague.disabled = true;
                     btnEuroleague.innerText = "Εξαντλήθηκε";
                     stockText.className = "stock-indicator out";
                     stockText.innerText = "❌ Μη διαθέσιμο απόθεμα";
-                    removeBox.innerHTML = userQty > 0 ? `<span class="remove-link" onclick="removeEuroleagueFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>` : "";
+                    removeBox.innerHTML = userQty > 0
+                        ? `<span class="remove-link" onclick="removeEuroleagueFromCart()"><i class="fas fa-trash"></i> Αφαίρεση από καλάθι</span>`
+                        : "";
                 } else if (userQty > 0) {
-                    btnEuroleague.disabled = false;
-                    btnEuroleague.innerText = `Προσθήκη ξανά (+1) | Έχετε: ${userQty}`;
+                    btnEuroleague.disabled = (available <= 0);
+                    btnEuroleague.innerText = `Προσθήκη (+1) | Έχετε: ${userQty}`;
                     stockText.className = "stock-indicator";
-                    stockText.innerText = `✔️ Live Απόθεμα στο Redis: ${realLiveStock} διαθέσιμα`;
+                    stockText.innerText = `✔️ Διαθέσιμα: ${realLiveStock}`;
                     removeBox.innerHTML = `<span class="remove-link" onclick="removeEuroleagueFromCart()"><i class="fas fa-trash"></i> Αφαίρεση όλων</span>`;
                 } else {
-                    btnEuroleague.disabled = false;
+                    btnEuroleague.disabled = (available <= 0);
                     btnEuroleague.innerText = "Προσθηκη στο καλαθι";
                     stockText.className = "stock-indicator";
                     stockText.innerText = `🔥 Live Stock: ${realLiveStock} διαθέσιμα`;
@@ -254,46 +266,49 @@
             btnEuroleague.innerText = "Παρακαλώ περιμένετε...";
 
             try {
-                const response = await fetch('/api/reserve-euroleague', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add' })
-                });
+                getCartId();
 
-                const data = await response.json();
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                let item = cart.find(i => i.name === PRODUCT_NAME);
+                const previousQty = item ? item.qty : 0;
 
-                if (response.ok) {
-                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                    const existingItem = cart.find(item => item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box');
-
-                    if (existingItem) {
-                        existingItem.qty += 1;
-                        existingItem.addedAt = Date.now();
-                    } else {
-                        cart.push({
-                            name: '2025-26 Panini EuroLeague Contenders Basketball Mega Box',
-                            price: 54.90,
-                            qty: 1,
-                            addedAt: Date.now()
-                        });
-                    }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    if (
-                        !localStorage.getItem(
-                            'cartStartTime'
-                        )
-                    ) {
-                        localStorage.setItem(
-                            'cartStartTime',
-                            Date.now()
-                        );
-                    }
-                    
-                    if (!sessionStorage.getItem('checkout_timer_start')) {
-                        sessionStorage.setItem('checkout_timer_start', Date.now());
-                    }
+                if (item) {
+                    item.qty++;
+                    item.addedAt = Date.now();
                 } else {
-                    alert(data.error || "Δεν υπάρχει διαθέσιμο στοκ.");
+                    item = { name: PRODUCT_NAME, price: PRODUCT_PRICE, qty: 1, addedAt: Date.now() };
+                    cart.push(item);
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+                if (!localStorage.getItem('cartStartTime')) localStorage.setItem('cartStartTime', Date.now());
+                if (!sessionStorage.getItem('checkout_timer_start')) sessionStorage.setItem('checkout_timer_start', Date.now());
+
+                try {
+                    const resp = await fetch(RESERVE_API);
+                    const data = await resp.json();
+                    const realLiveStock = data.stock ?? 0;
+
+                    if ((previousQty + 1) > realLiveStock) {
+                        let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
+                        cartNow = cartNow
+                            .map(i => i.name === PRODUCT_NAME ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i)
+                            .filter(i => (i.qty || 0) > 0);
+
+                        localStorage.setItem('cart', JSON.stringify(cartNow));
+                        updatePageState();
+                        alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
+                    }
+                } catch (e) {
+                    console.error('Stock validation failed:', e);
+                    let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
+                    cartNow = cartNow
+                        .map(i => i.name === PRODUCT_NAME ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i)
+                        .filter(i => (i.qty || 0) > 0);
+
+                    localStorage.setItem('cart', JSON.stringify(cartNow));
+                    updatePageState();
+                    alert('Σφάλμα επικοινωνίας με τον server. Η προσθήκη στο καλάθι ακυρώθηκε.');
                 }
             } catch (error) {
                 console.error("Error:", error);
@@ -304,22 +319,21 @@
 
         async function removeEuroleagueFromCart() {
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const euroleagueItem = cart.find(item => item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box');
-            
+            const euroleagueItem = cart.find(item => item.name === PRODUCT_NAME);
+
             if (!euroleagueItem) return;
 
             const btnEuroleague = document.getElementById('btn-euroleague');
             btnEuroleague.disabled = true;
 
             try {
-                for (let i = 0; i < euroleagueItem.qty; i++) {
-                    await fetch('/api/reserve-euroleague', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'remove' })
-                    });
-                }
-                cart = cart.filter(item => item.name !== '2025-26 Panini EuroLeague Contenders Basketball Mega Box');
+                await fetch(RESERVE_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'release', cartId: getCartId() })
+                });
+
+                cart = cart.filter(item => item.name !== PRODUCT_NAME);
                 localStorage.setItem('cart', JSON.stringify(cart));
             } catch (error) {
                 console.error("Error:", error);
