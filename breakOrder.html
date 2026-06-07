@@ -38,6 +38,8 @@
         .card-title { font-size: 22px; color: #ffffff; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
         .card-price { font-size: 32px; color: #ff0000; font-weight: bold; margin-bottom: 5px; }
         .stock-indicator { font-size: 13px; color: #22c55e; font-weight: 600; margin-bottom: 15px; }
+        .stock-indicator.out { color: #ef4444; }
+        .stock-indicator.loading { color: #cbd5e1; }
         .card-desc { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
         .add-btn { width: 100%; background-color: transparent; border: 2px solid #ff0000; color: #ffffff; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
         .add-btn:hover { background-color: #ff0000; }
@@ -151,7 +153,7 @@
                         <div class="card-image-container"><img src="images/ducks.png" alt="Ducks Break"></div>
                         <h2 class="card-title">Ducks</h2>
                         <div class="card-price">9.99 €</div>
-                        <div class="stock-indicator">Διαθέσιμο</div>
+                        <div id="ducks-stock-text" class="stock-indicator loading">&#934;&#972;&#961;&#964;&#969;&#963;&#951; &#945;&#960;&#959;&#952;&#941;&#956;&#945;&#964;&#959;&#962;...</div>
                         <p class="card-desc">Αποκλειστικό Ducks Break.</p>
                     </div>
                     <div class="add-btn">ΔΕΙΤΕ ΤΟ BREAK</div>
@@ -163,13 +165,22 @@
                         <h2 class="card-title">
 3 Κούτες Hobby Box Select Random Team & Κουτί Select  2025-26 Panini Select La Liga Soccer - Blester Box</h2>
                         <div class="card-price">29.50 €</div>
-                        <div class="stock-indicator">Διαθέσιμο</div>
+                        <div id="random-euroleague-stock-text" class="stock-indicator loading">&#934;&#972;&#961;&#964;&#969;&#963;&#951; &#945;&#960;&#959;&#952;&#941;&#956;&#945;&#964;&#959;&#962;...</div>
                         <p class="card-desc">Random spot σε μια ομάδα. Το reveal θα γίνει ζωντανά στο YouTube.</p>
                     </div>
                     <div class="add-btn">ΔΕΙΤΕ ΤΟ BREAK</div>
                 </a>
     
-                
+                <a href="break/selectEuroleagueSpots.html" class="team-box-product" style="text-decoration: none; color: inherit;">
+                    <div>
+                        <div class="card-image-container"><img src="images/imageEuroleaugueBreak.png" alt="Euroleague Break"></div>
+                        <h2 class="card-title">2025/26 Panini Select EuroLeague Basketball Hobby HALF CASE(6 ΚΟΥΤΙΆ)</h2>
+                        <div class="card-price">Διαφορετικές τιμές</div>
+                        <div id="select-euroleague-stock-text" class="stock-indicator loading">&#934;&#972;&#961;&#964;&#969;&#963;&#951; &#945;&#960;&#959;&#952;&#941;&#956;&#945;&#964;&#959;&#962;...</div>
+                        <p class="card-desc">Επιλέξτε την αγαπημένη σας ομάδα για το Euroleague Break.</p>
+                    </div>
+                    <div class="add-btn">ΔΕΙΤΕ ΤΟ BREAK</div>
+                </a>
     
             </div>
     </main>
@@ -182,7 +193,68 @@
             if (badge) badge.innerText = total;
         }
 
-        window.onload = updateCartBadge;
+        const STOCK_LABELS = {
+            available: '\u0394\u03b9\u03b1\u03b8\u03ad\u03c3\u03b9\u03bc\u03bf',
+            unavailable: '\u039c\u03b7 \u03b4\u03b9\u03b1\u03b8\u03ad\u03c3\u03b9\u03bc\u03bf',
+            error: '\u03a3\u03c6\u03ac\u03bb\u03bc\u03b1 \u03c6\u03cc\u03c1\u03c4\u03c9\u03c3\u03b7\u03c2 \u03c3\u03c4\u03bf\u03ba'
+        };
+
+        function setStockIndicator(id, available) {
+            const indicator = document.getElementById(id);
+            if (!indicator) return;
+
+            indicator.className = available ? 'stock-indicator' : 'stock-indicator out';
+            indicator.textContent = available ? STOCK_LABELS.available : STOCK_LABELS.unavailable;
+        }
+
+        function setStockError(id) {
+            const indicator = document.getElementById(id);
+            if (!indicator) return;
+
+            indicator.className = 'stock-indicator out';
+            indicator.textContent = STOCK_LABELS.error;
+        }
+
+        async function loadPoolStock(id, apiUrl) {
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'stock_failed');
+
+                setStockIndicator(id, Number(data.stock || 0) > 0);
+            } catch (error) {
+                console.error('Error loading stock:', apiUrl, error);
+                setStockError(id);
+            }
+        }
+
+        async function loadSelectStock() {
+            const id = 'select-euroleague-stock-text';
+
+            try {
+                const res = await fetch('/api/reserve-euroleagueSelect');
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'stock_failed');
+
+                const hasAvailableSpot = Object.values(data.stocks || {}).some(state => state === 'available');
+                setStockIndicator(id, hasAvailableSpot);
+            } catch (error) {
+                console.error('Error loading select stock:', error);
+                setStockError(id);
+            }
+        }
+
+        function loadBreakStock() {
+            loadPoolStock('ducks-stock-text', '/api/reserve-ducks');
+            loadPoolStock('random-euroleague-stock-text', '/api/reserve-randomEuroleagueBox');
+            loadSelectStock();
+        }
+
+        window.onload = () => {
+            updateCartBadge();
+            loadBreakStock();
+            setInterval(loadBreakStock, 10000);
+        };
         window.addEventListener('storage', updateCartBadge);
     </script>
 </body>
