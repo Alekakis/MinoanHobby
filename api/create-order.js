@@ -22,6 +22,15 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:randomEuroleagueBox',
         mappingKey: 'viva:mapping:randomEuroleagueBox',
         maxStock: 21
+    },
+    euroleagueMegaBox: {
+        stockKey: 'product:stock:euroleague',
+        holdPrefix: 'SELECT:euroleague-mega-box:hold',
+        holdIndexKey: 'SELECT:euroleague-mega-box:holdIndex',
+        holdCountKey: 'SELECT:euroleague-mega-box:holdCount',
+        pendingKey: 'viva:pending:euroleagueMegaBox',
+        mappingKey: 'viva:mapping:euroleagueMegaBox',
+        maxStock: 10
     }
 };
 
@@ -30,6 +39,7 @@ function normalizeProductId(item) {
 
     if (value === 'ducks') return 'ducks';
     if (value === 'panini select' || value === 'randomeuroleaguebox') return 'randomEuroleagueBox';
+    if (value === '2025-26 panini euroleague contenders basketball mega box') return 'euroleagueMegaBox';
 
     return null;
 }
@@ -289,7 +299,7 @@ export default async function handler(req, res) {
 
         if (lowerTeamId === 'megabox half case') {
             await redis.set(`viva:pending:megabox:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
-        } else if (lowerTeamId.includes('euroleague contenders')) {
+        } else if (lowerTeamId.includes('euroleague contenders') && !normalizeProductId({ teamId })) {
             await redis.set(`viva:pending:euroleague:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId.includes('euroleague select')) {
             await redis.set(`viva:pending:select:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
