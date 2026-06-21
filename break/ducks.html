@@ -400,7 +400,8 @@
 
                     <h2 class="card-title">Ducks Live Break 2025/26 Panini Select EuroLeague Basketball Hobby (2 ΚΟΥΤΙΆ)</h2>
 
-                    <div class="card-price">9.99 €</div>
+                    <!--<div class="card-price">9.99 €</div>-->
+                    <div class="card-price" id="ducks-price"></div>
 
                     <div id="ducks-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
 
@@ -448,6 +449,7 @@
     </main>
 
     <script>
+        const DUCKS_PRICE = 9.99;
         const CART_EXPIRE_TIME = 10 * 60 * 1000;
 
         async function cleanExpiredDucksItems() {
@@ -471,6 +473,7 @@
         }
 
         async function updatePageState() {
+            document.getElementById("ducks-price").innerText = `${DUCKS_PRICE.toFixed(2)} €`;
             await cleanExpiredDucksItems();
 
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -541,7 +544,7 @@
                     item.qty++;
                     item.addedAt = Date.now();
                 } else {
-                    item = { name: 'Ducks', price: 9.99, qty: 1, addedAt: Date.now() };
+                    item = { name: 'Ducks', price: DUCKS_PRICE, qty: 1, addedAt: Date.now() };
                     cart.push(item);
                 }
 
