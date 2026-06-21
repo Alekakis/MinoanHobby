@@ -408,7 +408,8 @@
 
 					<h2 class="card-title">Half Case Euroleague Select 25-26 Megaboxes (active case hit) Random Team</h2>
 
-					<div class="card-price">28.60 €</div>
+					<!--<div class="card-price">28.60 €</div>-->
+					<div class="card-price" id="spot-price"></div>
 
 					<div id="select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
 
@@ -436,6 +437,7 @@
 
 	<script>
 		const CART_EXPIRE_TIME = 10 * 60 * 1000;
+		const SPOT_PRICE = 28.60;
 
 		async function cleanExpiredSelectItems() {
 			const now = Date.now();
@@ -458,6 +460,7 @@
 		}
 
 		async function updatePageState() {
+			document.getElementById("spot-price").innerText = `${SPOT_PRICE.toFixed(2)} €`;
 			await cleanExpiredSelectItems();
 
 			const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -526,7 +529,7 @@
                     item.qty++;
                     item.addedAt = Date.now();
                 } else {
-                    item = { name: 'Panini Select', price: 28.60, qty: 1, addedAt: Date.now() };
+                    item = { name: 'Panini Select', price: SPOT_PRICE, qty: 1, addedAt: Date.now() };
                     cart.push(item);
                 }
 
