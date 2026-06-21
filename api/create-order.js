@@ -212,16 +212,18 @@ export default async function handler(req, res) {
             }
         }
 
-        const isBoxOrProduct = [
-            'ducks',
-            'megabox half case',
-            '2025-26 panini euroleague contenders basketball mega box',
-            'panini euroleague select box',
-            'panini la liga select box',
-            'panini select',
-            'mixed-cart',
-            'shipping-only'
-        ].includes(lowerTeamId);
+        const isBoxOrProduct =
+    isShippingItem({ name: teamId, teamId }) ||
+    [
+        'ducks',
+        'megabox half case',
+        '2025-26 panini euroleague contenders basketball mega box',
+        'panini euroleague select box',
+        'panini la liga select box',
+        'panini select',
+        'mixed-cart',
+        'shipping-only'
+    ].includes(lowerTeamId);
 
         if (!isBoxOrProduct) {
             const teamKey = `SELECT:team:${teamId}`;
