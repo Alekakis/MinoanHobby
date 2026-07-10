@@ -15,6 +15,24 @@ const POOLED_PRODUCTS = {
         mappingKey: 'viva:mapping:ducks',
         maxStock: 12
     },
+    merlinBox: {
+        stockKey: 'SELECT:merlin-box:stock',
+        holdPrefix: 'SELECT:merlin-box:hold',
+        holdIndexKey: 'SELECT:merlin-box:holdIndex',
+        holdCountKey: 'SELECT:merlin-box:holdCount',
+        pendingKey: 'viva:pending:merlinBox',
+        mappingKey: 'viva:mapping:merlinBox',
+        maxStock: 12
+    },
+    merlinPack: {
+        stockKey: 'SELECT:merlin-pack:stock',
+        holdPrefix: 'SELECT:merlin-pack:hold',
+        holdIndexKey: 'SELECT:merlin-pack:holdIndex',
+        holdCountKey: 'SELECT:merlin-pack:holdCount',
+        pendingKey: 'viva:pending:merlinPack',
+        mappingKey: 'viva:mapping:merlinPack',
+        maxStock: 12
+    },
     randomEuroleagueBox: {
         stockKey: 'SELECT:random-euroleague-box:stock',
         holdPrefix: 'SELECT:random-euroleague-box:hold',
@@ -32,6 +50,24 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:euroleagueMegaBox',
         mappingKey: 'viva:mapping:euroleagueMegaBox',
         maxStock: 10
+    },
+    origins: {
+        stockKey: 'SELECT:origins:stock',
+        holdPrefix: 'SELECT:origins:hold',
+        holdIndexKey: 'SELECT:origins:holdIndex',
+        holdCountKey: 'SELECT:origins:holdCount',
+        pendingKey: 'viva:pending:origins',
+        mappingKey: 'viva:mapping:origins',
+        maxStock: 20
+    },
+    topload: {
+        stockKey: 'SELECT:topload:stock',
+        holdPrefix: 'SELECT:topload:hold',
+        holdIndexKey: 'SELECT:topload:holdIndex',
+        holdCountKey: 'SELECT:topload:holdCount',
+        pendingKey: 'viva:pending:topload',
+        mappingKey: 'viva:mapping:topload',
+        maxStock: 50
     }
 };
 
@@ -39,8 +75,12 @@ function normalizeProductId(item) {
     const value = String(item.teamId || item.name || '').toLowerCase();
 
     if (value === 'ducks') return 'ducks';
+    if (value.includes('merlin') && value.includes('pack')) return 'merlinPack';
+    if (value.includes('merlin')) return 'merlinBox';
     if (value === 'panini select' || value === 'randomeuroleaguebox') return 'randomEuroleagueBox';
     if (value === '2025-26 panini euroleague contenders basketball mega box') return 'euroleagueMegaBox';
+    if (value.includes('origins') && value.includes('euroleague')) return 'origins';
+    if (value.includes('topload') && value.includes('card holder')) return 'topload';
 
     return null;
 }
@@ -224,7 +264,7 @@ export default async function handler(req, res) {
         'panini select',
         'mixed-cart',
         'shipping-only'
-    ].includes(lowerTeamId);
+    ].includes(lowerTeamId) || lowerTeamId.includes('merlin') || lowerTeamId.includes('origins') || lowerTeamId.includes('topload');
 
         if (!isBoxOrProduct) {
             const teamKey = `SELECT:team:${teamId}`;

@@ -14,6 +14,24 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:ducks',
         mappingKey: 'viva:mapping:ducks'
     },
+    merlinBox: {
+        holdPrefix: 'SELECT:merlin-box:hold',
+        holdIndexKey: 'SELECT:merlin-box:holdIndex',
+        holdCountKey: 'SELECT:merlin-box:holdCount',
+        soldCountKey: 'SELECT:merlin-box:soldCount',
+        stockKey: 'SELECT:merlin-box:stock',
+        pendingKey: 'viva:pending:merlinBox',
+        mappingKey: 'viva:mapping:merlinBox'
+    },
+    merlinPack: {
+        holdPrefix: 'SELECT:merlin-pack:hold',
+        holdIndexKey: 'SELECT:merlin-pack:holdIndex',
+        holdCountKey: 'SELECT:merlin-pack:holdCount',
+        soldCountKey: 'SELECT:merlin-pack:soldCount',
+        stockKey: 'SELECT:merlin-pack:stock',
+        pendingKey: 'viva:pending:merlinPack',
+        mappingKey: 'viva:mapping:merlinPack'
+    },
     randomEuroleagueBox: {
         holdPrefix: 'SELECT:random-euroleague-box:hold',
         holdIndexKey: 'SELECT:random-euroleague-box:holdIndex',
@@ -31,6 +49,24 @@ const POOLED_PRODUCTS = {
         stockKey: 'product:stock:euroleague',
         pendingKey: 'viva:pending:euroleagueMegaBox',
         mappingKey: 'viva:mapping:euroleagueMegaBox'
+    },
+    origins: {
+        holdPrefix: 'SELECT:origins:hold',
+        holdIndexKey: 'SELECT:origins:holdIndex',
+        holdCountKey: 'SELECT:origins:holdCount',
+        soldCountKey: 'SELECT:origins:soldCount',
+        stockKey: 'SELECT:origins:stock',
+        pendingKey: 'viva:pending:origins',
+        mappingKey: 'viva:mapping:origins'
+    },
+    topload: {
+        holdPrefix: 'SELECT:topload:hold',
+        holdIndexKey: 'SELECT:topload:holdIndex',
+        holdCountKey: 'SELECT:topload:holdCount',
+        soldCountKey: 'SELECT:topload:soldCount',
+        stockKey: 'SELECT:topload:stock',
+        pendingKey: 'viva:pending:topload',
+        mappingKey: 'viva:mapping:topload'
     }
 };
 
@@ -195,8 +231,12 @@ export default async function handler(req, res) {
             }
 
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.ducks);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.merlinBox);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.merlinPack);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.origins);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.topload);
 
             const teamId =
                 await redis.get(
@@ -283,8 +323,12 @@ export default async function handler(req, res) {
             }
 
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.ducks);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.merlinBox);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.merlinPack);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.origins);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.topload);
 
             const teamId =
                 await redis.get(

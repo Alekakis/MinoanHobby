@@ -356,7 +356,29 @@
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ action: 'release', cartId: getCartId() })
-						});
+						});					} else if (item.name === 'Merlin 2025-26 Topps Premier League') {
+							await fetch('/api/reserve-merlin', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ action: 'release', product: 'box', cartId: getCartId() })
+							});					} else if (item.name === 'Merlin 2025-26 Topps Premier League Pack') {
+							await fetch('/api/reserve-merlin', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ action: 'release', product: 'pack', cartId: getCartId() })
+							});
+					} else if (item.name === '2025-26 Panini Origins EuroLeague Basketball Hobby') {
+							await fetch('/api/reserve-origins', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ action: 'release', cartId: getCartId() })
+							});
+					} else if (item.name === '3×4 Topload Card Holder - Standard (100 CT. Pack)') {
+							await fetch('/api/reserve-topload', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ action: 'release', cartId: getCartId() })
+							});
 					} else if (item.name === '2025-26 Panini EuroLeague Contenders Basketball Mega Box') {
 						for (let i = 0; i < (item.qty || 1); i++) {
 							await fetch('/api/reserve-euroleague', {
@@ -614,6 +636,29 @@
                                 body: JSON.stringify({ action: 'remove' })
                             });
                         }
+					} else if (item.name === 'Merlin 2025-26 Topps Premier League') {
+                        await fetch('/api/reserve-merlin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', product: 'box', cartId: getCartId() })
+                        });
+                    } else if (item.name === 'Merlin 2025-26 Topps Premier League Pack') {
+                        await fetch('/api/reserve-merlin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', product: 'pack', cartId: getCartId() })
+                        });                    } else if (item.name === '2025-26 Panini Origins EuroLeague Basketball Hobby') {
+                        await fetch('/api/reserve-origins', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', cartId: getCartId() })
+                        });
+                    } else if (item.name === '3×4 Topload Card Holder - Standard (100 CT. Pack)') {
+                        await fetch('/api/reserve-topload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'release', cartId: getCartId() })
+                        });
                     } else if (item.name === 'Ducks') {
                         await fetch('/api/reserve-ducks', {
                             method: 'POST',
