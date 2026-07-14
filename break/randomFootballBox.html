@@ -403,7 +403,7 @@
 			<div class="shipping-card">
 				<div>
 					<div class="card-image-container">
-						<img src="../images/merlin.jpeg" alt="Panini Select">
+						<img src="../images/merlin.jpeg" alt="Football Box">
 						<!--<img src="../images/randomMegabox.jpg"  alt="Panini Select 2025/26">-->
 						<!--<img src="../images/Origins.png"  alt="Panini Select 2025/26"><img src="../images/randomMegabox.jpg"  alt="Panini Select 2025/26">-->
 					</div>
@@ -414,7 +414,7 @@
 					<!--<div class="card-price">28.60 €</div>-->
 					<div class="card-price" id="spot-price"></div>
 
-					<div id="select-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
+					<div id="football-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
 
 					<p class="card-desc">Random spot για ένα πακέτο. Το reveal θα γίνει ζωντανά στο YouTube.</p>
 					<p style="margin-top:8px;color:#cbd5e1;">Συνολικά: <strong>17 spots</strong></p>
@@ -422,7 +422,7 @@
 
 				<div>
 					<button class="add-btn" id="btn-select">Προσθηκη στο καλαθι</button>
-					<div id="remove-select-box"></div>
+					<div id="remove-football-box"></div>
 				</div>
 			</div>
 		</div>
@@ -449,7 +449,7 @@
 
 			for (const item of cart) {
                 if (
-                    item.name === 'Panini Select' &&
+                    item.name === 'Football Box' &&
                     item.addedAt &&
                     (now - item.addedAt) >= CART_EXPIRE_TIME
                 ) {
@@ -471,11 +471,11 @@
 
 			document.getElementById('global-cart-count').innerText = totalItems;
 
-			const selectInCart = cart.find(item => item.name === 'Panini Select');
+			const selectInCart = cart.find(item => item.name === 'Football Box');
 			const userQty = selectInCart ? selectInCart.qty : 0;
 			const btn = document.getElementById('btn-select');
-			const stockText = document.getElementById('select-stock-text');
-			const removeBox = document.getElementById('remove-select-box');
+			const stockText = document.getElementById('football-stock-text');
+			const removeBox = document.getElementById('remove-football-box');
 
 			try {
 				const response = await fetch('/api/reserve-randomFootballBox');
@@ -525,14 +525,14 @@
 
                 // Optimistic local add
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                let item = cart.find(i => i.name === 'Panini Select');
+                let item = cart.find(i => i.name === 'Football Box');
                 const previousQty = item ? item.qty : 0;
 
                 if (item) {
                     item.qty++;
                     item.addedAt = Date.now();
                 } else {
-                    item = { name: 'Panini Select', price: SPOT_PRICE, qty: 1, addedAt: Date.now() };
+                    item = { name: 'Football Box', price: SPOT_PRICE, qty: 1, addedAt: Date.now() };
                     cart.push(item);
                 }
 
@@ -547,7 +547,7 @@
                     if ((previousQty + 1) > realLiveStock) {
                         // revert
                         let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
-                        cartNow = cartNow.map(i => i.name === 'Panini Select' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
+                        cartNow = cartNow.map(i => i.name === 'Football Box' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
                         localStorage.setItem('cart', JSON.stringify(cartNow));
                         updatePageState();
                         alert('Δεν μπορείτε να προσθέσετε περισσότερα από το διαθέσιμο απόθεμα');
@@ -556,7 +556,7 @@
                     // validation failed (network or server error) -> revert optimistic add
                     console.error('Stock validation failed:', e);
                     let cartNow = JSON.parse(localStorage.getItem('cart')) || [];
-                    cartNow = cartNow.map(i => i.name === 'Panini Select' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
+                    cartNow = cartNow.map(i => i.name === 'Football Box' ? ({ ...i, qty: Math.max(0, (i.qty || 1) - 1) }) : i).filter(i => (i.qty || 0) > 0);
                     localStorage.setItem('cart', JSON.stringify(cartNow));
                     updatePageState();
                     alert('Σφάλμα επικοινωνίας με τον server. Η προσθήκη στο καλάθι ακυρώθηκε.');
@@ -570,13 +570,13 @@
 
 		async function removeSelectFromCart() {
 			let cart = JSON.parse(localStorage.getItem('cart')) || [];
-			const item = cart.find(i => i.name === 'Panini Select');
+			const item = cart.find(i => i.name === 'Football Box');
 
 			if (!item) return;
 
 			try {
                 // Local-only removal
-                localStorage.setItem('cart', JSON.stringify(cart.filter(i => i.name !== 'Panini Select')));
+                localStorage.setItem('cart', JSON.stringify(cart.filter(i => i.name !== 'Football Box')));
 			} catch (e) {
 				console.error(e);
 			}
