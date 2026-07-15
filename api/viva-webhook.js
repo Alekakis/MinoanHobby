@@ -41,6 +41,15 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:randomEuroleagueBox',
         mappingKey: 'viva:mapping:randomEuroleagueBox'
     },
+    randomFootballBox: {
+        holdPrefix: 'SELECT:random-football-box:hold',
+        holdIndexKey: 'SELECT:random-football-box:holdIndex',
+        holdCountKey: 'SELECT:random-football-box:holdCount',
+        soldCountKey: 'SELECT:random-football-box:soldCount',
+        stockKey: 'SELECT:random-football-box:stock',
+        pendingKey: 'viva:pending:randomFootballBox',
+        mappingKey: 'viva:mapping:randomFootballBox'
+    },
     euroleagueMegaBox: {
         holdPrefix: 'SELECT:euroleague-mega-box:hold',
         holdIndexKey: 'SELECT:euroleague-mega-box:holdIndex',
