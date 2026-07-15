@@ -401,6 +401,12 @@
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ action: 'release', cartId: getCartId() })
 						});
+					} else if (item.name === 'Football Box') {
+						await fetch('/api/reserve-randomFootballBox', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});
 					} else if (item.name === 'Panini La Liga Select Box') {
 						for (let i = 0; i < (item.qty || 1); i++) {
 							await fetch('/api/reserve-laliga', {
@@ -620,6 +626,12 @@
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ action: 'release', cartId: getCartId() })
 						});
+					} else if (item.name === 'Football Box') {
+						await fetch('/api/reserve-randomFootballBox', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ action: 'release', cartId: getCartId() })
+						});	
                     } else if (item.name === 'Panini La Liga Select Box') {
                         for (let i = 0; i < (item.qty || 1); i++) {
                             await fetch('/api/reserve-laliga', {
