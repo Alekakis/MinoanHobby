@@ -271,7 +271,7 @@ export default async function handler(req, res) {
         'panini euroleague select box',
         'panini la liga select box',
         'panini select',
-        'Football Box',
+        'football box',
         'mixed-cart',
         'shipping-only'
     ].includes(lowerTeamId) || lowerTeamId.includes('merlin') || lowerTeamId.includes('origins') || lowerTeamId.includes('topload');
