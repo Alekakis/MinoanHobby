@@ -357,6 +357,8 @@ export default async function handler(req, res) {
             await redis.set(`viva:pending:euroleague:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId.includes('euroleague select')) {
             await redis.set(`viva:pending:select:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
+        } else if (lowerTeamId.includes('Football Box')) {
+            await redis.set(`viva:pending:select:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId.includes('la liga')) {
             await redis.set(`viva:pending:laliga:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId !== 'shipping-only' && !normalizeProductId({ teamId })) {
