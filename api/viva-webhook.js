@@ -247,11 +247,13 @@ export default async function handler(req, res) {
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.origins);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.topload);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomFootballBox);
 
             await redis.del(
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:merlin:${orderCode}`,
                 `viva:pending:randomEuroleagueBox:${orderCode}`,
+                `viva:pending:randomFootballBox:${orderCode}`,
                 `viva:pending:euroleagueMegaBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
                 `viva:pending:euroleague:${orderCode}`,
@@ -327,6 +329,7 @@ export default async function handler(req, res) {
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.merlinBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.merlinPack);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomFootballBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.origins);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.topload);
@@ -351,6 +354,7 @@ export default async function handler(req, res) {
                 `viva:mapping:ducks:${orderCode}`,
                 `viva:mapping:merlin:${orderCode}`,
                 `viva:mapping:randomEuroleagueBox:${orderCode}`,
+                `viva:mapping:randomFootballBox:${orderCode}`,
                 `viva:mapping:euroleagueMegaBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
                 `viva:order:details:${orderCode}`
