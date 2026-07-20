@@ -87,6 +87,7 @@ function normalizeProductId(item) {
     if (value.includes('merlin') && value.includes('pack')) return 'merlinPack';
     if (value.includes('merlin')) return 'merlinBox';
     if (value === 'panini select' || value === 'randomeuroleaguebox') return 'randomEuroleagueBox';
+    if (value === 'football box' || value === 'randomfootballbox') return 'randomFootballBox';
     if (value === '2025-26 panini euroleague contenders basketball mega box') return 'euroleagueMegaBox';
     if (value.includes('origins') && value.includes('euroleague')) return 'origins';
     if (value.includes('topload') && value.includes('card holder')) return 'topload';
