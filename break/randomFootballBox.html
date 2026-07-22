@@ -403,20 +403,22 @@
 			<div class="shipping-card">
 				<div>
 					<div class="card-image-container">
-						<img src="../images/merlin.jpeg" alt="Football Box">
+						<img src="../images/ducks.png" alt="Ducks Break">
+						<!--<img src="../images/merlin.jpeg" alt="Football Box">-->
 						<!--<img src="../images/randomMegabox.jpg"  alt="Panini Select 2025/26">-->
 						<!--<img src="../images/Origins.png"  alt="Panini Select 2025/26"><img src="../images/randomMegabox.jpg"  alt="Panini Select 2025/26">-->
 					</div>
 
 					<!--<h2 class="card-title">1 Origins Euroleague Box / 3 Megabox SELECT Euroleague Boxes Random spot</h2>-->
-					<h2 class="card-title">Half Box Merlin 2025-26 Topps Premier League</h2>
+					<!--<h2 class="card-title">Half Box Merlin 2025-26 Topps Premier League</h2>-->
+					<h2 class="card-title">Ducks Live Break Half Case Euroleague Hobbybox Origins vol2</h2>
 
 					<!--<div class="card-price">28.60 €</div>-->
 					<div class="card-price" id="spot-price"></div>
 
 					<div id="football-stock-text" class="stock-indicator">Φόρτωση αποθέματος...</div>
 
-					<p class="card-desc">Random spot για ένα πακέτο. Το reveal θα γίνει ζωντανά στο YouTube.</p>
+					<!--<p class="card-desc">Random spot για ένα πακέτο. Το reveal θα γίνει ζωντανά στο YouTube.</p>-->
 					<p style="margin-top:8px;color:#cbd5e1;">Συνολικά: <strong>17 spots</strong></p>
 				</div>
 
@@ -427,20 +429,49 @@
 			</div>
 		</div>
 
-		<section class="raffle-box">
+		<!--<section class="raffle-box">
 			<h2>🎯 Random Spot</h2>
 			<p>
 				Αγοράζοντας αυτό το πακέτο παίρνεις <strong>1 spot</strong>
 				Το reveal θα γίνει ζωντανά στο κανάλι μας στο YouTube.
 			</p>
 			
-		</section>
+		</section>-->
+		<section class="raffle-box">
+            <h2>🎯 Κέρδισε Team Spot στο DUCKRACE!</h2>
+
+            <p>
+                Αγοράζοντας το πακέτο παίρνεις <strong>1 spot</strong>,
+                δηλαδή <strong> Μια θέση στοv DUCKRACE διαγωνισμός .</strong>
+            </p>
+
+            <div class="teams">
+                <div class="teams">
+                    <p><strong>1ος:</strong> Real</p>
+                    <p><strong>2ος:</strong> Barcelona</p>
+                    <p><strong>3ος:</strong> Fener</p>
+                    <p><strong>4ος:</strong> Armani</p>
+                    <p><strong>5ος:</strong> 1 spot σε Half Box Merlin</p>
+                    <p><strong>6ος:</strong> Free Shipping</p>
+                    
+                </div>
+               
+            </div>
+            
+            <p class="note">
+                ⚠️ Η αγορά spot δεν εξασφαλίζει κάρτες.
+            </p>
+
+            <p class="live">
+                📺 Θα πραγματοποιηθεί ζωντανά στο Live.
+            </p>
+        </section>
 
 	</main>
 
 	<script>
 		const CART_EXPIRE_TIME = 10 * 60 * 1000;
-		const SPOT_PRICE = 0.1;
+		const SPOT_PRICE = 9.99;
 
 		async function cleanExpiredSelectItems() {
 			const now = Date.now();
