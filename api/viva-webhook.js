@@ -206,17 +206,17 @@ export default async function handler(req, res) {
                             '💰 Πληρωμένη Παραγγελία: ' +
                             (details.firstName || ''),
                         'Order Code': orderCode,
-                        'Ονομα':
+                        'firstName':
                             (details.firstName || '') +
                             ' ' +
                             (details.lastName || ''),
                         'Email': details.email || '',
-                        'Τηλέφωνο': details.phone || '',
-                        'Διεύθυνση': details.address || '',
-                        'Πόλη': details.city || '',
-                        'ΤΚ': details.zip || '',
-                        'Είδος': details.teamName || 'Άγνωστο',
-                        'Ποσό': (details.price || '0') + ' €'
+                        'phone': details.phone || '',
+                        'address': details.address || '',
+                        'city': details.city || '',
+                        'zip': details.zip || '',
+                        'teamId': details.teamName || 'Άγνωστο',
+                        'amount': (details.price || '0') + ' €'
                     })
                 }
             );
@@ -229,11 +229,11 @@ export default async function handler(req, res) {
                     body: JSON.stringify({
                         subject: 'Πληρωμένη Παραγγελία (Viva): ' + (details.firstName || ''),
                         'Order Code': orderCode,
-                        'Ονομα': (details.firstName || '') + ' ' + (details.lastName || ''),
-                        'Email': details.email || '',
+                        'firstName': (details.firstName || '') + ' ' + (details.lastName || ''),
+                        'email': details.email || '',
                         'Τηλέφωνο': details.phone || '',
                         'Είδος': details.teamName || 'Άγνωστο',
-                        'Ποσό': (details.price || '0') + ' €'
+                        'amount': (details.price || '0') + ' €'
                     })
                 });
             } catch (e) {
