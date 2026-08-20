@@ -54,50 +54,35 @@ export default async function handler(req, res) {
 
                     textContent:
                         'Ονομα: ' +
-                        ((details.firstName || '') +
-                        ' ' +
-                        (details.lastName || '')) +
+                        ((details.firstName || '') + ' ' + (details.lastName || '')) +
                         '\n\n' +
 
-                        'Email: ' +
-                        (details.email || '') +
-                        '\n' +
+                        'Email: ' + (details.email || '') + '\n' +
+                        'Τηλέφωνο: ' + (details.phone || '') + '\n' +
+                        'Διεύθυνση: ' + (details.address || '') + '\n' +
+                        'Πόλη: ' + (details.city || '') + '\n' +
+                        'ΤΚ: ' + (details.zip || '') + '\n\n' +
 
-                        'Τηλέφωνο: ' +
-                        (details.phone || '') +
-                        '\n' +
-
-                        'Διεύθυνση: ' +
-                        (details.address || '') +
-                        '\n' +
-
-                        'Πόλη: ' +
-                        (details.city || '') +
-                        '\n' +
-
-                        'ΤΚ: ' +
-                        (details.zip || '') +
+                        'ΠΑΡΑΓΓΕΛΙΑ:\n' +
+                        (
+                            Array.isArray(details.cartDetails)
+                                ? details.cartDetails.map((item, index) => {
+                                    return (
+                                        (index + 1) + '. ' +
+                                        (item.name || item.teamId || 'Άγνωστο προϊόν') +
+                                        ' | Ποσότητα: ' + (item.qty || 1) +
+                                        ' | Τιμή: ' +
+                                        Number(item.price || 0).toFixed(2) +
+                                        ' €'
+                                    );
+                                }).join('\n')
+                                : 'Δεν υπάρχουν στοιχεία καλαθιού'
+                        ) +
                         '\n\n' +
 
-                        'Είδος: ' +
-                        (details.teamId ||
-                         details.teamName ||
-                         'Άγνωστο') +
-                        '\n' +
-
-                        'Ποσό: ' +
-                        (details.amount ||
-                         details.price ||
-                         '0') +
-                        ' €' +
-                        '\n\n' +
-
-                        'Καλάθι:\n' +
-                        JSON.stringify(
-                            details.cartDetails || '',
-                            null,
-                            2
-                        )
+                        'ΣΥΝΟΛΟ: ' +
+                        (details.amount || details.price || '0') +
+                        ' €'
                 })
             }
         );
