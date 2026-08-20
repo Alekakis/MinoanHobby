@@ -1,4 +1,4 @@
-const BREVO_API_KEY = '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';
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER_EMAIL = 'minoanhobby@gmail.com';
 const BREVO_TO_EMAIL = 'minoanhobby@gmail.com';
 
