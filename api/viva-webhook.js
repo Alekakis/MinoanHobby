@@ -1,3 +1,7 @@
+const BREVO_API_KEY = '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';
+const BREVO_SENDER_EMAIL = 'minoanhobby@gmail.com';
+const BREVO_TO_EMAIL = 'minoanhobby@gmail.com';
+
 import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
@@ -222,6 +226,49 @@ export default async function handler(req, res) {
             );
 
             // Also notify via Formspree so admin receives a direct mail with Viva OrderCode
+            try {
+                if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL || !BREVO_TO_EMAIL) {
+                    throw new Error('Missing BREVO_API_KEY, BREVO_SENDER_EMAIL or BREVO_TO_EMAIL');
+                }
+
+                const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': BREVO_API_KEY
+                    },
+                    body: JSON.stringify({
+                        sender: {
+                            name: 'MinoanHobby',
+                            email: BREVO_SENDER_EMAIL
+                        },
+                        to: [
+                            {
+                                email: BREVO_TO_EMAIL
+                            }
+                        ],
+                        subject: '💰 Πληρωμένη Παραγγελία: ' + (details.firstName || ''),
+                        textContent:
+                            'Order Code: ' + orderCode + '\n' +
+                            'Ονομα: ' + ((details.firstName || '') + ' ' + (details.lastName || '')) + '\n' +
+                            'Email: ' + (details.email || '') + '\n' +
+                            'Τηλέφωνο: ' + (details.phone || '') + '\n' +
+                            'Διεύθυνση: ' + (details.address || '') + '\n' +
+                            'Πόλη: ' + (details.city || '') + '\n' +
+                            'ΤΚ: ' + (details.zip || '') + '\n' +
+                            'Είδος: ' + (details.teamName || 'Άγνωστο') + '\n' +
+                            'Ποσό: ' + (details.price || '0') + ' €'
+                    })
+                });
+
+                if (!brevoResponse.ok) {
+                    const brevoError = await brevoResponse.text();
+                    throw new Error(`Brevo ${brevoResponse.status}: ${brevoError}`);
+                }
+            } catch (e) {
+                console.error('Brevo notify failed (viva-webhook):', e);
+            }
+
             try {
                 await fetch('https://formspree.io/f/xgoqqppn', {
                     method: 'POST',
