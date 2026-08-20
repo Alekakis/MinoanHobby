@@ -494,18 +494,33 @@
                 zip: document.getElementById('zip').value
             };
 
-            try {
-                await fetch('https://formspree.io/f/xgoqqppn', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...orderPayload,
-                        cartDetails: JSON.stringify(cart)
-                    })
-                });
-            } catch (e) {
-                console.error("Formspree error, continuing to payment...");
-            }
+           try {
+    await fetch('https://formspree.io/f/xgoqqppn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            ...orderPayload,
+            cartDetails: JSON.stringify(cart)
+        })
+    });
+} catch (e) {
+    console.error("Formspree error, continuing to payment...");
+}
+
+try {
+    await fetch('/api/send-order-brevo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            ...orderPayload,
+            cartDetails: cart
+        })
+    });
+} catch (e) {
+    console.error("Brevo error, continuing to payment...");
+}
 
             // ΠΡΟ-ΕΛΕΓΧΟΣ: προσπαθούμε να κάνουμε reserve στα team spots πριν τη δημιουργία παραγγελίας
             const cartIdVal = getCartId();
