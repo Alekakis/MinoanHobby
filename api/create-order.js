@@ -1,7 +1,3 @@
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_SENDER_EMAIL = 'minoanhobby@gmail.com';
-const BREVO_TO_EMAIL = 'minoanhobby@gmail.com';
-
 import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
@@ -368,95 +364,6 @@ export default async function handler(req, res) {
         } else if (lowerTeamId !== 'shipping-only' && !normalizeProductId({ teamId })) {
             await redis.set(`viva:mapping:team:${data.OrderCode}`, String(teamId), 'EX', HOLD_TTL);
         }
-
-        (async () => {
-            try {
-                await fetch('https://api.web3forms.com/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
-                        subject: 'Νέα Παραγγελία: ' + (customerData.firstName || ''),
-                        'Order Code': data.OrderCode,
-                        'Ονομα': (customerData.firstName || '') + ' ' + (customerData.lastName || ''),
-                        'Email': customerData.email || '',
-                        'Τηλέφωνο': customerData.phone || '',
-                        'Διεύθυνση': customerData.address || '',
-                        'Πόλη': customerData.city || '',
-                        'ΤΚ': customerData.zip || '',
-                        'Είδος': customerData.teamName || 'Άγνωστο',
-                        'Ποσό': (customerData.price || '0') + ' €'
-                    })
-                });
-            } catch (e) {
-                console.error('Web3Forms notify failed:', e);
-            }
-
-            try {
-                if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL || !BREVO_TO_EMAIL) {
-                    throw new Error('Missing BREVO_API_KEY, BREVO_SENDER_EMAIL or BREVO_TO_EMAIL');
-                }
-
-                const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'api-key': BREVO_API_KEY
-                    },
-                    body: JSON.stringify({
-                        sender: {
-                            name: 'MinoanHobby',
-                            email: BREVO_SENDER_EMAIL
-                        },
-                        to: [
-                            {
-                                email: BREVO_TO_EMAIL
-                            }
-                        ],
-                        subject: 'Νέα Παραγγελία: ' + (customerData.firstName || ''),
-                        textContent:
-                            'Order Code: ' + data.OrderCode + '\n' +
-                            'Ονομα: ' + ((customerData.firstName || '') + ' ' + (customerData.lastName || '')) + '\n' +
-                            'Email: ' + (customerData.email || '') + '\n' +
-                            'Τηλέφωνο: ' + (customerData.phone || '') + '\n' +
-                            'Διεύθυνση: ' + (customerData.address || '') + '\n' +
-                            'Πόλη: ' + (customerData.city || '') + '\n' +
-                            'ΤΚ: ' + (customerData.zip || '') + '\n' +
-                            'Είδος: ' + (customerData.teamName || 'Άγνωστο') + '\n' +
-                            'Ποσό: ' + (customerData.price || '0') + ' €'
-                    })
-                });
-
-                if (!brevoResponse.ok) {
-                    const brevoError = await brevoResponse.text();
-                    throw new Error(`Brevo ${brevoResponse.status}: ${brevoError}`);
-                }
-            } catch (e) {
-                console.error('Brevo notify failed (create-order):', e);
-            }
-
-            try {
-                await fetch('https://formspree.io/f/xgoqqppn', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subject: 'Νέα Παραγγελία (Formspree)',
-                        'Order Code': data.OrderCode,
-                        'Ονομα': (customerData.firstName || '') + ' ' + (customerData.lastName || ''),
-                        'Email': customerData.email || '',
-                        'Τηλέφωνο': customerData.phone || '',
-                        'Διεύθυνση': customerData.address || '',
-                        'Πόλη': customerData.city || '',
-                        'ΤΚ': customerData.zip || '',
-                        'Είδος': customerData.teamName || 'Άγνωστο',
-                        'Ποσό': (customerData.price || '0') + ' €'
-                    })
-                });
-            } catch (e) {
-                console.error('Formspree notify failed:', e);
-            }
-        })();
-
         return res.status(200).json(data);
     } catch (error) {
         for (const reservation of reservations) {
