@@ -1,6 +1,3 @@
-const BREVO_API_KEY = process.env.BREVO_API_KEY;const BREVO_SENDER_EMAIL = 'minoanhobby@gmail.com';
-const BREVO_TO_EMAIL = 'minoanhobby@gmail.com';
-
 import Redis from 'ioredis';
 
 const redis = new Redis("redis://default:9j6w6SPasZTuekVEVPTnoVCXNDFrRN0k@admirable-prosperous-insurance-32661.db.redis.io:10020");
@@ -149,6 +146,100 @@ async function releasePooledProduct(orderCode, config) {
     await redis.incrby(config.stockKey, pendingQty);
 }
 
+
+async function sendPaidOrderBrevoOnce(orderCode, details) {
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    const BREVO_SENDER_EMAIL = 'minoanhobby@gmail.com';
+    const BREVO_TO_EMAIL = 'minoanhobby@gmail.com';
+
+    if (!BREVO_API_KEY) {
+        console.error('BREVO_API_KEY is missing');
+        return false;
+    }
+
+    // Κοινό idempotency key και για τα 2 Viva handlers.
+    // Έτσι, ακόμη κι αν φτάσει το ίδιο payment event και στα δύο endpoints,
+    // το "Πληρωμένη Παραγγελία" email θα σταλεί μόνο μία φορά.
+    const emailLockKey = `brevo:paid-email:${orderCode}`;
+    const claimed = await redis.set(
+        emailLockKey,
+        'sending',
+        'NX',
+        'EX',
+        60 * 60 * 24 * 30
+    );
+
+    if (claimed !== 'OK') {
+        return false;
+    }
+
+    try {
+        const brevoResponse = await fetch(
+            'https://api.brevo.com/v3/smtp/email',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': BREVO_API_KEY
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: 'MinoanHobby',
+                        email: BREVO_SENDER_EMAIL
+                    },
+                    to: [
+                        {
+                            email: BREVO_TO_EMAIL
+                        }
+                    ],
+                    subject:
+                        '💰 Πληρωμένη Παραγγελία: ' +
+                        (details.firstName || ''),
+                    textContent:
+                        'Order Code: ' + orderCode + '\n' +
+                        'Ονομα: ' +
+                        ((details.firstName || '') +
+                        ' ' +
+                        (details.lastName || '')) +
+                        '\n' +
+                        'Email: ' + (details.email || '') + '\n' +
+                        'Τηλέφωνο: ' + (details.phone || '') + '\n' +
+                        'Διεύθυνση: ' + (details.address || '') + '\n' +
+                        'Πόλη: ' + (details.city || '') + '\n' +
+                        'ΤΚ: ' + (details.zip || '') + '\n' +
+                        'Είδος: ' +
+                        (details.teamName || 'Άγνωστο') +
+                        '\n' +
+                        'Ποσό: ' +
+                        (details.price || '0') +
+                        ' €'
+                })
+            }
+        );
+
+        if (!brevoResponse.ok) {
+            const brevoError = await brevoResponse.text();
+            throw new Error(
+                `Brevo ${brevoResponse.status}: ${brevoError}`
+            );
+        }
+
+        await redis.set(
+            emailLockKey,
+            'sent',
+            'EX',
+            60 * 60 * 24 * 30
+        );
+
+        return true;
+    } catch (error) {
+        // Αν η αποστολή αποτύχει, αφήνουμε επόμενο Viva retry να ξαναδοκιμάσει.
+        await redis.del(emailLockKey);
+        console.error('Brevo paid-order email failed:', error);
+        return false;
+    }
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({
@@ -196,95 +287,7 @@ export default async function handler(req, res) {
                 ? JSON.parse(orderDetailsRaw)
                 : {};
 
-            await fetch(
-                'https://api.web3forms.com/submit',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        access_key: "ef54407f-a593-41c3-8fce-209c5ebf6e97",
-                        subject:
-                            '💰 Πληρωμένη Παραγγελία: ' +
-                            (details.firstName || ''),
-                        'Order Code': orderCode,
-                        'firstName':
-                            (details.firstName || '') +
-                            ' ' +
-                            (details.lastName || ''),
-                        'Email': details.email || '',
-                        'phone': details.phone || '',
-                        'address': details.address || '',
-                        'city': details.city || '',
-                        'zip': details.zip || '',
-                        'teamId': details.teamName || 'Άγνωστο',
-                        'amount': (details.price || '0') + ' €'
-                    })
-                }
-            );
-
-            // Also notify via Formspree so admin receives a direct mail with Viva OrderCode
-            try {
-                if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL || !BREVO_TO_EMAIL) {
-                    throw new Error('Missing BREVO_API_KEY, BREVO_SENDER_EMAIL or BREVO_TO_EMAIL');
-                }
-
-                const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'api-key': BREVO_API_KEY
-                    },
-                    body: JSON.stringify({
-                        sender: {
-                            name: 'MinoanHobby',
-                            email: BREVO_SENDER_EMAIL
-                        },
-                        to: [
-                            {
-                                email: BREVO_TO_EMAIL
-                            }
-                        ],
-                        subject: '💰 Πληρωμένη Παραγγελία: ' + (details.firstName || ''),
-                        textContent:
-                            'Order Code: ' + orderCode + '\n' +
-                            'Ονομα: ' + ((details.firstName || '') + ' ' + (details.lastName || '')) + '\n' +
-                            'Email: ' + (details.email || '') + '\n' +
-                            'Τηλέφωνο: ' + (details.phone || '') + '\n' +
-                            'Διεύθυνση: ' + (details.address || '') + '\n' +
-                            'Πόλη: ' + (details.city || '') + '\n' +
-                            'ΤΚ: ' + (details.zip || '') + '\n' +
-                            'Είδος: ' + (details.teamName || 'Άγνωστο') + '\n' +
-                            'Ποσό: ' + (details.price || '0') + ' €'
-                    })
-                });
-
-                if (!brevoResponse.ok) {
-                    const brevoError = await brevoResponse.text();
-                    throw new Error(`Brevo ${brevoResponse.status}: ${brevoError}`);
-                }
-            } catch (e) {
-                console.error('Brevo notify failed (viva-webhook):', e);
-            }
-
-            try {
-                await fetch('https://formspree.io/f/xgoqqppn', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subject: 'Πληρωμένη Παραγγελία (Viva): ' + (details.firstName || ''),
-                        'Order Code': orderCode,
-                        'firstName': (details.firstName || '') + ' ' + (details.lastName || ''),
-                        'email': details.email || '',
-                        'Τηλέφωνο': details.phone || '',
-                        'Είδος': details.teamName || 'Άγνωστο',
-                        'amount': (details.price || '0') + ' €'
-                    })
-                });
-            } catch (e) {
-                console.error('Formspree notify failed (viva-webhook):', e);
-            }
+            await sendPaidOrderBrevoOnce(orderCode, details);
 
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.ducks);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.merlinBox);
