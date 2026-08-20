@@ -493,20 +493,6 @@
                 city: document.getElementById('city').value,
                 zip: document.getElementById('zip').value
             };
-
-           try {
-    await fetch('https://formspree.io/f/xgoqqppn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            ...orderPayload,
-            cartDetails: JSON.stringify(cart)
-        })
-    });
-} catch (e) {
-    console.error("Formspree error, continuing to payment...");
-}
-
 try {
     await fetch('/api/send-order-brevo', {
         method: 'POST',
@@ -563,21 +549,7 @@ try {
             }
 
             try {
-                // αποστολή email/φόρμας στον server (web3forms) με τα στοιχεία της παραγγελίας
-                try {
-                    await fetch('/api/send-order-web3', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            ...orderPayload,
-                            cartDetails: cart
-                        })
-                    });
-                } catch (e) {
-                    console.error('Failed to send web3form notification:', e);
-                }
-
-                const res = await fetch('/api/create-order', {
+const res = await fetch('/api/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderPayload)
