@@ -96,6 +96,7 @@ function normalizeProductId(item) {
     if (value.includes('merlin') && value.includes('pack')) return 'merlinPack';
     if (value.includes('merlin')) return 'merlinBox';
     if (value === 'panini select' || value === 'randomeuroleaguebox') return 'randomEuroleagueBox';
+    if (value === 'small select' || value === 'randomsmalleuroleaguebox') return 'randomSmallEuroleagueBox';
     if (value === 'football box' || value === 'randomfootballbox') return 'randomFootballBox';
     if (value === '2025-26 panini euroleague contenders basketball mega box') return 'euroleagueMegaBox';
     if (value.includes('origins') && value.includes('euroleague')) return 'origins';
@@ -281,6 +282,7 @@ export default async function handler(req, res) {
         'panini euroleague select box',
         'panini la liga select box',
         'panini select',
+        'small select',
         'football box',
         'mixed-cart',
         'shipping-only'
@@ -367,8 +369,10 @@ export default async function handler(req, res) {
         } else if (lowerTeamId.includes('euroleague select')) {
             await redis.set(`viva:pending:select:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId.includes('Football Box')) {
-            await redis.set(`viva:pending:select:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
-        } else if (lowerTeamId.includes('la liga')) {
+            await redis.set(`viva:pending:randomFootballBox:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
+        }else if (lowerTeamId.includes('Small Select')) {
+            await redis.set(`viva:pending:randomSmallEuroleagueBox:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
+        }else if (lowerTeamId.includes('la liga')) {
             await redis.set(`viva:pending:laliga:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId !== 'shipping-only' && !normalizeProductId({ teamId })) {
             await redis.set(`viva:mapping:team:${data.OrderCode}`, String(teamId), 'EX', HOLD_TTL);
