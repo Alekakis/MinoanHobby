@@ -41,7 +41,7 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:randomEuroleagueBox',
         mappingKey: 'viva:mapping:randomEuroleagueBox'
     },
-    randomSmallEuroleagueBox: {
+    randomSmallEuroleague: {
         holdPrefix: 'SELECT:random-small-euroleague:hold',
         holdIndexKey: 'SELECT:random-small-euroleague:holdIndex',
         holdCountKey: 'SELECT:random-small-euroleague:holdCount',
