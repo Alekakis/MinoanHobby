@@ -50,6 +50,15 @@ const POOLED_PRODUCTS = {
         pendingKey: 'viva:pending:randomSmallEuroleague',
         mappingKey: 'viva:mapping:randomSmallEuroleague'
     },
+    randomSmallComboEuroleague: {
+        holdPrefix: 'SELECT:random-small-combo-euroleague:hold',
+        holdIndexKey: 'SELECT:random-small-combo-euroleague:holdIndex',
+        holdCountKey: 'SELECT:random-small-combo-euroleague:holdCount',
+        soldCountKey: 'SELECT:random-small-combo-euroleague:soldCount',
+        stockKey: 'SELECT:random-small-combo-euroleague:stock',
+        pendingKey: 'viva:pending:randomSmallComboEuroleague',
+        mappingKey: 'viva:mapping:randomSmallComboEuroleague'
+    },
     randomFootballBox: {
         holdPrefix: 'SELECT:random-football-box:hold',
         holdIndexKey: 'SELECT:random-football-box:holdIndex',
@@ -303,6 +312,7 @@ export default async function handler(req, res) {
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.merlinPack);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomSmallEuroleague);
+            await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomSmallComboEuroleague);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.randomFootballBox);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
             await confirmPooledProduct(orderCode, POOLED_PRODUCTS.origins);
@@ -323,6 +333,7 @@ export default async function handler(req, res) {
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:randomEuroleagueBox:${orderCode}`,
                  `viva:pending:randomSmallEuroleague:${orderCode}`,
+                `viva:pending:randomSmallComboEuroleague:${orderCode}`,
                 `viva:pending:randomFootballBox:${orderCode}`,
                 `viva:pending:euroleagueMegaBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
@@ -332,6 +343,7 @@ export default async function handler(req, res) {
                 `viva:mapping:ducks:${orderCode}`,
                 `viva:mapping:randomEuroleagueBox:${orderCode}`,
                 `viva:mapping:randomSmallEuroleague:${orderCode}`,
+                `viva:mapping:randomSmallComboEuroleague:${orderCode}`,
                 `viva:mapping:randomFootballBox:${orderCode}`,
                 `viva:mapping:euroleagueMegaBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
@@ -401,6 +413,7 @@ export default async function handler(req, res) {
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.merlinPack);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomEuroleagueBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomSmallEuroleague);
+            await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomSmallComboEuroleague);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.randomFootballBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.euroleagueMegaBox);
             await releasePooledProduct(orderCode, POOLED_PRODUCTS.origins);
@@ -419,6 +432,7 @@ export default async function handler(req, res) {
                 `viva:pending:ducks:${orderCode}`,
                 `viva:pending:randomEuroleagueBox:${orderCode}`,
                 `viva:pending:randomSmallEuroleague:${orderCode}`,
+                `viva:pending:randomSmallComboEuroleague:${orderCode}`,
                 `viva:pending:randomFootballBox:${orderCode}`,
                 `viva:pending:euroleagueMegaBox:${orderCode}`,
                 `viva:pending:megabox:${orderCode}`,
@@ -428,6 +442,7 @@ export default async function handler(req, res) {
                 `viva:mapping:ducks:${orderCode}`,
                 `viva:mapping:randomEuroleagueBox:${orderCode}`,
                 `viva:mapping:randomSmallEuroleague:${orderCode}`,
+                `viva:mapping:randomSmallComboEuroleague:${orderCode}`,
                 `viva:mapping:randomFootballBox:${orderCode}`,
                 `viva:mapping:euroleagueMegaBox:${orderCode}`,
                 `viva:mapping:team:${orderCode}`,
