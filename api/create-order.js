@@ -51,6 +51,15 @@ const POOLED_PRODUCTS = {
         mappingKey: 'viva:mapping:randomSmallEuroleague',
         maxStock: 40
     },
+    randomSmallComboEuroleague: {
+        stockKey: 'SELECT:random-small-combo-euroleague:stock',
+        holdPrefix: 'SELECT:random-small-combo-euroleague:hold',
+        holdIndexKey: 'SELECT:random-small-combo-euroleague:holdIndex',
+        holdCountKey: 'SELECT:random-small-combo-euroleague:holdCount',
+        pendingKey: 'viva:pending:randomSmallComboEuroleague',
+        mappingKey: 'viva:mapping:randomSmallComboEuroleague',
+        maxStock: 40
+    },
     randomFootballBox: {
         stockKey: 'SELECT:random-football-box:stock',
         holdPrefix: 'SELECT:random-football-box:hold',
@@ -97,6 +106,7 @@ function normalizeProductId(item) {
     if (value.includes('merlin')) return 'merlinBox';
     if (value === 'panini select' || value === 'randomeuroleaguebox') return 'randomEuroleagueBox';
     if (value === 'small select' || value === 'randomsmalleuroleague') return 'randomSmallEuroleague';
+    if (value === 'small combo select' || value === 'randomsmallcomboeuroleague') return 'randomSmallComboEuroleague';
     if (value === 'football box' || value === 'randomfootballbox') return 'randomFootballBox';
     if (value === '2025-26 panini euroleague contenders basketball mega box') return 'euroleagueMegaBox';
     if (value.includes('origins') && value.includes('euroleague')) return 'origins';
@@ -283,6 +293,7 @@ export default async function handler(req, res) {
         'panini la liga select box',
         'panini select',
         'small select',
+        'small combo select',
         'football box',
         'mixed-cart',
         'shipping-only'
@@ -372,6 +383,8 @@ export default async function handler(req, res) {
             await redis.set(`viva:pending:randomFootballBox:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         }else if (lowerTeamId.includes('Small Select')) {
             await redis.set(`viva:pending:randomSmallEuroleague:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
+        }else if (lowerTeamId.includes('Small Combo Select')) {
+            await redis.set(`viva:pending:randomSmallComboEuroleague:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         }else if (lowerTeamId.includes('la liga')) {
             await redis.set(`viva:pending:laliga:${data.OrderCode}`, qty || 1, 'EX', HOLD_TTL);
         } else if (lowerTeamId !== 'shipping-only' && !normalizeProductId({ teamId })) {
